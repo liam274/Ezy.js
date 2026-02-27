@@ -59,7 +59,7 @@ It will be inherited by its components
 Switch class via the given validation function name.
 ```Javascript
 {
-    validate:"validationFunctoinName"
+    validate:"validationFunctionName"
 }
 ```
 - expire:
