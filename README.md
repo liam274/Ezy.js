@@ -32,9 +32,11 @@ The rendering Engine will choose div as tagName, if tag is not definded.
 - event & listener:
 The rendering Engine will use element.addEventlistener to plug in events in events. Data Structure:
 ``` javascript
-eventName:{
-    listener: [func1,func2,func3],// functions that you want to call in order, when the event is triggered
-    preventDefault: false// rather you want to preventDefault action, or not.
+{
+    eventName:{
+        listener: [func1,func2,func3],// functions that you want to call in order, when the event is triggered
+        preventDefault: false// rather you want to preventDefault action, or not.
+    }
 }
 ```
 - style:
@@ -55,14 +57,37 @@ The innerHTML that will be set.
 It will be inherited by its components
 - validate:
 Switch class via the given validation function name.
+```Javascript
+{
+    validate:"validationFunctoinName"
+}
+```
 - expire:
 Type in object. It has subattributes like date, expired. The component will be removed on the nearest second in date(ceiling), and when expired, it will first let the UI update, then execute the expired function.
+```Javascript
+{
+    expire:{
+        date:new Date(),// Date Object or number is fine
+        expired:()=>{}// This function will be triggered after the element is expired. Optional
+    }
+}
+```
 - forEach:
 It will loops through the given object to render components.
 - location:
-To decide where to goto when the component is clicked
+To decide where to goto when the component is clicked.
 - pipes:
 You can use pipes to send messages. Reciver **MUST** have pipe definded.
+```Javascript
+{
+    pipes:{
+        receive:{
+            receiveFrom:recieveFunc(messageFromReceiveFrom),
+            ...
+        }
+    }
+}
+```
 - main:
 This is a function that will be executed in every milisecond, reciving the component object itself as the first argument while the component element as the second.
 - data:
