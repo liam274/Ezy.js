@@ -33,7 +33,7 @@ The rendering Engine will choose div as tagName, if tag is not definded.
 The rendering Engine will use element.addEventlistener to plug in events in events. Data Structure:
 ``` javascript
 {
-    eventName:{
+    eventName: {
         listener: [func1,func2,func3],// functions that you want to call in order, when the event is triggered
         preventDefault: false// rather you want to preventDefault action, or not.
     }
@@ -59,7 +59,7 @@ It will be inherited by its components
 Switch class via the given validation function name.
 ```Javascript
 {
-    validate:"validationFunctionName"
+    validate: "validationFunctionName"
 }
 ```
 - expire:
@@ -80,9 +80,9 @@ To decide where to goto when the component is clicked.
 You can use pipes to send messages. Reciver **MUST** have pipe definded.
 ```Javascript
 {
-    pipes:{
-        receive:{
-            receiveFrom:recieveFunc(messageFromReceiveFrom),
+    pipes: {
+        receive: {
+            receiveFrom: recieveFunc(messageFromReceiveFrom),
             ...
         }
     }
