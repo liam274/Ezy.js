@@ -1,0 +1,11 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 左上獨立元件方塊 -->
+  <rect x="40" y="40" width="50" height="50" rx="10" fill="none" stroke="white" stroke-width="6" />
+  <!-- 右下獨立元件方塊 -->
+  <rect x="110" y="110" width="50" height="50" rx="10" fill="none" stroke="white" stroke-width="6" />
+  <!-- 連接兩者的流動曲線，象徵資料傳遞 -->
+  <path d="M65 65 Q100 100 135 135" stroke="white" stroke-width="5" fill="none" stroke-dasharray="8 8" />
+  <!-- 隱約的「nR」抽象折線（無文字，僅線條） -->
+  <path d="M40 170 L70 140 L100 170" stroke="white" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7" />
+  <circle cx="140" cy="155" r="18" fill="none" stroke="white" stroke-width="5" opacity="0.7" />
+</svg>
