@@ -805,10 +805,11 @@ class render {
                         }
                         first = false;
                     } else {
-                        if (extraScope[name]) {
-                            if (typeof extraScope[name] === "function") result = extraScope[name](result);
+                        name = name.split(":");
+                        if (extraScope[name[0]]) {
+                            if (typeof extraScope[name[0]] === "function") result = extraScope[name[0]](result, ...name.filter((_, i) => i));
                             else {
-                                error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when pharsing, expected filter as function, found ${typeof extraScope[name]}, not found, in ${traceback}`);
+                                error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when pharsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`);
                                 return this.set(5);
                             }
                         }
