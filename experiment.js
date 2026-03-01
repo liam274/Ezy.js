@@ -1,7 +1,7 @@
 const pageData = {
     data: {
         a: 1, b: 2,
-        func: (data, ask) => `Hi, ${data}, ${ask}`,
+        func: (data, ask) => `Hi, ${data} ${ask || ""}`,
         user: "Liam"
     }, main: {
         title: "laboritary",
@@ -9,7 +9,7 @@ const pageData = {
         toolbar: {},
         content: [
             {
-                content: "{user | func:'How are you?' | func | func}",
+                content: "{user | func: How are you? | func | func}",
                 type: ["font-light-white"],
                 tag: "span"
             }
