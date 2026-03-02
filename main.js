@@ -120,7 +120,7 @@ function equal(data) {
 
 function max(data) {
     let minV = "",
-        min = 2 ^ 32;
+        min = Infinity;
     for (let i in data)
         if (data[i] < min) {
             minV = i;
@@ -176,6 +176,7 @@ const Ezy = {
         if (item) {
             if (!obj.varage[item]) {
                 error(`[ezy.js] CRITICAL ERROR: Value Error: render.varage[component.if] not found, in ${traceback}`);
+                return obj.set(5);
             }
             if (typeof obj.varage[item] !== "function") {
                 error(`[ezy.js] CRITICAL ERROR: Value Error: expected render.varage[component.if] as function, found ${typeof obj.varage[item]}, in ${traceback}`);
@@ -861,7 +862,7 @@ class render {
             }
             el.id = i;
             applyStyles(el, val.style);
-            el.classList.add("footerLink", ...val.type);
+            el.classList.add("footerLink", ...(val.type || []));
             el.addEventListener("click", function () {
                 location.href = val.location || "#";
             });
@@ -1177,7 +1178,7 @@ class render {
                         this.pipes[j.pipe.name] = j.pipe;
                     }
                     if (j.data) for (let k in j.data) {
-                        el[`data - ${camel2array(k).join("-")}`] = j.data[k];
+                        el[`data-${camel2array(k).join("-")}`] = j.data[k];
                     }
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
@@ -1236,7 +1237,7 @@ class render {
                         this.pipes[j.pipe.name] = j.pipe;
                     }
                     if (j.data) for (let k in j.data) {
-                        el[`data - ${camel2array(k).join("-")}`] = j.data[k];
+                        el[`data-${camel2array(k).join("-")}`] = j.data[k];
                     }
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
