@@ -5,7 +5,7 @@
     by Liam Lei
     Started from 2026.02.11
 
-    Release: 0.0.2 (Stable)
+    Release: 0.0.3 (Stable)
 
     Acknowledgments:
         - Nathan Wong. Thanks for him providing his seat, as it's close to the electricity socket
@@ -256,6 +256,31 @@ const Ezy = {
             else result.push(i);
         }
         return result;
+    },
+    alert(data) {
+        const barrier = $$("div");
+        barrier.classList.add("alert-barrier");
+        const back = $$("div");
+        back.classList.add("alert-back");
+        barrier.appendChild(back);
+        const title = $$("div");
+        title.classList.add("alert-title");
+        title.innerHTML = data.title;
+        back.appendChild(title);
+        const content = $$("div");
+        content.innerHTML = data.content;
+        content.classList.add("alert-content");
+        back.appendChild(content);
+        const confirm = $$("button");
+        confirm.innerHTML = "OK";
+        confirm.classList.add("alert-button");
+        confirm.addEventListener("click", () => {
+            removeChild(barrier);
+            body.removeChild(barrier);
+            barrier.remove();
+        });
+        back.appendChild(confirm);
+        body.appendChild(barrier);
     },
 };
 
