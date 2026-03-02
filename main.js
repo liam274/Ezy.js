@@ -129,7 +129,9 @@ function max(data) {
     return minV;
 }
 
-// ezy
+// Ezy
+const head = document.head,
+    body = document.body;
 
 const Ezy = {
     plugins: [],
@@ -287,9 +289,7 @@ const Ezy = {
 
 // render
 
-const head = document.head,
-    body = document.body,
-    varage = {},// variable storage (?cold joke)
+const varage = {},// variable storage (?cold joke)
     vars = new Set(["content", "toolbar", "userbar", "footer"]);// Ensure that third party can use the given name in asVar (name) as variable in JS
 class render {
     constructor(data, maxWait = 60000, namespace = {}) {
@@ -298,6 +298,7 @@ class render {
         this.expireEls = [];
         this.mains = [];
         this.pipes = {};
+        this.frameID = [];
         if (!data) {
             this.set(1);
             this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", this.maxWait);
@@ -424,8 +425,11 @@ class render {
             i.func(i.obj, i.el);
         }
         if (this.interval)
-            this.frameID = requestAnimationFrame(this.loop.bind(this));
-        else cancelAnimationFrame(this.frameID);
+            this.frameID.push(requestAnimationFrame(this.loop.bind(this)));
+        else {
+            for (let i of this.frameID) cancelAnimationFrame(i);
+            this.frameID.length = 0;
+        }
     }
     pipe2(sender, receiver, data) {
         if (!(sender in this.pipes)) {
@@ -470,7 +474,7 @@ class render {
             const el = createElement(i, item);
             if (this.statusCode !== 0) return;
             if (!(el instanceof Node)) {
-                error(`[ezy.js] CRITICAL ERROR: Value Error: function "createElement" return unexpected value, expected Node, in page ${traceback}`);
+                error(`[ezy.js] CRITICAL ERROR: Value Error: argument-function "createElement" return unexpected value, expected Node(or NodeLike object), in page ${traceback}`);
                 return this.set(5);
             }
             for (let k in item) {
@@ -494,7 +498,7 @@ class render {
             traceback = `page ${title} -> content`;
         if (typeof i === "string") {
             if (!this.classify) {
-                error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component without classify dictonary, in ${traceback}`);
+                error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component without classify dictionary, in ${traceback}`);
                 return this.set(7);
             }
             if (!this.classify[i]) {
@@ -746,7 +750,7 @@ class render {
                 const traceback = `page ${title} -> title`;
                 if (typeof i === "string") {
                     if (!this.classify) {
-                        error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component without classify dictonary, in ${traceback}`);
+                        error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component without classify dictionary, in ${traceback}`);
                         return this.set(7);
                     }
                     if (!this.classify[i]) {
@@ -1111,7 +1115,7 @@ class render {
         for (let j of (i.component || [])) {
             if (typeof j === "string") {
                 if (!this.classify) {
-                    error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component without classify dictonary, in ${traceback}`);
+                    error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component without classify dictionary, in ${traceback}`);
                     return this.set(7);
                 }
                 if (!this.classify[j]) {
