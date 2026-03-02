@@ -55,6 +55,35 @@ const pageData = {
         content: [
             "cardie",
             {
+                component: [
+                    {
+                        tag: "h1",
+                        content: "Try:"
+                    },
+                    {
+                        tag: "p",
+                        content: "May you try the incrediable convience function!"
+                    },
+                    {
+                        tag: "button",
+                        content: "Ezy.alert",
+                        events: {
+                            onclick: {
+                                preventDefault: false,
+                                listener: [() => Ezy.alert({ title: "Ezy.js", content: "Hi, how are you today?" })]
+                            }
+                        }
+                    }
+                ],
+                type: ["card", "metal"],
+                events: {
+                    "contextmenu": {
+                        preventDefault: true,
+                        listener: []
+                    }
+                }
+            },
+            {
                 tag: "input",
                 type: ["font-black"],
                 style: {

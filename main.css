@@ -229,12 +229,13 @@ span {
     display: flex;
     justify-content: center;
     align-items: center;
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
-    scroll-behavior: none;
+    overscroll-behavior: none;
     background-color: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(4px);
+    overflow: hidden;
 }
 
 .alert-back {
