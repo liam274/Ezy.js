@@ -102,6 +102,33 @@ function camel2array(data) {
     return result;
 }
 
+function equal(data) {
+    let last;
+    for (let i of data) {
+        last = null;
+        for (let k in i) {
+            if (i[k] === null) return "NULL IS NOT ACCEPTED";
+            if (last === null) {
+                last = i[k];
+                continue;
+            }
+            if (last !== i[k]) return false;
+        }
+    }
+    return true;
+}
+
+function max(data) {
+    let minV = "",
+        min = 2 ^ 32;
+    for (let i in data)
+        if (data[i] < min) {
+            minV = i;
+            min = data[i];
+        }
+    return minV;
+}
+
 // ezy
 
 const Ezy = {
@@ -179,6 +206,56 @@ const Ezy = {
                 return obj.set(3);
             }
         }
+    },
+    split(data, chars, dis) {
+        const spliters = new Set(chars),
+            disallows = {},
+            result = [],
+            stack = [],
+            secondResult = [];
+        for (let i of dis) {
+            disallows[i[0]] = i[1];
+            disallows[i[1]] = i[0];
+        }
+        let last = "",
+            temporary = [];
+        for (let char of data) {
+            if (spliters.has(char) && equal(stack)) {
+                secondResult.push(temporary.join(""));
+                if (last !== char) {
+                    result.push([...secondResult]);
+                    secondResult.length = 0;
+                }
+                temporary.length = 0;
+                last = char;
+                continue;
+            }
+            if (char in disallows) {
+                if (stack.length !== 0 && char in stack[stack.length - 1]) {
+                    stack[stack.length - 1][char]++;
+                } else {
+                    if (!equal([stack[stack.length - 1]])) {
+                        throw new Error(`[ezy.js] CRITIACL ERROR: Pharsing Error: Error when pharsing, unclosed ${max(stack[stack.length - 1])}.`);
+                    }
+                    let _ = {};
+                    _[char] = 1;
+                    _[disallows[char]] = 0;
+                    stack.push(_);
+                }
+            }
+            temporary.push(char);
+        }
+        if (temporary) secondResult.push(temporary.join(""));
+        if (secondResult) result.push([...secondResult]);
+        return result;
+    },
+    flat(data) {
+        let result = [];
+        for (let i of data) {
+            if (Array.isArray(i)) result.push(...this.flat(i));
+            else result.push(i);
+        }
+        return result;
     },
 };
 
@@ -805,17 +882,17 @@ class render {
                         }
                         first = false;
                     } else {
-                        name = name.split(":");
+                        name = Ezy.flat(Ezy.split(name, [":"], [["{", "}"], ["\"", "\""], ["'", "'"]]));
                         if (extraScope[name[0]]) {
                             if (typeof extraScope[name[0]] === "function") result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
                                 traceback, { ...extraScope, result: result });
                             else {
-                                error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when pharsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback} `);
+                                error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when pharsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`);
                                 return this.set(5);
                             }
                         }
                         else {
-                            error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when trying to access variable ${name}, not found, in ${traceback} `);
+                            error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when trying to access variable ${name[0]}, not found, in ${traceback}`);
                             return this.set(5);
                         }
                     }
@@ -828,21 +905,22 @@ class render {
                     result = extraScope[name];
                 }
                 else {
-                    error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when trying to access variable ${name}, not found, in ${traceback} `);
+                    error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when trying to access variable ${name}, not found, in ${traceback}`);
                     return this.set(5);
                 }
                 first = false;
             } else {
-                name = name.split(":");
+                name = Ezy.flat(Ezy.split(name, [":"], [["{", "}"], ["\"", "\""], ["'", "'"]]));
                 if (extraScope[name[0]]) {
-                    if (typeof extraScope[name[0]] === "function") result = extraScope[name[0]](result, ...name.filter((_, i) => i));
+                    if (typeof extraScope[name[0]] === "function") result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
+                        traceback, { ...extraScope, result: result });
                     else {
-                        error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when pharsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback} `);
+                        error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when pharsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`);
                         return this.set(5);
                     }
                 }
                 else {
-                    error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when trying to access variable ${name}, not found, in ${traceback} `);
+                    error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when trying to access variable ${name[0]}, not found, in ${traceback}`);
                     return this.set(5);
                 }
             }
@@ -858,10 +936,10 @@ class render {
             return result === undefined ? '' : String(result);
         } catch (e) {
             if (e instanceof ReferenceError) {
-                console.warn(`[ezy.js] Warning: Variable not defined in "${expr}" at ${traceback} `);
+                console.warn(`[ezy.js] Warning: Variable not defined in "${expr}" at ${traceback}`);
                 return '';
             }
-            error(`[ezy.js] CRITICAL ERROR: Failed to evaluate "${expr}" in ${traceback} `, e);
+            error(`[ezy.js] CRITICAL ERROR: Failed to evaluate "${expr}" in ${traceback}`, e);
             this.set(6);
             return '';
         }
@@ -878,7 +956,7 @@ class render {
         const _varage = { ...this.varage, ...pipeData };
         for (let i in replacement) {
             for (let t of (dictionary[i] || [i])) {
-                data = data.replaceAll(`{ {${t} } } `, replacement[i]);
+                data = data.replaceAll(`{{${t}}}`, replacement[i]);
             }
         }
         for (let i of data) {
@@ -900,7 +978,7 @@ class render {
                         try {
                             result.push(String(this.evaluateExpression(varName, traceback, _varage)));
                         } catch (e) {
-                            error(`[ezy.js] CRITICAL ERROR: EVAL Error: Error when trying to eval expression ${varName}, as below, in ${traceback} `);
+                            error(`[ezy.js] CRITICAL ERROR: EVAL Error: Error when trying to eval expression ${varName}, as below, in ${traceback}`);
                             error(e);
                             return this.set(6);
                         }
@@ -918,11 +996,11 @@ class render {
             }
             if (i === "{") {
                 if (varName.length) {
-                    error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unexpected character "{" within value, in ${traceback} `);
+                    error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unexpected character "{" within value, in ${traceback}`);
                     return this.set(3);
                 }
                 if (longVar) {
-                    error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unexpected character "{" with two openings already, in ${traceback} `);
+                    error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unexpected character "{" with two openings already, in ${traceback}`);
                     return this.set(3);
                 }
                 if (startVar) {
@@ -934,12 +1012,12 @@ class render {
             }
             if (i === "}") {
                 if (!(startVar || longVar)) {
-                    error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unexpected ending without any opening, in ${traceback} `);
+                    error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unexpected ending without any opening, in ${traceback}`);
                     return this.set(3);
                 }
                 if (stop) {
                     if (startVar) {
-                        error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unexpected double ending with single opening, in ${traceback} `);
+                        error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unexpected double ending with single opening, in ${traceback}`);
                         return this.set(3);
                     }
                     stop = false;
@@ -949,7 +1027,7 @@ class render {
                 if (startVar) {
                     startVar = false;
                     if (doubleStop) {
-                        error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unexpected ending with single opening already, in ${traceback} `);
+                        error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unexpected ending with single opening already, in ${traceback}`);
                         return this.set(3);
                     }
                     stop = true;
@@ -969,15 +1047,15 @@ class render {
             result.push(i);
         }
         if (longVar && !doubleStop) {
-            error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unclosed double opening, in ${traceback} `);
+            error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unclosed double opening, in ${traceback}`);
             return this.set(3);
         }
         if (startVar && !stop) {
-            error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unclosed single opening, in ${traceback} `);
+            error(`[ezy.js] CRITICAL ERROR: Formatting Error: Error when formatting string, unclosed single opening, in ${traceback}`);
             return this.set(3);
         }
         if (skip) {
-            error(`[ezy.js] CRITICAL ERROR: Format Error: Error when formatting string, expected any character after \\ in ${traceback} `);
+            error(`[ezy.js] CRITICAL ERROR: Format Error: Error when formatting string, expected any character after \\ in ${traceback}`);
             return this.set(3);
         }
         varName = varName.join("").trim();
@@ -991,7 +1069,7 @@ class render {
                 try {
                     result.push(String(this.evaluateExpression(varName, traceback, _varage)));
                 } catch (e) {
-                    error(`[ezy.js] CRITICAL ERROR: EVAL Error: Error when trying to eval expression ${varName}, as below, in ${traceback} `);
+                    error(`[ezy.js] CRITICAL ERROR: EVAL Error: Error when trying to eval expression ${varName}, as below, in ${traceback}`);
                     error(e);
                     return this.set(6);
                 }
@@ -1007,11 +1085,11 @@ class render {
         for (let j of (i.component || [])) {
             if (typeof j === "string") {
                 if (!this.classify) {
-                    error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component without classify dictonary, in ${traceback} `);
+                    error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component without classify dictonary, in ${traceback}`);
                     return this.set(7);
                 }
                 if (!this.classify[j]) {
-                    error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component "${j}" without definition, in ${traceback} `);
+                    error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component "${j}" without definition, in ${traceback}`);
                     return this.set(7);
                 }
                 j = this.classify[j];
@@ -1020,12 +1098,12 @@ class render {
             if (this.statusCode !== 0) return;
             if (j.forEach) {
                 if (this.varage[j.forEach] === undefined) {
-                    error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected forEach variable, not found, in ${traceback} `);
+                    error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected forEach variable, not found, in ${traceback}`);
                     return this.set(3);
                 }
                 const obj = this.varage[j.forEach];
                 if (!(obj && typeof obj === "object")) {
-                    error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected object as forEach variable value, found ${obj}, in ${traceback} `);
+                    error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected object as forEach variable value, found ${obj}, in ${traceback}`);
                     return this.set(3);
                 }
                 let first = -1;
@@ -1035,14 +1113,14 @@ class render {
                     el.classList.add(...(j.type || []));
                     applyStyles(el, j.style);
                     for (let evt in j.events) {
-                        this.addListener(evt, j, el, traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")} `);
+                        this.addListener(evt, j, el, traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
                         if (this.statusCode !== 0) return;
                     }
                     for (let parm in j) {
                         if (keyword.has(parm)) continue;
                         el[parm] = j[parm];
                     }
-                    let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")} `;
+                    let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, { ...replacement, ...j.inherit, key: k, item: obj[k], ...own }
                     );
@@ -1059,7 +1137,7 @@ class render {
                     if (this.statusCode !== 0) return;
                     if (j.main) {
                         if (typeof j.main !== "function") {
-                            error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof j.main}, in ${traceback} `);
+                            error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof j.main}, in ${traceback}`);
                             return this.set(3);
                         }
                         this.mains.push({
@@ -1074,7 +1152,7 @@ class render {
                         this.pipes[j.pipe.name] = j.pipe;
                     }
                     if (j.data) for (let k in j.data) {
-                        el[`data - ${camel2array(k).join("-")} `] = j.data[k];
+                        el[`data - ${camel2array(k).join("-")}`] = j.data[k];
                     }
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
@@ -1094,14 +1172,14 @@ class render {
                     el.classList.add(...(j.type || []));
                     applyStyles(el, j.style);
                     for (let evt in j.events) {
-                        this.addListener(evt, j, el, traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")} `);
+                        this.addListener(evt, j, el, traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
                         if (this.statusCode !== 0) return;
                     }
                     for (let parm in j) {
                         if (keyword.has(parm)) continue;
                         el[parm] = j[parm];
                     }
-                    let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")} `;
+                    let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, { ...replacement, ...j.inherit, ...own }
                     );
@@ -1118,7 +1196,7 @@ class render {
                     if (this.statusCode !== 0) return;
                     if (j.main) {
                         if (typeof j.main !== "function") {
-                            error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof j.main}, in ${traceback} `);
+                            error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof j.main}, in ${traceback}`);
                             return this.set(3);
                         }
                         this.mains.push({
@@ -1133,7 +1211,7 @@ class render {
                         this.pipes[j.pipe.name] = j.pipe;
                     }
                     if (j.data) for (let k in j.data) {
-                        el[`data - ${camel2array(k).join("-")} `] = j.data[k];
+                        el[`data - ${camel2array(k).join("-")}`] = j.data[k];
                     }
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
@@ -1157,7 +1235,7 @@ class render {
     asVar(el, varAs, traceback) {
         if (varAs) {
             if (vars.has(varAs)) {
-                error(`[ezy.js] CRITICAL ERROR: ID Error: when rendering ${el.tagName}.${[...el.classList].join(".")}, id collide to "${varAs}", in ${traceback} `);
+                error(`[ezy.js] CRITICAL ERROR: ID Error: when rendering ${el.tagName}.${[...el.classList].join(".")}, id collide to "${varAs}", in ${traceback}`);
                 return this.set(2);
             }
             vars.add(varAs);
@@ -1189,7 +1267,7 @@ class render {
         let obj = i.events[j],
             { listener } = obj;
         if (!listener) {
-            error(`[ezy.js] MINOR ERROR: Value Error: Expected "listener" attribute in second parameter -> events[first parameter], in ${traceback} `);
+            error(`[ezy.js] MINOR ERROR: Value Error: Expected "listener" attribute in second parameter -> events[first parameter], in ${traceback}`);
             return this.set(5);
         }
         if (obj.preventDefault)
