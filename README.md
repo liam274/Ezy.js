@@ -26,7 +26,7 @@ Component is a list, expected with objects included, which is called CO.
 - CO:
 *Ezy.js* is mainly about CO. Every attributes introduced in the certain list can be applied to CO.
 - type:
-The rendering engine will render it as classList
+The rendering engine will render it as classList. Note that it's expected as list.
 - tag:
 The rendering Engine will choose div as tagName, if tag is not definded.
 - event & listener:
@@ -74,8 +74,6 @@ Type in object. It has subattributes like date, expired. The component will be r
 ```
 - forEach:
 It will loops through the given object to render components.
-- location:
-To decide where to goto when the component is clicked.
 - pipes:
 You can use pipes to send messages. Reciver **MUST** have pipe definded.
 ```Javascript
@@ -109,6 +107,3 @@ In the following sample, #a and #b is the first-level children of #root, while #
     </div>
 </div>
 ```
-
-## Notice
-- Developers should not, and cannot have components in userbar, toolbar and footer. Alternative will be provided.

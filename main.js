@@ -37,8 +37,8 @@ const keyword = new Set([
     "listener", "times", "title",
     "if", "content", "inherit",
     "validate", "expire", "text",
-    "forEach", "location", "innerHTML",
-    "config", "data"
+    "forEach", "innerHTML", "config",
+    "data"
 ]), errorMsg = {
     1: "data structure error",
     2: "this.asVar rewrite error",
