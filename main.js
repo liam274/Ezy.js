@@ -440,9 +440,6 @@ class render {
                 error(`[ezy.js] CRITICAL ERROR: Value Error: argument-function "createElement" return unexpected value, expected Node(or NodeLike object), in page ${traceback}`);
                 return this.set(5);
             }
-            for (let k in item) {
-                if (!keyword.has(k)) el[k] = this.preCompileStr(item[k], traceback, item.inherit || {});
-            }
             if (!special) {
                 this.beforePlugComponent(el, traceback);
                 if (this.statusCode !== 0) return;
@@ -540,7 +537,7 @@ class render {
                 if (this.statusCode !== 0) return;
                 for (let j in i) {
                     if (keyword.has(j)) continue;
-                    card[j] = this.preCompileStr(i[j], traceback, replacement);
+                    card.setAttribute(j, this.preCompileStr(i[j], traceback, replacement));
                 }
                 this.pushComponent(i, card, traceback, replacement);
                 if (this.statusCode !== 0) return;
@@ -600,7 +597,7 @@ class render {
                 if (this.statusCode !== 0) return;
                 for (let j in i) {
                     if (keyword.has(j)) continue;
-                    card[j] = this.preCompileStr(i[j], traceback, i.inherit);
+                    card.setAttribute(j, this.preCompileStr(i[j], traceback, i.inherit));
                 }
                 this.pushComponent(i, card, traceback, i.inherit);
                 if (this.statusCode !== 0) return;
@@ -891,7 +888,7 @@ class render {
                     const replace = { ...replacement, ...j.inherit, key: k, item: obj[k], ...own };
                     for (let parm in j) {
                         if (keyword.has(parm)) continue;
-                        el[parm] = this.preCompileStr(j[parm], myTraceback, replace);
+                        el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, replace));
                     }
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, replace
@@ -951,7 +948,7 @@ class render {
                     }
                     for (let parm in j) {
                         if (keyword.has(parm)) continue;
-                        el[parm] = this.preCompileStr(j[parm], myTraceback, { ...replacement, ...j.inherit, ...own });
+                        el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, { ...replacement, ...j.inherit, ...own }));
                     }
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, { ...replacement, ...j.inherit, ...own }
