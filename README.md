@@ -133,3 +133,6 @@ In the following sample, #a and #b is the first-level children of #root, while #
 
 ## community
 Discord: https://discord.gg/QhaEZTTgru
+
+## Notice
+- The `setting.html` is DESIGNED to pop up error, in order to test whether the `render.loadingPage` is working or not.
