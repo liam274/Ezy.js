@@ -25,11 +25,14 @@ const pageData = {
             },
             lab: {
                 text: "lab",
-                href: "expermential.html"
+                href: "experiment.html"
             }
         },
         users: {
-            user: "user"
+            user: {
+                text: "user",
+                href: "user.html"
+            }
         }
     }, main: [
         {
@@ -53,7 +56,7 @@ const pageData = {
                                 onclick: {
                                     listener: [
                                         (e) => {
-                                            location.href = e.target.dataset.href;
+                                            Ezy.navigate(e.target.dataset.href);
                                         }
                                     ]
                                 }
@@ -70,8 +73,20 @@ const pageData = {
                         {
                             tag: "img",
                             src: "./assets/{{key}}.svg",
-                            text: "{{value}}",
-                            forEach: "users"
+                            text: "{{value.text}}",
+                            forEach: "users",
+                            events: {
+                                onclick: {
+                                    listener: [
+                                        (e) => {
+                                            Ezy.navigate(e.target.dataset.href);
+                                        }
+                                    ]
+                                }
+                            },
+                            data: {
+                                href: "{{value.href}}"
+                            }
                         }
                     ]
                 }
@@ -188,7 +203,7 @@ const pageData = {
                     events: {
                         onclick: {
                             preventDefault: false,
-                            listener: [() => location.href = "https://github.com/liam274/Ezy.js/"]
+                            listener: [() => Ezy.navigate("https://github.com/liam274/Ezy.js/")]
                         }
                     }
                 }
@@ -211,6 +226,14 @@ const pageData = {
         }
     }
 };
+routeGuard.guards.push(function (data) {
+    if (routeGuard.builtin.has(data)) {
+        return { allow: true };
+    } else {
+        return { allow: false, href: "notFound.html" };
+    }
+});
+for (let i of ["index.html", "doc.html", "setting.html", "experiment.html"]) routeGuard.builtin.add(i);
 let _ = new render("head", {
     main: [
         {

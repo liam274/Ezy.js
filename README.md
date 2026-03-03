@@ -93,6 +93,29 @@ will be stored as data-* attributes.
 - config:
 Configuration to the element and its children(first-level children only).
 
+## Builtin functions
+
+- Ezy.navigate:
+We ***strongly*** suggest to use this function instead of location.href or other behaviours.
+```Javascript
+Ezy.navigate(href);// This function will be as the route guard, choosing to redirect the href or other behaviours.
+```
+For example:
+```Javascript
+let allowPages=["exists.html"];
+for(let i of allowPages) routeGuard.builtins.add(i);
+routeGuard.guards.push(
+    function(data){
+        if (routeGuard.builtin.has(data)) {
+            return { allow: true };
+        } else {
+            return { allow: false, href: "notFound.html" };
+        }
+    }
+);
+Ezy.navigate("doesNotExists.html");// will be redirected to notFound.html
+```
+
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.
 - CO(Component Object)

@@ -281,8 +281,32 @@ const Ezy = {
         });
         back.appendChild(confirm);
         body.appendChild(barrier);
-    },
+    }
 };
+
+// Route Guard
+
+const routeGuard = {
+    builtin: new Set([]),
+    guards: []
+};
+routeGuard.guards.push(function (href) {
+    return {
+        allow: routeGuard.builtin.has(href)
+    };
+});
+
+Ezy.navigate = function (href) {
+    let full = true;
+    for (let guard of routeGuard.guards) {
+        let result = guard(href);
+        if (!result.allow) {
+            location.href = (result.href || document.location.href);
+            full = false;
+        }
+    }
+    if (full) location.href = href;
+}
 
 // render
 

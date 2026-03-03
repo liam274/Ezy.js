@@ -27,7 +27,10 @@ const pageData = {
             }
         },
         users: {
-            user: "user"
+            user: {
+                text: "user",
+                href: "user.html"
+            }
         }
     }, main: [
         {
@@ -51,7 +54,7 @@ const pageData = {
                                 onclick: {
                                     listener: [
                                         (e) => {
-                                            location.href = e.target.dataset.href;
+                                            Ezy.navigate(e.target.dataset.href);
                                         }
                                     ]
                                 }
@@ -68,8 +71,20 @@ const pageData = {
                         {
                             tag: "img",
                             src: "./assets/{{key}}.svg",
-                            text: "{{value}}",
-                            forEach: "users"
+                            text: "{{value.text}}",
+                            forEach: "users",
+                            events: {
+                                onclick: {
+                                    listener: [
+                                        (e) => {
+                                            Ezy.navigate(e.target.dataset.href);
+                                        }
+                                    ]
+                                }
+                            },
+                            data: {
+                                href: "{{value.href}}"
+                            }
                         }
                     ]
                 }
@@ -174,6 +189,14 @@ const pageData = {
         }
     ]
 };
+routeGuard.guards.push(function (data) {
+    if (routeGuard.builtin.has(data)) {
+        return { allow: true };
+    } else {
+        return { allow: false, href: "notFound.html" };
+    }
+});
+for (let i of ["index.html", "doc.html", "setting.html", "experiment.html"]) routeGuard.builtin.add(i);
 let _ = new render("head", {
     main: [
         {
