@@ -349,7 +349,7 @@ class render {
         if (this.statusCode !== 0) return;
         if (this.el) this.mainEl.appendChild(this.el);
         this.clearLoading();
-        log(`[noReact] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
+        log(`[ezy.js] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
     }
     main() {
         this.statusCode = 0;
