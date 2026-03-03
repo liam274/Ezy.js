@@ -164,7 +164,7 @@ const pageData = {
                     events: {
                         onclick: {
                             preventDefault: false,
-                            listener: [() => location.href = "notes.html"]
+                            listener: [() => location.href = "https://github.com/liam274/Ezy.js/"]
                         }
                     }
                 }
