@@ -2,10 +2,11 @@
 
 ## Introduce
 *Ezy.js* is a modern framework that developes in raw JavaScript. It allows **flexible** and **dynamic** page rendering via **JS** code and **JSON** file structure.
+Note that this framework is ***NOT*** designed to build pages independently. Please use other backend languages to support the project, or any other ways you prefer.
 
 ## Attention
 Developers MUST detect the statusCode after reRender, as it might returns error code. Notice that if the statusCode is not zero, the obj created might not be *render*.
-Note that based on considerations of flexibilty, *Ezy.js* will not be responsible for XSS security or any other HTML-related attacks. If you want to implement such defense, please use PHP or any other possible backend language to pre-render contents.
+Note that based on considerations of flexibilty, *Ezy.js* will not be responsible for XSS security or any other HTML-related attacks. If you want to implement such defenses, please use PHP or any other possible backend language to pre-render contents.
 
 ## Data Structure
 
