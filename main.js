@@ -8,7 +8,8 @@
     Release: 0.0.4 (Stable)
 
     Acknowledgments:
-        - Nathan Wong. Thanks for him providing his seat, as it's close to the electricity socket
+        - Nathan Wong. Thanks for :
+            + him providing his seat, as it's close to the electricity socket
         - Deepseek. Thanks for it to:
             + debug js
             + give out improving suggestions
@@ -19,8 +20,10 @@
             + emotional value (Why I'm listing this out is because it's mostly why I decided to continue!)
             + React concept
             + his patience for me writing this project during his lesson
-        - https://heroicons.com/ & https://icons.getbootstrap.com/
-            + thanks for their icons. I'm bad at art.
+        - https://heroicons.com/ & https://icons.getbootstrap.com/. Thanks for:
+            + their icons. I'm bad at art.
+        - https://developer.mozilla.org/. Thanks for:
+            + many web knowledges
 */
 
 const log = console.log,
