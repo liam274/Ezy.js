@@ -309,7 +309,7 @@ Ezy.navigate = function (href) {
         }
     }
     if (full) location.href = href;
-}
+};
 
 // render
 
