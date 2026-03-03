@@ -322,7 +322,7 @@ class render {
         if (this.statusCode !== 0) return this;
     }
     reRender() {
-        if (!this.config.keepConsole) console.clear();
+        if (this.config && !this.config.keepConsole) console.clear();
         this.historyRender = +new Date();
         if (this.loadPage) this.clearLoading();
         if (!this.data) {
@@ -330,7 +330,7 @@ class render {
             this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", 404, this.maxWait);
             return;
         }
-        this.loadPage = this.loadingPage("", 404, this.maxWait);
+        this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", 404, this.maxWait);
         this.clear();
         this.varage = { ...varage, ...(this.data.data || {}) };
         this.statusCode = 0;
@@ -355,7 +355,7 @@ class render {
         this.statusCode = 0;
         if (this.data.onStart) {
             this.preRender(this.data.onStart);
-        } else console.warn("MAJOR SUGGESTION: : Suggest adding onStart function list to handle preprocess");
+        } else console.warn("[ezy.js] MAJOR SUGGESTION: : Suggest adding onStart function list to handle preprocess");
         for (let i of Ezy.plugins) i.onStart?.(this.data);
         if (!this.data.main) {
             this.set(1);

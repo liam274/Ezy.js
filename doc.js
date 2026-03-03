@@ -76,138 +76,103 @@ const pageData = {
             ]
         },
         {
-            id: "title",
-            component: [
-                {
-                    type: ["left-right"],
-                    component: [
-                        {
-                            style: {
-                                fontSize: "80px"
-                            },
-                            content: "Ezy.js",
-                            tag: "h1"
-                        },
-                        {
-                            tag: "span",
-                            id: "slogon",
-                            content: "A modern framework technology."
-                        }
-                    ]
-                },
-                {
-                    type: ["left-right"]
-                }
-            ]
-        },
-        {
             id: "content",
             component: [
-                "cardie",
                 {
+                    type: [
+                        "list"
+                    ],
                     component: [
                         {
-                            tag: "h1",
-                            content: "Try:"
+                            type: [
+                                "list-header"
+                            ]
                         },
                         {
-                            tag: "p",
-                            content: "May you try the incrediable convience function!"
-                        },
-                        {
-                            tag: "button",
-                            content: "Ezy.alert",
-                            events: {
-                                onclick: {
-                                    preventDefault: false,
-                                    listener: [() => Ezy.alert({ title: "Ezy.js", content: "Hi, how are you today?" })]
+                            type: [
+                                "list-item"
+                            ],
+                            component: [
+                                {
+                                    style: {
+                                        display: "inline-flex",
+                                        justifyContent: "space-between",
+                                        flexDirection: "column",
+                                        height: "100%",
+                                        width: "50%"
+                                    },
+                                    component: [
+                                        {
+                                            tag: "h2",
+                                            content: "Option"
+                                        },
+                                        {
+                                            tag: "span",
+                                            content: "Author: {author.toLocaleUpperCase()}.{{key}} says {{attr}}",
+                                            type: [
+                                                "big-2"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    style: {
+                                        display: "inline-flex",
+                                        justifyContent: "space-between",
+                                        flexDirection: "column",
+                                        alignItems: "flex-end",
+                                        height: "100%",
+                                        width: "50%"
+                                    },
+                                    component: [
+                                        {
+                                            tag: "button",
+                                            content: "Forward"
+                                        },
+                                        {
+                                            tag: "span",
+                                            content: "someDate"
+                                        }
+                                    ]
                                 }
+                            ],
+                            times: 12,
+                            content: "{{index}}{{key}}",
+                            style: {
+                                display: "flex"
+                            },
+                            if: "abc",
+                            forEach: "ary",
+                            inherit: {
+                                attr: "hi"
                             }
                         }
                     ],
-                    type: ["card", "metal"],
-                    events: {
-                        "contextmenu": {
-                            preventDefault: true,
-                            listener: []
-                        }
-                    }
-                },
-                {
-                    tag: "input",
-                    type: ["font-black"],
                     style: {
-                        fontWeight: "bold",
-                        borderRadius: "5px"
+                        width: "80%",
+                        height: "60vh"
                     },
-                    validate: "isEmail",
-                    placeholder: "subscribe email"
+                    varAs: "list"
                 },
                 {
-                    tag: "h1",
-                    expire: {
-                        date: 10000 + (+ new Date())
+                    tag: "ol",
+                    component: [
+                        {
+                            tag: "li",
+                            content: "{{item}}",
+                            forEach: "fruits",
+                            type: ["font-black", "selectable"]
+                        }
+                    ],
+                    style: {
+                        fontSize: "20px"
                     },
-                    content: "I'll expire in ten second!"
+                    content: "Fruits: ",
+                    type: ["font-black"]
                 }
             ]
-        },
-        {
-            id: "footer",
-            component: [
-                {
-                    text: "Normal Q&A",
-                    location: "q&a.html",
-                    type: ["bg-light-white", "font-black"],
-                    id: "clarify",
-                    content: "Normal Q&A"
-                }
-            ],
-            config: {
-                tag: "span",
-                type: ["footerLink"]
-            }
         }
-    ],
-    classify: {
-        cardie: {
-            component: [
-                {
-                    tag: "h1",
-                    content: "{{key}}"
-                },
-                {
-                    tag: "p",
-                    content: "{{value}}"
-                },
-                {
-                    tag: "button",
-                    content: "Get Started",
-                    events: {
-                        onclick: {
-                            preventDefault: false,
-                            listener: [() => location.href = "https://github.com/liam274/Ezy.js/"]
-                        }
-                    }
-                }
-            ],
-            type: ["card", "metal"],
-            forEach: "details",
-            events: {
-                "contextmenu": {
-                    preventDefault: true,
-                    listener: []
-                }
-            }
-        },
-        tit: {
-            tag: "h1",
-            content: "Ezy.js",
-            style: {
-                fontSize: "80px"
-            }
-        }
-    }
+    ]
 };
 let _ = new render("head", {
     main: [
@@ -217,5 +182,5 @@ let _ = new render("head", {
         }
     ]
 });
-const proc = new render(pageData);
+const proc = new render(body, pageData);
 proc.reRender();
