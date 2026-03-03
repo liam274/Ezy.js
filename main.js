@@ -38,7 +38,7 @@ const keyword = new Set([
     "if", "content", "inherit",
     "validate", "expire", "text",
     "forEach", "location", "innerHTML",
-    "config"
+    "config", "data"
 ]), errorMsg = {
     1: "data structure error",
     2: "this.asVar rewrite error",
@@ -89,7 +89,7 @@ function camel2array(data) {
     let result = [],
         word = [];
     for (let i of data) {
-        if (i === i.toLocaleUpperCase()) {
+        if (i === i.toLocaleUpperCase() && /[A-Za-z]/.test(i)) {
             result.push(word.join(""));
             word.length = 0;
             word.push(i.toLocaleLowerCase());
@@ -116,14 +116,14 @@ function equal(data) {
 }
 
 function max(data) {
-    let minV = "",
-        min = Infinity;
+    let maxV = "",
+        max = -Infinity;
     for (let i in data)
-        if (data[i] < min) {
-            minV = i;
-            min = data[i];
+        if (data[i] > max) {
+            maxV = i;
+            max = data[i];
         }
-    return minV;
+    return maxV;
 }
 
 // Ezy
@@ -235,7 +235,7 @@ const Ezy = {
                     stack[stack.length - 1][char]++;
                 } else {
                     if (!equal([stack[stack.length - 1]])) {
-                        throw new Error(`[ezy.js] CRITIACL ERROR: Pharsing Error: Error when pharsing, unclosed ${max(stack[stack.length - 1])}.`);
+                        throw new Error(`[ezy.js] CRITICAL ERROR: Parsing Error: Error when parsing, unclosed ${max(stack[stack.length - 1])}.`);
                     }
                     let _ = {};
                     _[char] = 1;
@@ -295,10 +295,10 @@ class render {
         this.expireEls = [];
         this.mains = [];
         this.pipes = {};
-        this.frameID = [];
+        this.frameID = undefined;
         if (!data) {
             this.set(1);
-            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", this.maxWait);
+            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", 404, this.maxWait);
             return this;
         }
         for (let i in required) {
@@ -309,7 +309,7 @@ class render {
         }
         if (!this.data.main) {
             this.set(1);
-            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure attribute \"main\" missing.", this.maxWait);
+            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure attribute \"main\" missing.", 404, this.maxWait);
             return this;
         }
         this.config = data.config || {};
@@ -327,10 +327,10 @@ class render {
         if (this.loadPage) this.clearLoading();
         if (!this.data) {
             this.set(1);
-            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", this.maxWait);
+            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", 404, this.maxWait);
             return;
         }
-        this.loadPage = this.loadingPage("", this.maxWait);
+        this.loadPage = this.loadingPage("", 404, this.maxWait);
         this.clear();
         this.varage = { ...varage, ...(this.data.data || {}) };
         this.statusCode = 0;
@@ -355,12 +355,12 @@ class render {
         this.statusCode = 0;
         if (this.data.onStart) {
             this.preRender(this.data.onStart);
-        } else console.warn("MAJOR SUGGESTION: : Suggest adding onStart function to handle preprocess");
+        } else console.warn("MAJOR SUGGESTION: : Suggest adding onStart function list to handle preprocess");
         for (let i of Ezy.plugins) i.onStart?.(this.data);
         if (!this.data.main) {
             this.set(1);
             error("[ezy.js] CRITICAL ERROR: Structure Error: Data structure incomplete.");
-            this.loadPage = this.loadingPage("", this.maxWait, "page.data.main");
+            this.loadPage = this.loadingPage("", 404, this.maxWait, "page.data.main");
             return;
         }
         this.mainRender(this.data.main);
@@ -372,10 +372,6 @@ class render {
         if (this.statusCode !== 0) return;
     }
     loop() {
-        if (!this.interval) {
-            if (this.frameID) cancelAnimationFrame(this.frameID);
-            return;
-        }
         const date = +new Date();
         let t = 0;
         for (let i of [...this.expireEls]) {
@@ -394,12 +390,9 @@ class render {
         for (let i of this.mains) {
             i.func(i.obj, i.el);
         }
+        cancelAnimationFrame(this.frameID);
         if (this.interval)
-            this.frameID.push(requestAnimationFrame(this.loop.bind(this)));
-        else {
-            for (let i of this.frameID) cancelAnimationFrame(i);
-            this.frameID.length = 0;
-        }
+            this.frameID = requestAnimationFrame(this.loop.bind(this));
     }
     pipe2(sender, receiver, data) {
         if (!(sender in this.pipes)) {
@@ -448,7 +441,7 @@ class render {
                 return this.set(5);
             }
             for (let k in item) {
-                if (!keyword.has(k)) el[k] = this.preCompileStr(item[k]);
+                if (!keyword.has(k)) el[k] = this.preCompileStr(item[k], traceback, item.inherit || {});
             }
             if (!special) {
                 this.beforePlugComponent(el, traceback);
@@ -519,8 +512,11 @@ class render {
                     if (this.statusCode !== 0) return;
                     this.pipes[i.pipe.name] = i.pipe;
                 }
+                const replacement = {
+                    ...this.systemPlot, ...(i.inherit || {}), key: k, item: obj[k]
+                };
                 if (i.data) for (let k in i.data) {
-                    card[`data-${camel2array(k).join("-")}`] = i.data[k];
+                    card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, replacement));
                 }
                 this.beforePlugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
@@ -537,9 +533,6 @@ class render {
                     this.addListener(j, i, card, traceback);
                     if (this.statusCode !== 0) return;
                 }
-                const replacement = {
-                    ...this.systemPlot, ...(i.inherit || {}), key: k, item: obj[k]
-                };
                 card.innerHTML += this.preCompileStr(
                     (i.content || ""),
                     traceback, replacement
@@ -555,7 +548,7 @@ class render {
         } else
             for (let k = 0; k < (i.times || 1); k++) {
                 const card = $$(i.tag || config.tag || "div");
-                card.classList.add(...(i.type || config.tag || []));
+                card.classList.add(...(i.type || []), ...(config.type || []));
                 if (i.expire) {
                     this.expireEls.push({
                         el: card,
@@ -583,7 +576,7 @@ class render {
                     this.pipes[i.pipe.name] = i.pipe;
                 }
                 if (i.data) for (let k in i.data) {
-                    card[`data-${camel2array(k).join("-")}`] = i.data[k];
+                    card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, i.inherit || {}));
                 }
                 this.beforePlugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
@@ -615,7 +608,7 @@ class render {
         return todo;
     };
     mainRender(pageData) {
-        this.sectionRender(pageData, this.el, "content", pageData.title || "", this.contentRender, true);
+        this.sectionRender(pageData, this.el, pageData.name || "", pageData.title || "", this.contentRender, true);
         if (this.statusCode !== 0) return;
     }
     set(code) {
@@ -652,7 +645,7 @@ class render {
                             result = extraScope[name];
                         }
                         else {
-                            error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when trying to access variable ${name}, not found, in ${traceback}`);
+                            error(`[ezy.js] CRITICAL ERROR: Parsing Error: Error when trying to access variable ${name}, not found, in ${traceback}`);
                             return this.set(5);
                         }
                         first = false;
@@ -662,12 +655,12 @@ class render {
                             if (typeof extraScope[name[0]] === "function") result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
                                 traceback, { ...extraScope, result: result });
                             else {
-                                error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when pharsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`);
+                                error(`[ezy.js] CRITICAL ERROR: Parsing Error: Error when parsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`);
                                 return this.set(5);
                             }
                         }
                         else {
-                            error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when trying to access variable ${name[0]}, not found, in ${traceback}`);
+                            error(`[ezy.js] CRITICAL ERROR: Parsing Error: Error when trying to access variable ${name[0]}, not found, in ${traceback}`);
                             return this.set(5);
                         }
                     }
@@ -680,7 +673,7 @@ class render {
                     result = extraScope[name];
                 }
                 else {
-                    error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when trying to access variable ${name}, not found, in ${traceback}`);
+                    error(`[ezy.js] CRITICAL ERROR: Parsing Error: Error when trying to access variable ${name}, not found, in ${traceback}`);
                     return this.set(5);
                 }
                 first = false;
@@ -690,20 +683,19 @@ class render {
                     if (typeof extraScope[name[0]] === "function") result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
                         traceback, { ...extraScope, result: result });
                     else {
-                        error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when pharsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`);
+                        error(`[ezy.js] CRITICAL ERROR: Parsing Error: Error when parsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`);
                         return this.set(5);
                     }
                 }
                 else {
-                    error(`[ezy.js] CRITICAL ERROR: Pharsing Error: Error when trying to access variable ${name[0]}, not found, in ${traceback}`);
+                    error(`[ezy.js] CRITICAL ERROR: Parsing Error: Error when trying to access variable ${name[0]}, not found, in ${traceback}`);
                     return this.set(5);
                 }
             }
             return result;
         }
-        const scope = extraScope;
-        const keys = Object.keys(scope);
-        const values = keys.map(k => scope[k]);
+        const keys = Object.keys(extraScope);
+        const values = keys.map(k => extraScope[k]);
 
         try {
             const fn = new Function(...keys, `return (${expr})`);
@@ -728,12 +720,15 @@ class render {
             doubleStop = false,
             varName = [];
         replacement = { ...this.systemPlot, ...replacement };
+        let newReplacement = {};
         const _varage = { ...this.varage, ...pipeData };
         for (let i in replacement) {
             for (let t of (dictionary[i] || [i])) {
-                data = data.replaceAll(`{{${t}}}`, replacement[i]);
+                newReplacement[t] = replacement[i];
             }
         }
+        for (let i in newReplacement)
+            data = data.replaceAll(`{{${i}}}`, newReplacement[i]);
         for (let i of data) {
             if (skip) {
                 if (varName.length) varName.push(i);
@@ -743,20 +738,19 @@ class render {
             }
             if ((stop && !longVar) || (doubleStop && longVar)) {
                 varName = varName.join("").trim();
-                if (stop) {
-                    if (_varage[varName])
-                        if ((typeof _varage[varName]) === "function")
-                            result.push(String(_varage[varName]()));
-                        else
-                            result.push(String(_varage[varName]));
-                    else {
-                        try {
-                            result.push(String(this.evaluateExpression(varName, traceback, _varage)));
-                        } catch (e) {
-                            error(`[ezy.js] CRITICAL ERROR: EVAL Error: Error when trying to eval expression ${varName}, as below, in ${traceback}`);
-                            error(e);
-                            return this.set(6);
-                        }
+                const _var = stop ? _varage : newReplacement;
+                if (_var[varName])
+                    if ((typeof _var[varName]) === "function")
+                        result.push(String(_var[varName]()));
+                    else
+                        result.push(String(_var[varName]));
+                else {
+                    try {
+                        result.push(String(this.evaluateExpression(varName, traceback, _var)));
+                    } catch (e) {
+                        error(`[ezy.js] CRITICAL ERROR: EVAL Error: Error when trying to eval expression ${varName}, as below, in ${traceback}`);
+                        error(e);
+                        return this.set(6);
                     }
                 }
                 stop = false;
@@ -834,15 +828,16 @@ class render {
             return this.set(3);
         }
         varName = varName.join("").trim();
-        if (stop) {
-            if (_varage[varName])
-                if ((typeof _varage[varName]) === "function")
-                    result.push(String(_varage[varName]()));
+        if (stop || doubleStop) {
+            const _var = stop ? _varage : newReplacement;
+            if (_var[varName])
+                if ((typeof _var[varName]) === "function")
+                    result.push(String(_var[varName]()));
                 else
-                    result.push(String(_varage[varName]));
+                    result.push(String(_var[varName]));
             else {
                 try {
-                    result.push(String(this.evaluateExpression(varName, traceback, _varage)));
+                    result.push(String(this.evaluateExpression(varName, traceback, _var)));
                 } catch (e) {
                     error(`[ezy.js] CRITICAL ERROR: EVAL Error: Error when trying to eval expression ${varName}, as below, in ${traceback}`);
                     error(e);
@@ -893,12 +888,13 @@ class render {
                         this.addListener(evt, j, el, myTraceback);
                         if (this.statusCode !== 0) return;
                     }
+                    const replace = { ...replacement, ...j.inherit, key: k, item: obj[k], ...own };
                     for (let parm in j) {
                         if (keyword.has(parm)) continue;
-                        el[parm] = this.preCompileStr(j[parm], myTraceback, { ...replacement, ...j.inherit, key: k, item: obj[k], ...own });
+                        el[parm] = this.preCompileStr(j[parm], myTraceback, replace);
                     }
                     el.innerHTML = this.preCompileStr(
-                        (j.content || ""), myTraceback, { ...replacement, ...j.inherit, key: k, item: obj[k], ...own }
+                        (j.content || ""), myTraceback, replace
                     );
                     if (this.statusCode !== 0) return;
                     if (j.expire) {
@@ -927,9 +923,9 @@ class render {
                         if (this.statusCode !== 0) return;
                         this.pipes[j.pipe.name] = j.pipe;
                     }
-                    if (j.text) el.title = this.preCompileStr(j.text, myTraceback, { ...replacement, ...j.inherit, key: k, item: obj[k] });
+                    if (j.text) el.title = this.preCompileStr(j.text, myTraceback, replace);
                     if (j.data) for (let k in j.data) {
-                        el[`data-${camel2array(k).join("-")}`] = j.data[k];
+                        el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, replace));
                     }
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
@@ -940,7 +936,7 @@ class render {
                     todo.appendChild(el);
                     this.plugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
-                    this.pushComponent(j, el, myTraceback, { ...replacement, ...j.inherit, key: k, item: obj[k] });
+                    this.pushComponent(j, el, myTraceback, replace);
                     if (this.statusCode !== 0) return;
                 }
             } else {
@@ -989,7 +985,7 @@ class render {
                     }
                     if (j.text) el.title = this.preCompileStr(j.text, myTraceback, { ...replacement, ...j.inherit, ...own });
                     if (j.data) for (let k in j.data) {
-                        el[`data-${camel2array(k).join("-")}`] = j.data[k];
+                        el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, { ...replacement, ...j.inherit, ...own }));
                     }
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
@@ -1055,7 +1051,7 @@ class render {
                 for (let i of listener) i(e);
             });
     }
-    loadingPage(msg, guillotine = 60000, reason = "page.data", parentNode = body) {// hell meme
+    loadingPage(msg, errorCode, guillotine = 60000, reason = "page.data", parentNode = body) {// hell meme
         const pot = $$("div");
         pot.classList.add("flex", "horizontal-mid", "vertical-mid", "bg-white");
         pot.style.width = "100%";
@@ -1069,18 +1065,18 @@ class render {
             parent: parentNode,
             id: setTimeout(() => {
                 parentNode.removeChild(pot);
-                this.errorPage(msg, reason, parentNode);
+                this.errorPage(msg, errorCode, reason, parentNode);
             }, guillotine)
         };
     }
-    errorPage(msg, reason = "page.data", parentNode = body) {
+    errorPage(msg, errorCode, reason = "page.data", parentNode = body) {
         error(msg);
         const pot = $$("div");
         pot.classList.add("flex", "bg-white", "horizontal-mid", "vertical-mid");
         pot.style.width = "100%";
         pot.style.height = "100%";
         const div = $$("div");
-        div.innerHTML = "404";
+        div.innerHTML = errorCode || "404";
         div.style.fontSize = "20px";
         div.style.border = "1px solid black";
         div.style.borderWidth = "0 1px 0 0";

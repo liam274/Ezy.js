@@ -11,10 +11,22 @@ const pageData = {
         },
         ezy: "<i><b>Ezy.js</b></i>",
         tools: {
-            _home: "ezy",
-            notes: "documentation",
-            setting: "setting",
-            lab: "lab"
+            _home: {
+                text: "ezy",
+                href: "index.html"
+            },
+            notes: {
+                text: "documentation",
+                href: "doc.html"
+            },
+            setting: {
+                text: "setting",
+                href: "setting.html"
+            },
+            lab: {
+                text: "lab",
+                href: "expermential.html"
+            }
         },
         users: {
             user: "user"
@@ -35,8 +47,20 @@ const pageData = {
                         {
                             tag: "img",
                             src: "./assets/{{key}}.svg",
-                            text: "{{value}}",
-                            forEach: "tools"
+                            text: "{{value.text}}",
+                            forEach: "tools",
+                            events: {
+                                onclick: {
+                                    listener: [
+                                        (e) => {
+                                            location.href = e.target.dataset.href;
+                                        }
+                                    ]
+                                }
+                            },
+                            data: {
+                                href: "{{value.href}}"
+                            }
                         }
                     ]
                 },
