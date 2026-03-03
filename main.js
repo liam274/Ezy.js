@@ -5,7 +5,7 @@
     by Liam Lei
     Started from 2026.02.11
 
-    Release: 0.0.4 (Stable)
+    Release: 0.0.5 (Stable)
 
     Acknowledgments:
         - Nathan Wong. Thanks for :

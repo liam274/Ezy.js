@@ -130,3 +130,6 @@ In the following sample, #a and #b is the first-level children of #root, while #
     </div>
 </div>
 ```
+
+## community
+Discord: https://discord.gg/QhaEZTTgru
