@@ -9,106 +9,144 @@ const pageData = {
             "Why Ezy?": "{ezy} is lightweight, easy-learning and have incrediable functions: 2+2={2+2}",
             "How to get start?": "{ezy} is <b>FREE!</b> You can use it wherever you'd like to."
         },
-        ezy: "<i><b>Ezy.js</b></i>"
-    }, main: {
-        title: "Ezy.js: A modern front-end framework",
-        toolbar: {
-            _home: {
-                text: "ezy",
-                location: "index.html"
-            },
-            notes: {
-                text: "Documentation",
-                location: "doc.html"
-            },
-            setting: {
-                text: "Setting",
-                location: "setting.html"
-            },
-            lab: {
-                text: "lab",
-                location: "experiment.html"
-            }
+        ezy: "<i><b>Ezy.js</b></i>",
+        tools: {
+            _home: "ezy",
+            notes: "documentation",
+            setting: "setting",
+            lab: "lab"
         },
-        userbar: {
-            user: {
-                text: "User",
-                location: "user.html"
-            }
+        users: {
+            user: "user"
+        }
+    }, main: [
+        {
+            id: "head",
+            component: [
+                {
+                    id: "toolbar",
+                    component: [
+                        {
+                            tag: "span",
+                            type: ["link"],
+                            id: "home",
+                            content: "Ezy.js"
+                        },
+                        {
+                            tag: "img",
+                            src: "./assets/{{key}}.svg",
+                            text: "{{value}}",
+                            forEach: "tools"
+                        }
+                    ]
+                },
+                {
+                    id: "userbar",
+                    component: [
+                        {
+                            tag: "img",
+                            src: "./assets/{{key}}.svg",
+                            text: "{{value}}",
+                            forEach: "users"
+                        }
+                    ]
+                }
+            ]
         },
-        banner: [
-            {
-                type: ["left-right"],
-                component: [
-                    "tit",
-                    {
-                        tag: "span",
-                        id: "slogon",
-                        content: "A modern framework technology."
-                    }
-                ]
-            },
-            {
-                type: ["left-right"]
-            }
-        ],
-        content: [
-            "cardie",
-            {
-                component: [
-                    {
-                        tag: "h1",
-                        content: "Try:"
-                    },
-                    {
-                        tag: "p",
-                        content: "May you try the incrediable convience function!"
-                    },
-                    {
-                        tag: "button",
-                        content: "Ezy.alert",
-                        events: {
-                            onclick: {
-                                preventDefault: false,
-                                listener: [() => Ezy.alert({ title: "Ezy.js", content: "Hi, how are you today?" })]
+        {
+            id: "title",
+            component: [
+                {
+                    type: ["left-right"],
+                    component: [
+                        {
+                            style: {
+                                fontSize: "80px"
+                            },
+                            content: "Ezy.js",
+                            tag: "h1"
+                        },
+                        {
+                            tag: "span",
+                            id: "slogon",
+                            content: "A modern framework technology."
+                        }
+                    ]
+                },
+                {
+                    type: ["left-right"]
+                }
+            ]
+        },
+        {
+            id: "content",
+            component: [
+                "cardie",
+                {
+                    component: [
+                        {
+                            tag: "h1",
+                            content: "Try:"
+                        },
+                        {
+                            tag: "p",
+                            content: "May you try the incrediable convience function!"
+                        },
+                        {
+                            tag: "button",
+                            content: "Ezy.alert",
+                            events: {
+                                onclick: {
+                                    preventDefault: false,
+                                    listener: [() => Ezy.alert({ title: "Ezy.js", content: "Hi, how are you today?" })]
+                                }
                             }
                         }
+                    ],
+                    type: ["card", "metal"],
+                    events: {
+                        "contextmenu": {
+                            preventDefault: true,
+                            listener: []
+                        }
                     }
-                ],
-                type: ["card", "metal"],
-                events: {
-                    "contextmenu": {
-                        preventDefault: true,
-                        listener: []
-                    }
+                },
+                {
+                    tag: "input",
+                    type: ["font-black"],
+                    style: {
+                        fontWeight: "bold",
+                        borderRadius: "5px"
+                    },
+                    validate: "isEmail",
+                    placeholder: "subscribe email"
+                },
+                {
+                    tag: "h1",
+                    expire: {
+                        date: 10000 + (+ new Date())
+                    },
+                    content: "I'll expire in ten second!"
                 }
-            },
-            {
-                tag: "input",
-                type: ["font-black"],
-                style: {
-                    fontWeight: "bold",
-                    borderRadius: "5px"
-                },
-                validate: "isEmail",
-                placeholder: "subscribe email"
-            },
-            {
-                tag: "h1",
-                expire: {
-                    date: 10000 + (+ new Date())
-                },
-                content: "I'll expire in ten second!"
-            }
-        ],
-        footer: {
-            clarify: {
-                text: "Normal Q&A",
-                location: "q&a.html",
-                type: ["bg-light-white", "font-black"]
+            ]
+        },
+        {
+            id: "footer",
+            component: [
+                {
+                    text: "Normal Q&A",
+                    location: "q&a.html",
+                    type: ["bg-light-white", "font-black"],
+                    id: "clarify",
+                    content: "Normal Q&A"
+                }
+            ],
+            config: {
+                tag: "span",
+                type: ["footerLink"]
             }
         }
-    },
+    ],
     classify: {
         cardie: {
             component: [
@@ -149,5 +187,13 @@ const pageData = {
         }
     }
 };
-const proc = new render(pageData);
+let _ = new render("head", {
+    main: [
+        {
+            tag: "title",
+            content: "Ezy.js: A modern front-end framework"
+        }
+    ]
+});
+const proc = new render(body, pageData);
 proc.reRender();

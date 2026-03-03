@@ -5,7 +5,7 @@
     by Liam Lei
     Started from 2026.02.11
 
-    Release: 0.0.3 (Stable)
+    Release: 0.0.4 (Stable)
 
     Acknowledgments:
         - Nathan Wong. Thanks for him providing his seat, as it's close to the electricity socket
@@ -37,7 +37,8 @@ const keyword = new Set([
     "listener", "times", "title",
     "if", "content", "inherit",
     "validate", "expire", "text",
-    "forEach", "location", "innerHTML"
+    "forEach", "location", "innerHTML",
+    "config"
 ]), errorMsg = {
     1: "data structure error",
     2: "this.asVar rewrite error",
@@ -55,10 +56,6 @@ const dictionary = {
     item: ["item", "value"]
 },
     required = {// store required in namespace, and tell the default
-        toolbar: "toolbar",
-        userbar: "userbar",
-        content: "content",
-        footer: "footer",
     };
 // class
 
@@ -292,7 +289,7 @@ const Ezy = {
 const varage = {},// variable storage (?cold joke)
     vars = new Set(["content", "toolbar", "userbar", "footer"]);// Ensure that third party can use the given name in asVar (name) as variable in JS
 class render {
-    constructor(data, maxWait = 60000, namespace = {}) {
+    constructor(el, data, maxWait = 60000, namespace = {}) {
         this.maxWait = maxWait;
         this.data = data;
         this.expireEls = [];
@@ -317,33 +314,14 @@ class render {
         }
         this.config = data.config || {};
         this.namespace = namespace;
-        let all = document.createDocumentFragment();
-        this.header = $$("div");
-        this.header.id = "head";
-        all.appendChild(this.header);
-        this.toolbar = $$("div");
-        this.toolbar.id = this.namespace.toolbar;
-        this.userbar = $$("div");
-        this.userbar.id = this.namespace.userbar;
-        if (this.data.main.banner) {
-            this.title = $$("div");
-            this.title.id = "title";
-            all.appendChild(this.title);
-        }
-        this.content = $$("div");
-        this.content.id = this.namespace.content;
-        all.appendChild(this.content);
-        if (this.data.main.footer) {
-            this.footer = $$("div");
-            this.footer.id = this.namespace.footer;
-            all.appendChild(this.footer);
-        }
-        this.header.appendChild(this.toolbar);
-        this.header.appendChild(this.userbar);
-        this.reRender(all);
+        if (typeof el === "string") this.mainEl = $(el);
+        else this.mainEl = el;
+        this.original = this.mainEl.innerHTML;
+        this.el = document.createDocumentFragment();
+        this.reRender();
         if (this.statusCode !== 0) return this;
     }
-    reRender(all) {
+    reRender() {
         if (!this.config.keepConsole) console.clear();
         this.historyRender = +new Date();
         if (this.loadPage) this.clearLoading();
@@ -359,14 +337,6 @@ class render {
         this.systemPlot = {
             time: 0
         };
-        const home = $$("span");
-        home.id = "home";
-        home.classList.add("link");
-        home.innerHTML = this.data.title || "Ezy.js";
-        home.onclick = () => {
-            location.href = "index.html";
-        };
-        this.toolbar.appendChild(home);
         this.expireEls.length = 0;
         this.mains.length = 0;
         for (var key in this.pipes) {
@@ -377,7 +347,7 @@ class render {
         this.oldTimeout = setTimeout(() => { this.interval = true; this.loop(); }, 1000 - ((+new Date()) % 1000));
         this.main();
         if (this.statusCode !== 0) return;
-        if (all) body.appendChild(all);
+        if (this.el) this.mainEl.appendChild(this.el);
         this.clearLoading();
         log(`[noReact] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
     }
@@ -459,7 +429,7 @@ class render {
             i(this.data);
         }
     }
-    sectionRender(sectionData, parentElement, sectionName, title, createElement, special = false) {
+    sectionRender = (sectionData, parentElement, sectionName, title, createElement, special = false) => {
         const traceback = `page ${title} -> ${sectionName}`;
         if (!sectionData) {
             error(`[ezy.js] CRITICAL ERROR: Value Error: function found first parameter in ${sectionData}, expected object, in ${traceback}`);
@@ -471,14 +441,14 @@ class render {
             const item = sectionData[i];
             if (Ezy.validateComponentIf(this, item.if, traceback)) continue;
             if (this.statusCode !== 0) return;
-            const el = createElement(i, item);
+            const el = createElement(i, item, i.config || {});
             if (this.statusCode !== 0) return;
             if (!(el instanceof Node)) {
                 error(`[ezy.js] CRITICAL ERROR: Value Error: argument-function "createElement" return unexpected value, expected Node(or NodeLike object), in page ${traceback}`);
                 return this.set(5);
             }
             for (let k in item) {
-                if (!keyword.has(k)) el[k] = item[k];
+                if (!keyword.has(k)) el[k] = this.preCompileStr(item[k]);
             }
             if (!special) {
                 this.beforePlugComponent(el, traceback);
@@ -492,8 +462,8 @@ class render {
             this.systemPlot.time++;
         }
         parentElement.appendChild(todo);
-    }
-    contentRender = (_, i) => {
+    };
+    contentRender = (_, i, config) => {
         const title = this.data.main.title,
             traceback = `page ${title} -> content`;
         if (typeof i === "string") {
@@ -521,8 +491,8 @@ class render {
             let first = -1;
             for (let k in obj) {
                 first++;
-                const card = $$(i.tag || "div");
-                card.classList.add(...(i.type || []));
+                const card = $$(i.tag || config.tag || "div");
+                card.classList.add(...(i.type || []), ...(config.type || []));
                 if (i.expire) {
                     this.expireEls.push({
                         el: card,
@@ -558,6 +528,7 @@ class render {
                     this.asVar(card, i.varAs, traceback);
                     if (this.statusCode !== 0) return;
                 }
+                if (i.text) card.title = this.preCompileStr(i.text, traceback, replacement);
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
@@ -566,22 +537,25 @@ class render {
                     this.addListener(j, i, card, traceback);
                     if (this.statusCode !== 0) return;
                 }
+                const replacement = {
+                    ...this.systemPlot, ...(i.inherit || {}), key: k, item: obj[k]
+                };
                 card.innerHTML += this.preCompileStr(
                     (i.content || ""),
-                    traceback, { ...this.systemPlot, ...(i.inherit || {}), key: k, item: obj[k] }
+                    traceback, replacement
                 );
                 if (this.statusCode !== 0) return;
                 for (let j in i) {
                     if (keyword.has(j)) continue;
-                    card[j] = i[j];
+                    card[j] = this.preCompileStr(i[j], traceback, replacement);
                 }
-                this.pushComponent(i, card, traceback, { ...this.systemPlot, ...(i.inherit || {}), key: k, item: obj[k] });
+                this.pushComponent(i, card, traceback, replacement);
                 if (this.statusCode !== 0) return;
             }
         } else
             for (let k = 0; k < (i.times || 1); k++) {
-                const card = $$(i.tag || "div");
-                card.classList.add(...(i.type || []));
+                const card = $$(i.tag || config.tag || "div");
+                card.classList.add(...(i.type || config.tag || []));
                 if (i.expire) {
                     this.expireEls.push({
                         el: card,
@@ -617,6 +591,7 @@ class render {
                     this.asVar(card, i.varAs, traceback);
                     if (this.statusCode !== 0) return;
                 }
+                if (i.text) card.title = this.preCompileStr(i.text, traceback, i.inherit || {});
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
@@ -632,7 +607,7 @@ class render {
                 if (this.statusCode !== 0) return;
                 for (let j in i) {
                     if (keyword.has(j)) continue;
-                    card[j] = i[j];
+                    card[j] = this.preCompileStr(i[j], traceback, i.inherit);
                 }
                 this.pushComponent(i, card, traceback, i.inherit);
                 if (this.statusCode !== 0) return;
@@ -640,238 +615,8 @@ class render {
         return todo;
     };
     mainRender(pageData) {
-        const tit = ($("title") || $$("title")),
-            ico = ($("link[rel=icon]") || $$("link")),
-            title = pageData.title,
-            toolbar = this.toolbar,
-            userbar = this.userbar,
-            content = this.content,
-            footer = this.footer;
-        if (!pageData.title) {
-            error(`[ezy.js] CRITICAL ERROR: Structure Error: Structure missing title`);
-            return this.set(1);
-        }
-        tit.innerHTML = title;
-        ico.href = pageData.icon || "./assets/icon.svg";
-        ico.rel = "icon";
-        head.appendChild(ico);
-        head.appendChild(tit);
-        this.sectionRender(pageData.toolbar, toolbar, "toolbar", title, (i, val) => {
-            const btn = $$("img"),
-                traceback = `page ${title} -> toolbar`;
-            btn.src = `./assets/${i}.svg`;
-            btn.classList.add(...(val.type || []));
-            btn.title = this.preCompileStr(
-                (val.text || ""),
-                traceback, val.inherit || {}
-            );
-            if (this.statusCode !== 0) return;
-            if (val.expire) {
-                this.expireEls.push({
-                    el: btn,
-                    date: val.expire.date,
-                    expired: val.expire.expired || emptyFunc,
-                    obj: val
-                });
-            }
-            Ezy.validateValidation(this, btn, val.validate, traceback);
-            if (this.statusCode !== 0) return;
-            if (val.main) {
-                if (typeof val.main !== "function") {
-                    error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof val.main}, in ${traceback}`);
-                    return this.set(3);
-                }
-                this.mains.push({
-                    el: btn,
-                    obj: val,
-                    func: val.main
-                });
-            }
-            if (val.pipe) {
-                Ezy.validatePipe(this, val.pipe, traceback);
-                if (this.statusCode !== 0) return;
-                this.pipes[val.pipe.name] = val.pipe;
-            }
-            if (val.data) for (let k in val.data) {
-                btn[`data-${camel2array(k).join("-")}`] = val.data[k];
-            }
-            btn.onclick = () => {
-                location.href = val.location || "#";
-            };
-            return btn;
-        });
+        this.sectionRender(pageData, this.el, "content", pageData.title || "", this.contentRender, true);
         if (this.statusCode !== 0) return;
-        this.sectionRender(pageData.userbar, userbar, "userbar", title, (i, val) => {
-            const btn = $$("img"),
-                traceback = `page ${title} -> userbar`;
-            btn.src = `./assets/${i}.svg`;
-            btn.title = this.preCompileStr(
-                (val.text || ""),
-                traceback, val.inherit || {}
-            );
-            if (this.statusCode !== 0) return;
-            if (val.expire) {
-                this.expireEls.push({
-                    el: btn,
-                    date: val.expire.date,
-                    expired: val.expire.expired || emptyFunc,
-                    obj: val
-                });
-            }
-            Ezy.validateValidation(this, btn, val.validate, traceback);
-            if (this.statusCode !== 0) return;
-            if (val.main) {
-                if (typeof val.main !== "function") {
-                    error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof val.main}, in ${traceback}`);
-                    return this.set(3);
-                }
-                this.mains.push({
-                    el: btn,
-                    obj: val,
-                    func: val.main
-                });
-            }
-            if (val.pipe) {
-                Ezy.validatePipe(this, val.pipe, traceback);
-                if (this.statusCode !== 0) return;
-                this.pipes[val.pipe.name] = val.pipe;
-            }
-            if (val.data) for (let k in val.data) {
-                btn[`data-${camel2array(k).join("-")}`] = val.data[k];
-            }
-            btn.onclick = () => {
-                location.href = val.location || "#";
-            };
-            return btn;
-        });
-        if (this.statusCode !== 0) return;
-        if (pageData.banner) {
-            this.sectionRender(pageData.banner, this.title, "title", title, (_, i) => {
-                const traceback = `page ${title} -> title`;
-                if (typeof i === "string") {
-                    if (!this.classify) {
-                        error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component without classify dictionary, in ${traceback}`);
-                        return this.set(7);
-                    }
-                    if (!this.classify[i]) {
-                        error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component "${i}" without definition, in ${traceback}`);
-                        return this.set(7);
-                    }
-                    i = this.classify[i];
-                }
-                const todo = document.createDocumentFragment();
-                for (let k = 0; k < (i.times || 1); k++) {
-                    const card = $$(i.tag || "div");
-                    card.classList.add(...(i.type || []));
-                    if (i.expire) {
-                        this.expireEls.push({
-                            el: card,
-                            date: i.expire.date,
-                            expired: i.expire.expired || emptyFunc,
-                            obj: i
-                        });
-                    }
-                    Ezy.validateValidation(this, card, i.validate, traceback);
-                    if (this.statusCode !== 0) return;
-                    if (i.main) {
-                        if (typeof i.main !== "function") {
-                            error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof i.main}, in ${traceback}`);
-                            return this.set(3);
-                        }
-                        this.mains.push({
-                            el: card,
-                            obj: i,
-                            func: i.main
-                        });
-                    }
-                    if (i.pipe) {
-                        Ezy.validatePipe(this, i.pipe, traceback);
-                        if (this.statusCode !== 0) return;
-                        this.pipes[i.pipe.name] = i.pipe;
-                    }
-                    if (i.data) for (let k in i.data) {
-                        card[`data-${camel2array(k).join("-")}`] = i.data[k];
-                    }
-                    this.beforePlugComponent(card, traceback);
-                    if (this.statusCode !== 0) return;
-                    if (k == 0 && i.varAs) {
-                        this.asVar(card, i.varAs, traceback);
-                        if (this.statusCode !== 0) return;
-                    }
-                    todo.appendChild(card);
-                    this.plugComponent(card, traceback);
-                    if (this.statusCode !== 0) return;
-                    applyStyles(card, i.style);
-                    for (let j in (i.events || {})) {
-                        this.addListener(j, i, card, traceback);
-                        if (this.statusCode !== 0) return;
-                    }
-                    card.innerHTML += this.preCompileStr(
-                        (i.content || ""),
-                        traceback, i.inherit || {}
-                    );
-                    if (this.statusCode !== 0) return;
-                    for (let j in i) {
-                        if (keyword.has(j)) continue;
-                        card[j] = i[j];
-                    }
-                    this.pushComponent(i, card, traceback, i.inherit);
-                    if (this.statusCode !== 0) return;
-                }
-                return todo;
-            }, true);
-            if (this.statusCode !== 0) return;
-        }
-        this.sectionRender(pageData.content, content, "content", title, this.contentRender, true);
-        if (this.statusCode !== 0) return;
-        if (pageData.footer) this.sectionRender(pageData.footer, footer, "footer", title, (i, val) => {
-            const el = $$("span"),
-                traceback = `page ${title} -> footer`;
-            el.innerHTML = this.preCompileStr(
-                (val.text),
-                traceback, val.inherit || {});
-            if (this.statusCode !== 0) return;
-            if (val.expire) {
-                this.expireEls.push({
-                    el,
-                    date: val.expire.date,
-                    expired: val.expire.expired || emptyFunc,
-                    obj: val
-                });
-            }
-            Ezy.validateValidation(this, el, val.validate, traceback);
-            if (this.statusCode !== 0) return;
-            if (val.main) {
-                if (typeof val.main !== "function") {
-                    error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof val.main}, in ${traceback}`);
-                    return this.set(3);
-                }
-                this.mains.push({
-                    el,
-                    obj: val,
-                    func: val.main
-                });
-            }
-            if (val.pipe) {
-                Ezy.validatePipe(this, val.pipe, traceback);
-                if (this.statusCode !== 0) return;
-                this.pipes[val.pipe.name] = val.pipe;
-            }
-            if (val.data) for (let k in val.data) {
-                el[`data-${camel2array(k).join("-")}`] = val.data[k];
-            }
-            if (vars.has(i)) {
-                error(`[ezy.js] CRITICAL ERROR: ID Error: Error when rendering, rewriting id ${i}, in ${traceback}`);
-                return this.set(2);
-            }
-            el.id = i;
-            applyStyles(el, val.style);
-            el.classList.add("footerLink", ...(val.type || []));
-            el.addEventListener("click", function () {
-                location.href = val.location || "#";
-            });
-            return el;
-        });
     }
     set(code) {
         this.statusCode = code;
@@ -1112,6 +857,7 @@ class render {
             time: 0
         },
             todo = document.createDocumentFragment();
+        const config = i.config || {};
         for (let j of (i.component || [])) {
             if (typeof j === "string") {
                 if (!this.classify) {
@@ -1139,18 +885,18 @@ class render {
                 let first = -1;
                 for (let k in obj) {
                     first++;
-                    const el = $$(j.tag || "div");
-                    el.classList.add(...(j.type || []));
+                    const el = $$(j.tag || config.tag || "div");
+                    el.classList.add(...(j.type || []), ...(config.type || []));
                     applyStyles(el, j.style);
+                    let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     for (let evt in j.events) {
-                        this.addListener(evt, j, el, traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
+                        this.addListener(evt, j, el, myTraceback);
                         if (this.statusCode !== 0) return;
                     }
                     for (let parm in j) {
                         if (keyword.has(parm)) continue;
-                        el[parm] = j[parm];
+                        el[parm] = this.preCompileStr(j[parm], myTraceback, { ...replacement, ...j.inherit, key: k, item: obj[k], ...own });
                     }
-                    let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, { ...replacement, ...j.inherit, key: k, item: obj[k], ...own }
                     );
@@ -1181,6 +927,7 @@ class render {
                         if (this.statusCode !== 0) return;
                         this.pipes[j.pipe.name] = j.pipe;
                     }
+                    if (j.text) el.title = this.preCompileStr(j.text, myTraceback, { ...replacement, ...j.inherit, key: k, item: obj[k] });
                     if (j.data) for (let k in j.data) {
                         el[`data-${camel2array(k).join("-")}`] = j.data[k];
                     }
@@ -1198,18 +945,18 @@ class render {
                 }
             } else {
                 for (let k = 0; k < (j.times || 1); k++) {
-                    const el = $$(j.tag || "div");
-                    el.classList.add(...(j.type || []));
+                    const el = $$(j.tag || config.tag || "div");
+                    el.classList.add(...(j.type || []), ...(config.type || []));
                     applyStyles(el, j.style);
+                    let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     for (let evt in j.events) {
-                        this.addListener(evt, j, el, traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
+                        this.addListener(evt, j, el, myTraceback);
                         if (this.statusCode !== 0) return;
                     }
                     for (let parm in j) {
                         if (keyword.has(parm)) continue;
-                        el[parm] = j[parm];
+                        el[parm] = this.preCompileStr(j[parm], myTraceback, { ...replacement, ...j.inherit, ...own });
                     }
-                    let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, { ...replacement, ...j.inherit, ...own }
                     );
@@ -1240,6 +987,7 @@ class render {
                         if (this.statusCode !== 0) return;
                         this.pipes[j.pipe.name] = j.pipe;
                     }
+                    if (j.text) el.title = this.preCompileStr(j.text, myTraceback, { ...replacement, ...j.inherit, ...own });
                     if (j.data) for (let k in j.data) {
                         el[`data-${camel2array(k).join("-")}`] = j.data[k];
                     }
@@ -1273,11 +1021,8 @@ class render {
         }
     }
     clear() {
-        removeChild(this.toolbar);
-        removeChild(this.userbar);
-        if (this.title) removeChild(this.title);
-        removeChild(this.content);
-        if (this.footer) removeChild(this.footer);
+        removeChild(this.mainEl);
+        this.mainEl.innerHTML = this.original;
         vars.clear();
         for (let i of ["content", "toolbar", "userbar", "footer"]) vars.add(i);
     }
@@ -1357,7 +1102,8 @@ class render {
     clearLoading() {
         if (!this.loadPage) return;
         clearTimeout(this.loadPage.id);
-        this.loadPage.parent.removeChild(this.loadPage.obj);
+        if (this.loadPage.parent.contains(this.loadPage.obj))
+            this.loadPage.parent.removeChild(this.loadPage.obj);
         this.loadPage = undefined;
 
     }
