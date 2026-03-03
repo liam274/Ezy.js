@@ -12,8 +12,8 @@ Note that based on considerations of flexibilty, *Ezy.js* will not be responsibl
 ### Root
 In the root data, we have:
 - **main**, will be rendered as LRP.
-- **onStart**, being executed before LRP is rendered.
-- **onLoad**, being executed after LRP is rendered.
+- **onStart**, which is a list, its element will be executed before LRP is rendered.
+- **onLoad**, which is a list, be executed after LRP is rendered.
 - **config**, store configrations to the page
 - **data**, store the datas that should be in varage. It's safier then simply `varage.varName`, since it make sure it will be in the `render.varage`.
 
@@ -92,10 +92,23 @@ You can use pipes to send messages. Reciver **MUST** have pipe definded.
 This is a function that will be executed in every milisecond, reciving the component object itself as the first argument while the component element as the second.
 - data:
 will be stored as data-* attributes.
+- config:
+Configuration to the element and its children(first-level children only).
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.
 - CO(Component Object)
+- First-level children:
+In the following sample, #a and #b is the first-level children of #root, while #b is the first-level children of #a.
+```HTML
+<div id="root">
+    <div id="a">
+        <div id="b"></div>
+    </div>
+    <div id="c">
+    </div>
+</div>
+```
 
 ## Notice
 - Developers should not, and cannot have components in userbar, toolbar and footer. Alternative will be provided.
