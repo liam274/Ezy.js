@@ -334,7 +334,7 @@ Ezy.navigate = function (href) {
     for (let guard of routeGuard.guards) {
         let result = guard(href);
         if (!result.allow) {
-            location.href = (result.href || document.location.href);
+            if (result.href) location.href = result.href;
             full = false;
         }
     }
