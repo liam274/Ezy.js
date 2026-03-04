@@ -51,7 +51,37 @@ const keyword = new Set([
     6: "eval error",
     7: "classify error",
     8: "pipe error"
-};
+},
+    htmlKeywords = new Set([
+        "nodeType", "nodeName", "nodeValue", "ownerDocument", "parentNode", "parentElement",
+        "childNodes", "children", "firstChild", "lastChild", "previousSibling", "nextSibling",
+        "attributes", "isConnected", "textContent", "innerText", "outerText",
+        "tagName", "id", "className", "classList", "style", "dataset", "outerHTML",
+        "hidden", "tabIndex", "accessKey", "draggable", "spellcheck", "contentEditable",
+        "isContentEditable", "offsetParent", "offsetTop", "offsetLeft", "offsetWidth", "offsetHeight",
+        "clientTop", "clientLeft", "clientWidth", "clientHeight", "scrollTop", "scrollLeft",
+        "scrollWidth", "scrollHeight", "scrollIntoView", "scrollIntoViewIfNeeded",
+        "onabort", "onblur", "oncancel", "oncanplay", "oncanplaythrough", "onchange", "onclick",
+        "onclose", "oncontextmenu", "oncuechange", "ondblclick", "ondrag", "ondragend",
+        "ondragenter", "ondragleave", "ondragover", "ondragstart", "ondrop", "ondurationchange",
+        "onemptied", "onended", "onerror", "onfocus", "onformdata", "oninput", "oninvalid",
+        "onkeydown", "onkeypress", "onkeyup", "onload", "onloadeddata", "onloadedmetadata",
+        "onloadstart", "onmousedown", "onmouseenter", "onmouseleave", "onmousemove", "onmouseout",
+        "onmouseover", "onmouseup", "onmousewheel", "onpause", "onplay", "onplaying",
+        "onprogress", "onratechange", "onreset", "onresize", "onscroll", "onseeked", "onseeking",
+        "onselect", "onstalled", "onsubmit", "onsuspend", "ontimeupdate", "ontoggle",
+        "onvolumechange", "onwaiting", "onwheel", "onauxclick", "ongotpointercapture",
+        "onlostpointercapture", "onpointerdown", "onpointermove", "onpointerup", "onpointercancel",
+        "onpointerover", "onpointerout", "onpointerenter", "onpointerleave",
+        "appendChild", "removeChild", "replaceChild", "insertBefore", "cloneNode", "hasChildNodes",
+        "addEventListener", "removeEventListener", "dispatchEvent", "getAttribute", "setAttribute",
+        "removeAttribute", "hasAttribute", "getAttributeNS", "setAttributeNS", "removeAttributeNS",
+        "hasAttributeNS", "getBoundingClientRect", "getClientRects", "getElementsByClassName",
+        "getElementsByTagName", "getElementsByTagNameNS", "querySelector", "querySelectorAll",
+        "matches", "closest", "contains", "insertAdjacentHTML", "insertAdjacentText",
+        "insertAdjacentElement", "requestFullscreen", "requestPointerLock", "scroll", "scrollTo",
+        "scrollBy", "focus", "blur", "click"
+    ]);
 
 const dictionary = {
     time: ["i", "index", "renderIndex"], // maintain counts of independent elements (Which means those who is independent on times duplication)
@@ -319,10 +349,10 @@ class render {
     constructor(el, data, maxWait = 60000, namespace = {}) {
         this.maxWait = maxWait;
         this.data = data;
-        this.expireEls = [];
         this.mains = [];
         this.pipes = {};
         this.frameID = undefined;
+        this.vdom = { children: [] };
         if (!data) {
             this.set(1);
             this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", 404, this.maxWait);
@@ -343,6 +373,10 @@ class render {
         this.namespace = namespace;
         if (typeof el === "string") this.mainEl = $(el);
         else this.mainEl = el;
+        for (let i in this.mainEl) {
+            if (htmlKeywords.has(i)) continue;
+            if (this.mainEl[i]) this.vdom[i] = this.mainEl[i];
+        }
         this.original = this.mainEl.innerHTML;
         this.el = document.createDocumentFragment();
         this.reRender();
@@ -364,7 +398,6 @@ class render {
         this.systemPlot = {
             time: 0
         };
-        this.expireEls.length = 0;
         this.mains.length = 0;
         for (var key in this.pipes) {
             delete this.pipes[key];
@@ -399,21 +432,6 @@ class render {
         if (this.statusCode !== 0) return;
     }
     loop() {
-        const date = +new Date();
-        let t = 0;
-        for (let i of [...this.expireEls]) {
-            if (i.date <= date) {
-                i.el.innerHTML = "";
-                i.el.parentNode.removeChild(i.el);
-                if (i.obj.pipe) delete this.pipes[i.obj.pipe.name];
-                this.expireEls.splice(t, 1);
-                setTimeout(() => {
-                    if (i.expired) i.expired();
-                }, 0);
-                t--;
-            }
-            t++;
-        }
         for (let i of this.mains) {
             i.func(i.obj, i.el);
         }
@@ -455,16 +473,22 @@ class render {
             error(`[ezy.js] CRITICAL ERROR: Value Error: function found first parameter in ${sectionData}, expected object, in ${traceback}`);
             return this.set(5);
         }
-        const todo = document.createDocumentFragment();
+        const todo = document.createDocumentFragment(),
+            vdom = [];
         this.systemPlot.time = 0;
         for (let i in sectionData) {
             const item = sectionData[i];
             if (Ezy.validateComponentIf(this, item.if, traceback)) continue;
             if (this.statusCode !== 0) return;
-            const el = createElement(i, item, i.config || {});
+            const temp = createElement(i, item, i.config || {});
             if (this.statusCode !== 0) return;
+            if (!temp) {
+                error(`[ezy.js] CRITICAL ERROR: Value Error: argument-function "createElement" return unexpected value, expected {el:Node(or NodeLike object),obj:vdom}, in page ${traceback}`);
+                return this.set(5);
+            }
+            const { el, obj } = temp;
             if (!(el instanceof Node)) {
-                error(`[ezy.js] CRITICAL ERROR: Value Error: argument-function "createElement" return unexpected value, expected Node(or NodeLike object), in page ${traceback}`);
+                error(`[ezy.js] CRITICAL ERROR: Value Error: argument-function "createElement" return unexpected value, expected {el:Node(or NodeLike object),obj:vdom}, in page ${traceback}`);
                 return this.set(5);
             }
             if (!special) {
@@ -477,12 +501,15 @@ class render {
             }
             todo.appendChild(el);
             this.systemPlot.time++;
+            vdom.push(obj);
         }
         parentElement.appendChild(todo);
+        return vdom;
     };
     contentRender = (_, i, config) => {
         const title = this.data.main.title,
-            traceback = `page ${title} -> content`;
+            traceback = `page ${title} -> content`,
+            vdom = [];
         if (typeof i === "string") {
             if (!this.classify) {
                 error(`[ezy.js] CRITICAL ERROR: Classify Error: Error when trying to use classify component without classify dictionary, in ${traceback}`);
@@ -508,15 +535,20 @@ class render {
             let first = -1;
             for (let k in obj) {
                 first++;
-                const card = $$(i.tag || config.tag || "div");
+                const card = $$(i.tag || config.tag || "div"),
+                    temp = {
+                        children: []
+                    };
                 card.classList.add(...(i.type || []), ...(config.type || []));
                 if (i.expire) {
-                    this.expireEls.push({
-                        el: card,
-                        date: i.expire.date,
-                        expired: i.expire.expired || emptyFunc,
-                        obj: i
-                    });
+                    setTimeout((function () {
+                        card.innerHTML = "";
+                        card.parentNode.removeChild(card);
+                        if (i.pipe) delete this.pipes[i.pipe.name];
+                        setTimeout(() => {
+                            if (i.expire.expired) i.expire.expired();
+                        });
+                    }).bind(this), i.expire.date - new Date());
                 }
                 Ezy.validateValidation(this, card, i.validate, traceback);
                 if (this.statusCode !== 0) return;
@@ -548,7 +580,10 @@ class render {
                     this.asVar(card, i.varAs, traceback);
                     if (this.statusCode !== 0) return;
                 }
-                if (i.text) card.title = this.preCompileStr(i.text, traceback, replacement);
+                if (i.text) {
+                    card.title = this.preCompileStr(i.text, traceback, replacement);
+                    vdom.title = card.title;
+                }
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
@@ -566,20 +601,30 @@ class render {
                     if (keyword.has(j)) continue;
                     card.setAttribute(j, this.preCompileStr(i[j], traceback, replacement));
                 }
-                this.pushComponent(i, card, traceback, replacement);
+                temp.children.push(this.pushComponent(i, card, traceback, replacement));
                 if (this.statusCode !== 0) return;
+                for (let i in card) {
+                    if (htmlKeywords.has(i)) continue;
+                    if (card[i]) temp[i] = card[i];
+                }
+                vdom.push(temp);
             }
         } else
             for (let k = 0; k < (i.times || 1); k++) {
-                const card = $$(i.tag || config.tag || "div");
+                const card = $$(i.tag || config.tag || "div"),
+                    temp = {
+                        children: []
+                    };
                 card.classList.add(...(i.type || []), ...(config.type || []));
                 if (i.expire) {
-                    this.expireEls.push({
-                        el: card,
-                        date: i.expire.date,
-                        expired: i.expire.expired || emptyFunc,
-                        obj: i
-                    });
+                    setTimeout((function () {
+                        card.innerHTML = "";
+                        card.parentNode.removeChild(card);
+                        if (i.pipe) delete this.pipes[i.pipe.name];
+                        setTimeout(() => {
+                            if (i.expire.expired) i.expire.expired();
+                        });
+                    }).bind(this), i.expire.date - new Date());
                 }
                 Ezy.validateValidation(this, card, i.validate, traceback);
                 if (this.statusCode !== 0) return;
@@ -626,13 +671,21 @@ class render {
                     if (keyword.has(j)) continue;
                     card.setAttribute(j, this.preCompileStr(i[j], traceback, i.inherit));
                 }
-                this.pushComponent(i, card, traceback, i.inherit);
+                temp.children.push(this.pushComponent(i, card, traceback, i.inherit));
                 if (this.statusCode !== 0) return;
+                for (let i in card) {
+                    if (htmlKeywords.has(i)) continue;
+                    if (card[i]) temp[i] = card[i];
+                }
+                vdom.push(temp);
             }
-        return todo;
+        return {
+            el: todo,
+            obj: vdom
+        };
     };
     mainRender(pageData) {
-        this.sectionRender(pageData, this.el, pageData.name || "", pageData.title || "", this.contentRender, true);
+        this.vdom.children.push(...this.sectionRender(pageData, this.el, pageData.name || "", pageData.title || "", this.contentRender, true));
         if (this.statusCode !== 0) return;
     }
     set(code) {
@@ -876,7 +929,8 @@ class render {
             time: 0
         },
             todo = document.createDocumentFragment();
-        const config = i.config || {};
+        const config = i.config || {},
+            vdom = [];
         for (let j of (i.component || [])) {
             if (typeof j === "string") {
                 if (!this.classify) {
@@ -904,7 +958,10 @@ class render {
                 let first = -1;
                 for (let k in obj) {
                     first++;
-                    const el = $$(j.tag || config.tag || "div");
+                    const el = $$(j.tag || config.tag || "div"),
+                        temp = {
+                            children: []
+                        };
                     el.classList.add(...(j.type || []), ...(config.type || []));
                     applyStyles(el, j.style);
                     let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
@@ -922,12 +979,14 @@ class render {
                     );
                     if (this.statusCode !== 0) return;
                     if (j.expire) {
-                        this.expireEls.push({
-                            el,
-                            date: j.expire.date,
-                            expired: j.expire.expired || emptyFunc,
-                            obj: j
-                        });
+                        setTimeout((function () {
+                            el.innerHTML = "";
+                            el.parentNode.removeChild(el);
+                            if (j.pipe) delete this.pipes[j.pipe.name];
+                            setTimeout(() => {
+                                if (j.expire.expired) j.expire.expired();
+                            });
+                        }).bind(this), j.expire.date - new Date());
                     }
                     Ezy.validateValidation(this, el, j.validate, traceback);
                     if (this.statusCode !== 0) return;
@@ -960,12 +1019,20 @@ class render {
                     todo.appendChild(el);
                     this.plugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
-                    this.pushComponent(j, el, myTraceback, replace);
+                    temp.children.push(this.pushComponent(j, el, myTraceback, replace));
                     if (this.statusCode !== 0) return;
+                    for (let _ in el) {
+                        if (htmlKeywords.has(_)) continue;
+                        if (el[_]) temp[_] = el[_];
+                    }
+                    vdom.push(temp);
                 }
             } else {
                 for (let k = 0; k < (j.times || 1); k++) {
-                    const el = $$(j.tag || config.tag || "div");
+                    const el = $$(j.tag || config.tag || "div"),
+                        temp = {
+                            children: []
+                        };
                     el.classList.add(...(j.type || []), ...(config.type || []));
                     applyStyles(el, j.style);
                     let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
@@ -982,12 +1049,14 @@ class render {
                     );
                     if (this.statusCode !== 0) return;
                     if (j.expire) {
-                        this.expireEls.push({
-                            el,
-                            date: j.expire.date,
-                            expired: j.expire.expired || emptyFunc,
-                            obj: j
-                        });
+                        setTimeout((function () {
+                            el.innerHTML = "";
+                            el.parentNode.removeChild(el);
+                            if (j.pipe) delete this.pipes[j.pipe.name];
+                            setTimeout(() => {
+                                if (j.expire.expired) j.expire.expired();
+                            });
+                        }).bind(this), j.expire.date - new Date());
                     }
                     Ezy.validateValidation(this, el, j.validate, traceback);
                     if (this.statusCode !== 0) return;
@@ -1020,15 +1089,20 @@ class render {
                     todo.appendChild(el);
                     this.plugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
-                    this.pushComponent(j, el, myTraceback, { ...replacement, ...j.inherit, ...own });
+                    temp.children.push(this.pushComponent(j, el, myTraceback, { ...replacement, ...j.inherit, ...own }));
                     if (this.statusCode !== 0) return;
+                    for (let _ in el) {
+                        if (htmlKeywords.has(_)) continue;
+                        if (el[_]) temp[_] = el[_];
+                    }
+                    vdom.push(temp);
                 }
             }
             own.time++;
             parentNode.appendChild(todo);
             todo.replaceChildren();
         }
-        return 0;
+        return vdom;
     }
     asVar(el, varAs, traceback) {
         if (varAs) {
