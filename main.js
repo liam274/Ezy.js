@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+/* eslint-disable indent */
 "use strict";
 
 /*
@@ -42,15 +44,17 @@ const keyword = new Set([
     "validate", "expire", "text",
     "forEach", "innerHTML", "config",
     "data"
-]), errorMsg = {
-    1: "data structure error",
-    2: "this.asVar rewrite error",
-    3: "format error",
-    4: "template structure error",
-    5: "value error",
-    6: "eval error",
-    7: "classify error",
-    8: "pipe error"
+]), errors = {
+    STRUCTURE_ERROR: 1,
+    ASVAR_REWRITE_ERROR: 2,
+    FORMAT_ERROR: 3,
+    TEMPLATE_STRUCTURE_ERROR: 4,
+    VALUE_ERROR: 5,
+    EVAL_ERROR: 6,
+    CLASSIFY_ERROR: 7,
+    PIPE_ERROR: 8,
+    RENDER_ERROR: 9,
+    PHARSING_ERROR: 10
 };
 
 const dictionary = {
@@ -75,40 +79,45 @@ class unknownVariableError extends Error {
 // global functions
 
 function applyStyles(el, styles) {
-    if (!styles) return;
-    for (let prop in styles) {
+    if (!styles) {
+        return;
+    }
+    for (const prop in styles) {
         el.style.setProperty(camel2array(prop).join("-"), styles[prop]);
     }
 }
 
 function removeChild(el) {
-    let list = [...el.children];
-    for (let i of list) {
+    for (const i of [...el.children]) {
         el.replaceChildren(i);
     }
 }
 
 function camel2array(data) {
-    let result = [],
+    const result = [],
         word = [];
-    for (let i of data) {
+    for (const i of data) {
         if (i === i.toLocaleUpperCase() && /[A-Za-z]/.test(i)) {
             result.push(word.join(""));
             word.length = 0;
             word.push(i.toLocaleLowerCase());
-        } else word.push(i);
+        } else {
+            word.push(i);
+        }
     }
-    if (word.length) result.push(word.join(""));
+    if (word.length) {
+        result.push(word.join(""));
+    }
     return result;
 }
 
 function array2camel(data) {
-    let result = [],
-        sec,
+    const result = [];
+    let sec,
         first = false;
-    for (let i of data) {
+    for (const i of data) {
         sec = true;
-        for (let char of i) {
+        for (const char of i) {
             result.push(sec && first ? char.toLocaleUpperCase() : char);
             sec = false;
         }
@@ -119,15 +128,19 @@ function array2camel(data) {
 
 function equal(data) {
     let last;
-    for (let i of data) {
+    for (const i of data) {
         last = null;
-        for (let k in i) {
-            if (i[k] === null) return "NULL IS NOT ACCEPTED";
+        for (const k in i) {
+            if (i[k] === null) {
+                return "NULL IS NOT ACCEPTED";
+            }
             if (last === null) {
                 last = i[k];
                 continue;
             }
-            if (last !== i[k]) return false;
+            if (last !== i[k]) {
+                return false;
+            }
         }
     }
     return true;
@@ -136,11 +149,12 @@ function equal(data) {
 function max(data) {
     let maxV = "",
         max = -Infinity;
-    for (let i in data)
+    for (const i in data) {
         if (data[i] > max) {
             maxV = i;
             max = data[i];
         }
+    }
     return maxV;
 }
 
@@ -172,7 +186,7 @@ const Ezy = {
             error(`[ezy.js] CRITICAL ERROR: Pipe Error: Error when rendering, expected object[string,function], found ${data.pipe.receive}, in ${traceback}`);
             return obj.set(8);
         }
-        for (let i in data.pipe.receive) {
+        for (const i in data.pipe.receive) {
             const sobj = data.pipe.receive[i];
             if (typeof sobj.func !== "function") {
                 error(`[ezy.js] CRITICAL ERROR: Structure Error: Error when piping, expected data.pipe.receive.*.func as function, found ${typeof sobj.func}, in ${traceback}`);
@@ -203,8 +217,8 @@ const Ezy = {
     },
     validateValidation(obj, el, validate, traceback) {
         if (validate && typeof validate === "string") {
-            if (Ezy[validate])
-                if (typeof Ezy[validate] === "function")
+            if (Ezy[validate]) {
+                if (typeof Ezy[validate] === "function") {
                     el.addEventListener("input", function (e) {
                         if (Ezy[validate](e.target.value)) {
                             el.classList.add("valid");
@@ -214,10 +228,12 @@ const Ezy = {
                             el.classList.add("invalid");
                         }
                     });
+                }
                 else {
                     error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.validate in Ezy as function, found ${typeof Ezy[validate]}, in ${traceback}`);
                     return obj.set(3);
                 }
+            }
             else {
                 error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, Ezy[component.validate] not found, in ${traceback}`);
                 return obj.set(3);
@@ -230,13 +246,13 @@ const Ezy = {
             result = [],
             stack = [],
             secondResult = [];
-        for (let i of dis) {
+        for (const i of dis) {
             disallows[i[0]] = i[1];
             disallows[i[1]] = i[0];
         }
-        let last = "",
-            temporary = [];
-        for (let char of data) {
+        let last = "";
+        const temporary = [];
+        for (const char of data) {
             if (spliters.has(char) && equal(stack)) {
                 secondResult.push(temporary.join(""));
                 if (last !== char) {
@@ -254,7 +270,7 @@ const Ezy = {
                     if (!equal([stack[stack.length - 1]])) {
                         throw new Error(`[ezy.js] CRITICAL ERROR: Parsing Error: Error when parsing, unclosed ${max(stack[stack.length - 1])}.`);
                     }
-                    let _ = {};
+                    const _ = {};
                     _[char] = 1;
                     _[disallows[char]] = 0;
                     stack.push(_);
@@ -262,15 +278,23 @@ const Ezy = {
             }
             temporary.push(char);
         }
-        if (temporary) secondResult.push(temporary.join(""));
-        if (secondResult) result.push([...secondResult]);
+        if (temporary) {
+            secondResult.push(temporary.join(""));
+        }
+        if (secondResult) {
+            result.push([...secondResult]);
+        }
         return result;
     },
     flat(data) {
-        let result = [];
-        for (let i of data) {
-            if (Array.isArray(i)) result.push(...this.flat(i));
-            else result.push(i);
+        const result = [];
+        for (const i of data) {
+            if (Array.isArray(i)) {
+                result.push(...this.flat(i));
+            }
+            else {
+                result.push(i);
+            }
         }
         return result;
     },
@@ -315,14 +339,20 @@ routeGuard.guards.push(function (href) {
 
 Ezy.navigate = function (href) {
     let full = true;
-    for (let guard of routeGuard.guards) {
-        let result = guard(href);
+    for (const guard of routeGuard.guards) {
+        const result = guard(href);
         if (!result.allow) {
-            if (result.href) location.href = result.href;
+            if (result.href) {
+                // eslint-disable-next-line no-undef
+                location.href = result.href;
+            }
             full = false;
         }
     }
-    if (full) location.href = href;
+    if (full) {
+        // eslint-disable-next-line no-undef
+        location.href = href;
+    }
 };
 
 // render
@@ -335,9 +365,9 @@ const varage = {},// variable storage (?cold joke)
         id: (data) => data,
         style: (data) => {
             const result = {};
-            for (let i in data) {
+            for (const i in data) {
                 if (Ezy.isInt(i)) {
-                    let got = array2camel(data[i].split("-"));
+                    const got = array2camel(data[i].split("-"));
                     result[got] = data[got];
                 }
             }
@@ -348,8 +378,11 @@ const varage = {},// variable storage (?cold joke)
             return { ...data };
         }
     };
+const MAXWAIT = 60000,
+    HTTP_NOT_FOUND = 404;
+// eslint-disable-next-line no-unused-vars
 class render {
-    constructor(el, data, maxWait = 60000, namespace = {}) {
+    constructor(el, data, maxWait = MAXWAIT, namespace = {}) {
         this.maxWait = maxWait;
         this.data = data;
         this.mains = [];
@@ -364,7 +397,7 @@ class render {
             this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", 404, this.maxWait);
             return this;
         }
-        for (let i in required) {
+        for (const i in required) {
             namespace[i] = namespace[i] || required[i];
         }
         if (data.classify) {
@@ -377,10 +410,14 @@ class render {
         }
         this.config = data.config || {};
         this.namespace = namespace;
-        if (typeof el === "string") this.mainEl = $(el);
-        else this.mainEl = el;
+        if (typeof el === "string") {
+            this.mainEl = $(el);
+        }
+        else {
+            this.mainEl = el;
+        }
         {
-            for (let i in ARGS) {
+            for (const i in ARGS) {
                 this.vdom[i] = ARGS[i](this.mainEl[i]);
             }
             this.vdom.tag = this.mainEl.tagName;
@@ -389,12 +426,18 @@ class render {
         this.original = this.mainEl.innerHTML;
         this.el = document.createDocumentFragment();
         this.reRender();
-        if (this.statusCode !== 0) return this;
+        if (this.statusCode !== 0) {
+            return this;
+        }
     }
     reRender() {
-        if (this.config && !this.config.keepConsole) console.clear();
+        if (this.config && !this.config.keepConsole) {
+            console.clear();
+        }
         this.historyRender = +new Date();
-        if (this.loadPage) this.clearLoading();
+        if (this.loadPage) {
+            this.clearLoading();
+        }
         if (!this.data) {
             this.set(1);
             this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", 404, this.maxWait);
@@ -408,15 +451,23 @@ class render {
             time: 0
         };
         this.mains.length = 0;
-        for (var key in this.pipes) {
+        for (const key in this.pipes) {
             delete this.pipes[key];
         }
         this.interval = false;
-        if (this.oldTimeout) clearTimeout(this.oldTimeout);
+        if (this.oldTimeout) {
+            // eslint-disable-next-line no-undef
+            clearTimeout(this.oldTimeout);
+        }
+        // eslint-disable-next-line no-undef
         this.oldTimeout = setTimeout(() => { this.interval = true; this.loop(); }, 1000 - ((+new Date()) % 1000));
         this.main();
-        if (this.statusCode !== 0) return;
-        if (this.el) this.mainEl.appendChild(this.el);
+        if (this.statusCode !== 0) {
+            return;
+        }
+        if (this.el) {
+            this.mainEl.appendChild(this.el);
+        }
         this.clearLoading();
         log(`[ezy.js] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
     }
@@ -424,42 +475,61 @@ class render {
         this.statusCode = 0;
         if (this.data.onStart) {
             this.preRender(this.data.onStart);
-        } else console.warn("[ezy.js] MAJOR SUGGESTION: : Suggest adding onStart function list to handle preprocess");
-        for (let i of Ezy.plugins) i.onStart?.(this.data);
+        } else {
+            console.warn("[ezy.js] MAJOR SUGGESTION: : Suggest adding onStart function list to handle preprocess");
+        }
+        for (const i of Ezy.plugins) {
+            i.onStart?.(this.data);
+        }
         if (!this.data.main) {
             this.set(1);
             error("[ezy.js] CRITICAL ERROR: Structure Error: Data structure incomplete.");
-            this.loadPage = this.loadingPage("", 404, this.maxWait, "page.data.main");
+            this.loadPage = this.loadingPage("", HTTP_NOT_FOUND, this.maxWait, "page.data.main");
             return;
         }
         this.mainRender(this.data.main);
-        if (this.statusCode !== 0) return;
-        log(`[ezy.js] Render Program exits ${this.statusCode == 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`);
-        if (this.data.onLoad) for (let i of this.data.onLoad) i(this.data);
-        else console.warn("[ezy.js] MINOR SUGGESSION: : Suggest adding onLoad function list to handle onLoad process");
-        for (let i of Ezy.plugins) i.onLoad?.(this.data);
-        if (this.statusCode !== 0) return;
+        if (this.statusCode !== 0) {
+            return;
+        }
+        log(`[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`);
+        if (this.data.onLoad) {
+            for (const i of this.data.onLoad) {
+                i(this.data);
+            }
+        }
+        else {
+            console.warn("[ezy.js] MINOR SUGGESSION: : Suggest adding onLoad function list to handle onLoad process");
+        }
+        for (const i of Ezy.plugins) {
+            i.onLoad?.(this.data);
+        }
+        if (this.statusCode !== 0) {
+            return;
+        }
     }
     loop() {
-        for (let i of this.mains) {
+        for (const i of this.mains) {
             i.func(i.obj, i.el);
         }
+        // eslint-disable-next-line no-undef
         cancelAnimationFrame(this.frameID);
-        if (this.interval)
+        if (this.interval) {
+            // eslint-disable-next-line no-undef
             this.frameID = requestAnimationFrame(this.loop.bind(this));
+        }
     }
     pipe2(sender, receiver, data) {
         if (!(sender in this.pipes)) {
             error(`[ezy.js] CRITICAL ERROR: Pipe Error: Error when piping, trying to send message from ${sender}, not found in this.pipes`);
-            return this.set(8);
+            return this.set(errors.PIPE_ERROR);
         }
         if (!(receiver in this.pipes)) {
             error(`[ezy.js] CRITICAL ERROR: Pipe Error: Error when piping, trying to send message to ${receiver}, not found in this.pipes`);
-            return this.set(8);
+            return this.set(errors.PIPE_ERROR);
         }
         if (!(sender in this.pipes[receiver].receive)) {
             error(`[ezy.js] CRITICAL ERROR: Pipe Error: Error when piping, try to receive message from ${sender}, not found in this.pipes.${receiver}.receive`);
-            return this.set(8);
+            return this.set(errors.PIPE_ERROR);
         }
         const obj = this.pipes[receiver].receive[sender];
         obj.func(data, ...obj.data);
@@ -468,30 +538,38 @@ class render {
         this.varage[key] = data;
     }
     read(key) {
-        if (key in this.varage) return this.varage[key];
-        else throw new unknownVariableError(`[ezy.js] Critical Error: Variable Error: Variable "${key}" not found`);
+        if (key in this.varage) {
+            return this.varage[key];
+        }
+        else {
+            throw new unknownVariableError(`[ezy.js] Critical Error: Variable Error: Variable "${key}" not found`);
+        }
     }
     preRender(data) {
-        for (let i of data.funcs) {
+        for (const i of data.funcs) {
             i(this.data);
         }
     }
     removeVdom(data, vdom = this.vdom) {
         for (let i = vdom.children.length; i > 0; i--) {
-            if (vdom.children[i - 1] == data) {
+            if (vdom.children[i - 1] === data) {
                 delete vdom.children[i - 1];
                 return true;
             }
-            if (this.removeVdom(data, vdom.children[i - 1])) return true;
+            if (this.removeVdom(data, vdom.children[i - 1])) {
+                return true;
+            }
         }
     }
     editVdom(data, func, vdom = this.vdom) {
         for (let i = vdom.children.length; i > 0; i--) {
-            if (vdom.children[i - 1] == data) {
+            if (vdom.children[i - 1] === data) {
                 func(vdom.children[i - 1]);
                 return true;
             }
-            if (this.editVdom(data, func, vdom.children[i - 1])) return true;
+            if (this.editVdom(data, func, vdom.children[i - 1])) {
+                return true;
+            }
         }
     }
     sectionRender = (sectionData, parentElement, sectionName, title, createElement, special = false) => {
@@ -503,28 +581,43 @@ class render {
         const todo = document.createDocumentFragment(),
             vdom = [];
         this.systemPlot.time = 0;
-        for (let i in sectionData) {
+        for (const i in sectionData) {
             const item = sectionData[i];
-            if (Ezy.validateComponentIf(this, item.if, traceback)) continue;
-            if (this.statusCode !== 0) return;
+            if (Ezy.validateComponentIf(this, item.if, traceback)) {
+                continue;
+            }
+            if (this.statusCode !== 0) {
+                return;
+            }
             const temp = createElement(i, item, i.config || {});
-            if (this.statusCode !== 0) return;
+            if (this.statusCode !== 0) {
+                return;
+            }
             if (!temp) {
                 error(`[ezy.js] CRITICAL ERROR: Value Error: argument-function "createElement" return unexpected value, expected {el:Node(or NodeLike object),obj:vdom}, in page ${traceback}`);
                 return this.set(5);
             }
             const { el, obj } = temp;
+            // eslint-disable-next-line no-undef
             if (!(el instanceof Node)) {
                 error(`[ezy.js] CRITICAL ERROR: Value Error: argument-function "createElement" return unexpected value, expected {el:Node(or NodeLike object),obj:vdom}, in page ${traceback}`);
                 return this.set(5);
             }
             if (!special) {
                 this.beforePlugComponent(el, traceback);
-                if (this.statusCode !== 0) return;
-                if (item.varAs) this.asVar(el, i, traceback);
-                if (this.statusCode !== 0) return;
+                if (this.statusCode !== 0) {
+                    return;
+                }
+                if (item.varAs) {
+                    this.asVar(el, i, traceback);
+                }
+                if (this.statusCode !== 0) {
+                    return;
+                }
                 this.plugComponent(el, traceback);
-                if (this.statusCode !== 0) return;
+                if (this.statusCode !== 0) {
+                    return;
+                }
             }
             todo.appendChild(el);
             this.systemPlot.time++;
@@ -560,7 +653,7 @@ class render {
                 return this.set(3);
             }
             let first = -1;
-            for (let k in obj) {
+            for (const k in obj) {
                 first++;
                 const card = $$(i.tag || config.tag || "div"),
                     temp = {
@@ -569,22 +662,28 @@ class render {
                     };
                 card.classList.add(...(i.type || []), ...(config.type || []));
                 if (i.expire) {
+                    // eslint-disable-next-line no-undef
                     setTimeout((function () {
                         card.innerHTML = "";
                         card.parentNode.removeChild(card);
-                        if (i.pipe) delete this.pipes[i.pipe.name];
+                        if (i.pipe) {
+                            delete this.pipes[i.pipe.name];
+                        }
                         this.removeVdom(temp);
+                        // eslint-disable-next-line no-undef
                         setTimeout(() => {
-                            if (i.expire.expired) i.expire.expired();
+                            i.expire.expired?.();
                         });
                     }).bind(this), i.expire.date - new Date());
                 }
                 Ezy.validateValidation(this, card, i.validate, traceback);
-                if (this.statusCode !== 0) return;
+                if (this.statusCode !== 0) {
+                    return;
+                }
                 if (i.main) {
                     if (typeof i.main !== "function") {
                         error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof i.main}, in ${traceback}`);
-                        return this.set(3);
+                        return this.set(errors.RENDER_ERROR);
                     }
                     this.mains.push({
                         el: card,
@@ -594,44 +693,64 @@ class render {
                 }
                 if (i.pipe) {
                     Ezy.validatePipe(this, i.pipe, traceback);
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                     this.pipes[i.pipe.name] = i.pipe;
                 }
                 const replacement = {
                     ...this.systemPlot, ...(i.inherit || {}), key: k, item: obj[k]
                 };
-                if (i.data) for (let k in i.data) {
-                    card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, replacement));
+                if (i.data) {
+                    for (const k in i.data) {
+                        card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, replacement));
+                    }
                 }
                 this.beforePlugComponent(card, traceback);
-                if (this.statusCode !== 0) return;
-                if (first == 0 && i.varAs) {
-                    this.asVar(card, i.varAs, traceback);
-                    if (this.statusCode !== 0) return;
+                if (this.statusCode !== 0) {
+                    return;
                 }
-                if (i.text) card.title = this.preCompileStr(i.text, traceback, replacement);
+                if (first === 0 && i.varAs) {
+                    this.asVar(card, i.varAs, traceback);
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
+                }
+                if (i.text) {
+                    card.title = this.preCompileStr(i.text, traceback, replacement);
+                }
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
-                if (this.statusCode !== 0) return;
+                if (this.statusCode !== 0) {
+                    return;
+                }
                 applyStyles(card, i.style);
-                for (let j in (i.events || {})) {
+                for (const j in (i.events || {})) {
                     this.addListener(j, i, card, traceback);
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                 }
                 card.innerHTML += this.preCompileStr(
                     (i.content || ""),
                     traceback, replacement
                 );
-                if (this.statusCode !== 0) return;
-                for (let j in i) {
-                    if (keyword.has(j)) continue;
+                if (this.statusCode !== 0) {
+                    return;
+                }
+                for (const j in i) {
+                    if (keyword.has(j)) {
+                        continue;
+                    }
                     card.setAttribute(j, this.preCompileStr(i[j], traceback, replacement));
                     temp[j] = card[j];
                 }
                 temp.children.push(...this.pushComponent(i, card, traceback, replacement));
-                if (this.statusCode !== 0) return;
+                if (this.statusCode !== 0) {
+                    return;
+                }
                 {
-                    for (let i in ARGS) {
+                    for (const i in ARGS) {
                         temp[i] = ARGS[i](card[i]);
                     }
                     temp.tag = card.tagName;
@@ -639,7 +758,7 @@ class render {
                 };
                 vdom.push(temp);
             }
-        } else
+        } else {
             for (let k = 0; k < (i.times || 1); k++) {
                 const card = $$(i.tag || config.tag || "div"),
                     temp = {
@@ -648,18 +767,24 @@ class render {
                     };
                 card.classList.add(...(i.type || []), ...(config.type || []));
                 if (i.expire) {
+                    // eslint-disable-next-line no-undef
                     setTimeout((function () {
                         card.innerHTML = "";
                         card.parentNode.removeChild(card);
-                        if (i.pipe) delete this.pipes[i.pipe.name];
+                        if (i.pipe) {
+                            delete this.pipes[i.pipe.name];
+                        }
                         this.removeVdom(temp);
+                        // eslint-disable-next-line no-undef
                         setTimeout(() => {
-                            if (i.expire.expired) i.expire.expired();
+                            i.expire.expired?.();
                         });
                     }).bind(this), i.expire.date - new Date());
                 }
                 Ezy.validateValidation(this, card, i.validate, traceback);
-                if (this.statusCode !== 0) return;
+                if (this.statusCode !== 0) {
+                    return;
+                }
                 if (i.main) {
                     if (typeof i.main !== "function") {
                         error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof i.main}, in ${traceback}`);
@@ -673,41 +798,61 @@ class render {
                 }
                 if (i.pipe) {
                     Ezy.validatePipe(this, i.pipe, traceback);
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                     this.pipes[i.pipe.name] = i.pipe;
                 }
-                if (i.data) for (let k in i.data) {
-                    card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, i.inherit || {}));
+                if (i.data) {
+                    for (const k in i.data) {
+                        card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, i.inherit || {}));
+                    }
                 }
                 this.beforePlugComponent(card, traceback);
-                if (this.statusCode !== 0) return;
-                if (k == 0 && i.varAs) {
-                    this.asVar(card, i.varAs, traceback);
-                    if (this.statusCode !== 0) return;
+                if (this.statusCode !== 0) {
+                    return;
                 }
-                if (i.text) card.title = this.preCompileStr(i.text, traceback, i.inherit || {});
+                if (k === 0 && i.varAs) {
+                    this.asVar(card, i.varAs, traceback);
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
+                }
+                if (i.text) {
+                    card.title = this.preCompileStr(i.text, traceback, i.inherit || {});
+                }
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
-                if (this.statusCode !== 0) return;
+                if (this.statusCode !== 0) {
+                    return;
+                }
                 applyStyles(card, i.style);
-                for (let j in (i.events || {})) {
+                for (const j in (i.events || {})) {
                     this.addListener(j, i, card, traceback);
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                 }
                 card.innerHTML += this.preCompileStr(
                     (i.content || ""),
                     traceback, i.inherit || {}
                 );
-                if (this.statusCode !== 0) return;
-                for (let j in i) {
-                    if (keyword.has(j)) continue;
+                if (this.statusCode !== 0) {
+                    return;
+                }
+                for (const j in i) {
+                    if (keyword.has(j)) {
+                        continue;
+                    }
                     card.setAttribute(j, this.preCompileStr(i[j], traceback, i.inherit));
                     temp[j] = card[j];
                 }
                 temp.children.push(...this.pushComponent(i, card, traceback, i.inherit));
-                if (this.statusCode !== 0) return;
+                if (this.statusCode !== 0) {
+                    return;
+                }
                 {
-                    for (let i in ARGS) {
+                    for (const i in ARGS) {
                         temp[i] = ARGS[i](card[i]);
                     }
                     temp.tag = card.tagName;
@@ -715,6 +860,7 @@ class render {
                 };
                 vdom.push(temp);
             }
+        }
         return {
             el: todo,
             obj: vdom
@@ -722,18 +868,22 @@ class render {
     };
     mainRender(pageData) {
         this.vdom.children.push(...this.sectionRender(pageData, this.el, pageData.name || "", pageData.title || "", this.contentRender, true));
-        if (this.statusCode !== 0) return;
+        if (this.statusCode !== 0) {
+            return;
+        }
     }
     set(code) {
         this.statusCode = code;
     }
     evaluateExpression(expr, traceback, extraScope) {
         expr = expr.trim();
-        if (!expr) return "";
+        if (!expr) {
+            return "";
+        }
         let last = false,
             double = false,
             exist = false;
-        for (let i of expr) {
+        for (const i of expr) {
             if (i === "|") {
                 exist = true;
                 if (last) {
@@ -747,10 +897,10 @@ class render {
             double = false;
         }
         if (!double && exist) {
-            let varName = [],
-                first = true,
+            const varName = [];
+            let first = true,
                 result = undefined;
-            for (let char of expr) {
+            for (const char of expr) {
                 if (char === "|") {
                     let name = varName.join("").trim();
                     if (first) {
@@ -765,11 +915,13 @@ class render {
                     } else {
                         name = Ezy.flat(Ezy.split(name, [":"], [["{", "}"], ["\"", "\""], ["'", "'"]]));
                         if (extraScope[name[0]]) {
-                            if (typeof extraScope[name[0]] === "function") result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
-                                traceback, { ...extraScope, result: result });
+                            if (typeof extraScope[name[0]] === "function") {
+                                result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
+                                    traceback, { ...extraScope, result: result });
+                            }
                             else {
                                 error(`[ezy.js] CRITICAL ERROR: Parsing Error: Error when parsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`);
-                                return this.set(5);
+                                return this.set(error.PHARSING_ERROR);
                             }
                         }
                         else {
@@ -778,7 +930,9 @@ class render {
                         }
                     }
                     varName.length = 0;
-                } else varName.push(char);
+                } else {
+                    varName.push(char);
+                }
             }
             let name = varName.join("").trim();
             if (first) {
@@ -789,12 +943,15 @@ class render {
                     error(`[ezy.js] CRITICAL ERROR: Parsing Error: Error when trying to access variable ${name}, not found, in ${traceback}`);
                     return this.set(5);
                 }
+                // eslint-disable-next-line no-useless-assignment
                 first = false;
             } else {
                 name = Ezy.flat(Ezy.split(name, [":"], [["{", "}"], ["\"", "\""], ["'", "'"]]));
                 if (extraScope[name[0]]) {
-                    if (typeof extraScope[name[0]] === "function") result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
-                        traceback, { ...extraScope, result: result });
+                    if (typeof extraScope[name[0]] === "function") {
+                        result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
+                            traceback, { ...extraScope, result: result });
+                    }
                     else {
                         error(`[ezy.js] CRITICAL ERROR: Parsing Error: Error when parsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`);
                         return this.set(5);
@@ -813,57 +970,65 @@ class render {
         try {
             const fn = new Function(...keys, `return (${expr})`);
             const result = fn(...values);
-            return result === undefined ? '' : String(result);
+            return result === undefined ? "" : String(result);
         } catch (e) {
             if (e instanceof ReferenceError) {
                 console.warn(`[ezy.js] Warning: Variable not defined in "${expr}" at ${traceback}`);
-                return '';
+                return "";
             }
             error(`[ezy.js] CRITICAL ERROR: Failed to evaluate "${expr}" in ${traceback}`, e);
             this.set(6);
-            return '';
+            return "";
         }
     }
     preCompileStr(data, traceback, replacement = {}, pipeData = {}) {
-        let result = [],
-            skip = false,
+        const result = [];
+        let skip = false,
             startVar = false,
             longVar = false,
             stop = false,
             doubleStop = false,
             varName = [];
         replacement = { ...this.systemPlot, ...replacement };
-        let newReplacement = {};
+        const newReplacement = {};
         const _varage = { ...this.varage, ...pipeData };
-        for (let i in replacement) {
-            for (let t of (dictionary[i] || [i])) {
+        for (const i in replacement) {
+            for (const t of (dictionary[i] || [i])) {
                 newReplacement[t] = replacement[i];
             }
         }
-        for (let i in newReplacement)
+        for (const i in newReplacement) {
             data = data.replaceAll(`{{${i}}}`, newReplacement[i]);
-        for (let i of data) {
+        }
+        for (const i of data) {
             if (skip) {
-                if (varName.length) varName.push(i);
-                else result.push(i);
+                if (varName.length) {
+                    varName.push(i);
+                }
+                else {
+                    result.push(i);
+                }
                 skip = false;
                 continue;
             }
             if ((stop && !longVar) || (doubleStop && longVar)) {
                 varName = varName.join("").trim();
                 const _var = stop ? _varage : newReplacement;
-                if (_var[varName])
-                    if ((typeof _var[varName]) === "function")
+                if (_var[varName]) {
+                    if ((typeof _var[varName]) === "function") {
                         result.push(String(_var[varName]()));
-                    else
+                    }
+                    else {
                         result.push(String(_var[varName]));
+                    }
+                }
                 else {
                     try {
                         result.push(String(this.evaluateExpression(varName, traceback, _var)));
                     } catch (e) {
                         error(`[ezy.js] CRITICAL ERROR: EVAL Error: Error when trying to eval expression ${varName}, as below, in ${traceback}`);
                         error(e);
-                        return this.set(6);
+                        return this.set(errors.EVAL_ERROR);
                     }
                 }
                 stop = false;
@@ -888,8 +1053,9 @@ class render {
                 if (startVar) {
                     startVar = false;
                     longVar = true;
-                } else
+                } else {
                     startVar = true;
+                }
                 continue;
             }
             if (i === "}") {
@@ -918,7 +1084,9 @@ class render {
                     if (stop) {
                         doubleStop = true;
                         stop = false;
-                    } else stop = true;
+                    } else {
+                        stop = true;
+                    }
                 }
                 continue;
             }
@@ -943,11 +1111,14 @@ class render {
         varName = varName.join("").trim();
         if (stop || doubleStop) {
             const _var = stop ? _varage : newReplacement;
-            if (_var[varName])
-                if ((typeof _var[varName]) === "function")
+            if (_var[varName]) {
+                if ((typeof _var[varName]) === "function") {
                     result.push(String(_var[varName]()));
-                else
+                }
+                else {
                     result.push(String(_var[varName]));
+                }
+            }
             else {
                 try {
                     result.push(String(this.evaluateExpression(varName, traceback, _var)));
@@ -961,7 +1132,7 @@ class render {
         return result.join("");
     }
     pushComponent(i, parentNode, traceback, replacement = {}) {
-        let own = {
+        const own = {
             time: 0
         },
             todo = document.createDocumentFragment();
@@ -979,8 +1150,12 @@ class render {
                 }
                 j = this.classify[j];
             }
-            if (Ezy.validateComponentIf(this, j.if, traceback)) continue;
-            if (this.statusCode !== 0) return;
+            if (Ezy.validateComponentIf(this, j.if, traceback)) {
+                continue;
+            }
+            if (this.statusCode !== 0) {
+                return;
+            }
             if (j.forEach) {
                 if (this.varage[j.forEach] === undefined) {
                     error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected forEach variable, not found, in ${traceback}`);
@@ -992,7 +1167,7 @@ class render {
                     return this.set(3);
                 }
                 let first = -1;
-                for (let k in obj) {
+                for (const k in obj) {
                     first++;
                     const el = $$(j.tag || config.tag || "div"),
                         temp = {
@@ -1001,34 +1176,46 @@ class render {
                         };
                     el.classList.add(...(j.type || []), ...(config.type || []));
                     applyStyles(el, j.style);
-                    let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
-                    for (let evt in j.events) {
+                    const myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
+                    for (const evt in j.events) {
                         this.addListener(evt, j, el, myTraceback);
-                        if (this.statusCode !== 0) return;
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
                     }
                     const replace = { ...replacement, ...j.inherit, key: k, item: obj[k], ...own };
-                    for (let parm in j) {
-                        if (keyword.has(parm)) continue;
+                    for (const parm in j) {
+                        if (keyword.has(parm)) {
+                            continue;
+                        }
                         el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, replace));
                         temp[parm] = el[parm];
                     }
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, replace
                     );
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                     if (j.expire) {
+                        // eslint-disable-next-line no-undef
                         setTimeout((function () {
                             el.innerHTML = "";
                             el.parentNode.removeChild(el);
-                            if (j.pipe) delete this.pipes[j.pipe.name];
+                            if (j.pipe) {
+                                delete this.pipes[j.pipe.name];
+                            }
                             this.removeVdom(temp);
+                            // eslint-disable-next-line no-undef
                             setTimeout(() => {
-                                if (j.expire.expired) j.expire.expired();
+                                j.expire.expired?.();
                             });
                         }).bind(this), j.expire.date - new Date());
                     }
                     Ezy.validateValidation(this, el, j.validate, traceback);
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                     if (j.main) {
                         if (typeof j.main !== "function") {
                             error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof j.main}, in ${traceback}`);
@@ -1042,26 +1229,40 @@ class render {
                     }
                     if (j.pipe) {
                         Ezy.validatePipe(this, j.pipe, traceback);
-                        if (this.statusCode !== 0) return;
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
                         this.pipes[j.pipe.name] = j.pipe;
                     }
-                    if (j.text) el.title = this.preCompileStr(j.text, myTraceback, replace);
-                    if (j.data) for (let k in j.data) {
-                        el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, replace));
+                    if (j.text) {
+                        el.title = this.preCompileStr(j.text, myTraceback, replace);
+                    }
+                    if (j.data) {
+                        for (const k in j.data) {
+                            el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, replace));
+                        }
                     }
                     this.beforePlugComponent(el, myTraceback);
-                    if (this.statusCode !== 0) return;
-                    if (first == 0) {
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
+                    if (first === 0) {
                         this.asVar(el, j.varAs, myTraceback);
-                        if (this.statusCode !== 0) return;
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
                     }
                     todo.appendChild(el);
                     this.plugComponent(el, myTraceback);
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                     temp.children.push(...this.pushComponent(j, el, myTraceback, replace));
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                     {
-                        for (let i in ARGS) {
+                        for (const i in ARGS) {
                             temp[i] = ARGS[i](el[i]);
                         }
                         temp.tag = el.tagName;
@@ -1078,33 +1279,49 @@ class render {
                         };
                     el.classList.add(...(j.type || []), ...(config.type || []));
                     applyStyles(el, j.style);
-                    let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
-                    for (let evt in j.events) {
+                    const myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
+                    for (const evt in j.events) {
                         this.addListener(evt, j, el, myTraceback);
-                        if (this.statusCode !== 0) return;
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
                     }
-                    for (let parm in j) {
-                        if (keyword.has(parm)) continue;
+                    for (const parm in j) {
+                        if (keyword.has(parm)) {
+                            continue;
+                        }
                         el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, { ...replacement, ...j.inherit, ...own }));
                         temp[parm] = el[parm];
                     }
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, { ...replacement, ...j.inherit, ...own }
                     );
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                     if (j.expire) {
+                        // eslint-disable-next-line no-undef
                         setTimeout((function () {
                             el.innerHTML = "";
-                            if (el.parentNode && el.parentNode.contains(el)) el.parentNode.removeChild(el);
-                            if (j.pipe) delete this.pipes[j.pipe.name];
+                            if (el.parentNode && el.parentNode.contains(el)) {
+                                el.parentNode.removeChild(el);
+                            }
+                            if (j.pipe) {
+                                delete this.pipes[j.pipe.name];
+                            }
                             this.removeVdom(temp);
+                            // eslint-disable-next-line no-undef
                             setTimeout(() => {
-                                if (j.expire.expired) j.expire.expired();
+                                if (j.expire.expired) {
+                                    j.expire.expired();
+                                }
                             });
                         }).bind(this), j.expire.date - new Date());
                     }
                     Ezy.validateValidation(this, el, j.validate, traceback);
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                     if (j.main) {
                         if (typeof j.main !== "function") {
                             error(`[ezy.js] CRITICAL ERROR: Rendering Error: Error when rendering, expected component.main attribute as function, found ${typeof j.main}, in ${traceback}`);
@@ -1118,26 +1335,40 @@ class render {
                     }
                     if (j.pipe) {
                         Ezy.validatePipe(this, j.pipe, traceback);
-                        if (this.statusCode !== 0) return;
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
                         this.pipes[j.pipe.name] = j.pipe;
                     }
-                    if (j.text) el.title = this.preCompileStr(j.text, myTraceback, { ...replacement, ...j.inherit, ...own });
-                    if (j.data) for (let k in j.data) {
-                        el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, { ...replacement, ...j.inherit, ...own }));
+                    if (j.text) {
+                        el.title = this.preCompileStr(j.text, myTraceback, { ...replacement, ...j.inherit, ...own });
+                    }
+                    if (j.data) {
+                        for (const k in j.data) {
+                            el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, { ...replacement, ...j.inherit, ...own }));
+                        }
                     }
                     this.beforePlugComponent(el, myTraceback);
-                    if (this.statusCode !== 0) return;
-                    if (k == 0) {
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
+                    if (k === 0) {
                         this.asVar(el, j.varAs, myTraceback);
-                        if (this.statusCode !== 0) return;
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
                     }
                     todo.appendChild(el);
                     this.plugComponent(el, myTraceback);
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                     temp.children.push(...this.pushComponent(j, el, myTraceback, { ...replacement, ...j.inherit, ...own }));
-                    if (this.statusCode !== 0) return;
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                     {
-                        for (let i in ARGS) {
+                        for (const i in ARGS) {
                             temp[i] = ARGS[i](el[i]);
                         }
                         temp.tag = el.tagName;
@@ -1170,38 +1401,50 @@ class render {
             dataset: {}
         };
         vars.clear();
-        for (let i of ["content", "toolbar", "userbar", "footer"]) vars.add(i);
+        for (const i of ["content", "toolbar", "userbar", "footer"]) {
+            vars.add(i);
+        }
     }
     plugComponent(el, traceback) {
-        for (let i of Ezy.plugins) {
+        for (const i of Ezy.plugins) {
             i.onComponentLoad?.(this, el, traceback);
-            if (this.statusCode !== 0) return;
+            if (this.statusCode !== 0) {
+                return;
+            }
         }
     }
     beforePlugComponent(el, traceback) {
-        for (let i of Ezy.plugins) {
+        for (const i of Ezy.plugins) {
             i.beforeComponentLoad?.(this, el, traceback);
-            if (this.statusCode !== 0) return;
+            if (this.statusCode !== 0) {
+                return;
+            }
         }
     }
     addListener(j, i, el, traceback) {
-        let obj = i.events[j],
+        const obj = i.events[j],
             { listener } = obj;
         if (!listener) {
             error(`[ezy.js] MINOR ERROR: Value Error: Expected "listener" attribute in second parameter -> events[first parameter], in ${traceback}`);
             return this.set(5);
         }
-        if (obj.preventDefault)
+        if (obj.preventDefault) {
             el.addEventListener(removePrefix(j, "on"), function (e) {
                 e.preventDefault();
-                for (let i of listener) i(e);
+                for (const i of listener) {
+                    i(e);
+                }
             });
-        else
+        }
+        else {
             el.addEventListener(removePrefix(j, "on"), function (e) {
-                for (let i of listener) i(e);
+                for (const i of listener) {
+                    i(e);
+                }
             });
+        }
     }
-    loadingPage(msg, errorCode, guillotine = 60000, reason = "page.data", parentNode = body) {// hell meme
+    loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "page.data", parentNode = body) {// hell meme
         const pot = $$("div");
         pot.classList.add("flex", "horizontal-mid", "vertical-mid", "bg-white");
         pot.style.width = "100%";
@@ -1213,6 +1456,7 @@ class render {
         return {
             obj: pot,
             parent: parentNode,
+            // eslint-disable-next-line no-undef
             id: setTimeout(() => {
                 parentNode.removeChild(pot);
                 this.errorPage(msg, errorCode, reason, parentNode);
@@ -1246,10 +1490,14 @@ class render {
         parentNode.appendChild(pot);
     }
     clearLoading() {
-        if (!this.loadPage) return;
+        if (!this.loadPage) {
+            return;
+        }
+        // eslint-disable-next-line no-undef
         clearTimeout(this.loadPage.id);
-        if (this.loadPage.parent.contains(this.loadPage.obj))
+        if (this.loadPage.parent.contains(this.loadPage.obj)) {
             this.loadPage.parent.removeChild(this.loadPage.obj);
+        }
         this.loadPage = undefined;
     }
 };
