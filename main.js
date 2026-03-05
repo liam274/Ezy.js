@@ -102,6 +102,21 @@ function camel2array(data) {
     return result;
 }
 
+function array2camel(data) {
+    let result = [],
+        sec = true,
+        first = false;
+    for (let i of data) {
+        sec = true;
+        for (let char of i) {
+            result.push(sec && first ? char.toLocaleUpperCase() : char);
+            sec = false;
+        }
+        first = true;
+    }
+    return result.join("");
+}
+
 function equal(data) {
     let last;
     for (let i of data) {
@@ -319,7 +334,16 @@ const varage = {},// variable storage (?cold joke)
         classList: (data) => Array.from(data),
         innerHTML: (data) => data,
         id: (data) => data,
-        style: (data) => Object.fromEntries(Array.from(data).map(p => [p, data[p]])),
+        style: (data) => {
+            const result = {};
+            for (let i in data) {
+                if (Ezy.isInt(i)) {
+                    let got = array2camel(data[i].split("-"));
+                    result[got] = data[got];
+                }
+            }
+            return { ...result };
+        },
         title: (data) => data,
         events: (data) => { return { ...data }; }
     };
@@ -1049,7 +1073,7 @@ class render {
                     if (j.expire) {
                         setTimeout((function () {
                             el.innerHTML = "";
-                            el.parentNode.removeChild(el);
+                            if (el.parentNode && el.parentNode.contains(el)) el.parentNode.removeChild(el);
                             if (j.pipe) delete this.pipes[j.pipe.name];
                             setTimeout(() => {
                                 if (j.expire.expired) j.expire.expired();
@@ -1092,6 +1116,7 @@ class render {
                     {
                         for (let i in ARGS) {
                             temp[i] = ARGS[i](el[i]);
+                            if (i === "style" && temp[i]) log(temp[i]);
                         }
                         temp.tag = el.tagName;
                         temp.dataset = { ...temp.dataset, ...el.dataset };
