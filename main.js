@@ -324,7 +324,7 @@ Ezy.navigate = function (href) {
         }
     }
     if (full) location.href = href;
-}
+};
 
 // render
 
@@ -345,7 +345,9 @@ const varage = {},// variable storage (?cold joke)
             return { ...result };
         },
         title: (data) => data,
-        events: (data) => { return { ...data }; }
+        events: (data) => {
+            return { ...data };
+        }
     };
 class render {
     constructor(el, data, maxWait = 60000, namespace = {}) {
@@ -635,7 +637,7 @@ class render {
                     }
                     temp.tag = card.tagName;
                     temp.dataset = { ...temp.dataset, ...card.dataset };
-                }
+                };
                 vdom.push(temp);
             }
         } else
@@ -711,7 +713,7 @@ class render {
                     }
                     temp.tag = card.tagName;
                     temp.dataset = { ...temp.dataset, ...card.dataset };
-                }
+                };
                 vdom.push(temp);
             }
         return {
@@ -1065,7 +1067,7 @@ class render {
                         }
                         temp.tag = el.tagName;
                         temp.dataset = { ...temp.dataset, ...el.dataset };
-                    }
+                    };
                     vdom.push(temp);
                 }
             } else {
@@ -1141,7 +1143,7 @@ class render {
                         }
                         temp.tag = el.tagName;
                         temp.dataset = { ...temp.dataset, ...el.dataset };
-                    }
+                    };
                     vdom.push(temp);
                 }
             }
@@ -1251,4 +1253,4 @@ class render {
             this.loadPage.parent.removeChild(this.loadPage.obj);
         this.loadPage = undefined;
     }
-}
+};
