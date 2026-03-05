@@ -1,3 +1,5 @@
+/* eslint-disable no-magic-numbers */
+/* eslint-disable no-undef */
 // data
 const pageData = {
     onStart: {
@@ -233,8 +235,10 @@ routeGuard.guards.push(function (data) {
         return { allow: false, href: "notFound.html" };
     }
 });
-for (let i of ["index.html", "doc.html", "setting.html", "experiment.html"]) routeGuard.builtin.add(i);
-let _ = new render("head", {
+for (const i of ["index.html", "doc.html", "setting.html", "experiment.html"]) {
+    routeGuard.builtin.add(i);
+}
+new render("head", {
     main: [
         {
             tag: "title",
