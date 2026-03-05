@@ -3,4 +3,4 @@ experiment.js
 experiment.css
 experiment.html
 todo.md
-node_modules/*
+eslint.config.js
