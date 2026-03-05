@@ -314,7 +314,15 @@ Ezy.navigate = function (href) {
 // render
 
 const varage = {},// variable storage (?cold joke)
-    vars = new Set(["content", "toolbar", "userbar", "footer"]);// Ensure that third party can use the given name in asVar (name) as variable in JS
+    vars = new Set(),// Ensure that third party can use the given name in asVar (name) as variable in JS
+    ARGS = {
+        classList: (data) => Array.from(data),
+        innerHTML: (data) => data,
+        id: (data) => data,
+        style: (data) => Object.fromEntries(Array.from(data).map(p => [p, data[p]])),
+        title: (data) => data,
+        events: (data) => { return { ...data }; }
+    };
 class render {
     constructor(el, data, maxWait = 60000, namespace = {}) {
         this.maxWait = maxWait;
@@ -322,7 +330,10 @@ class render {
         this.mains = [];
         this.pipes = {};
         this.frameID = undefined;
-        this.vdom = { children: [] };
+        this.vdom = {
+            children: [],
+            dataset: {}
+        };
         if (!data) {
             this.set(1);
             this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", 404, this.maxWait);
@@ -343,9 +354,12 @@ class render {
         this.namespace = namespace;
         if (typeof el === "string") this.mainEl = $(el);
         else this.mainEl = el;
-        for (let i in this.mainEl) {
-            if (htmlKeywords.has(i)) continue;
-            if (this.mainEl[i]) this.vdom[i] = this.mainEl[i];
+        {
+            for (let i in ARGS) {
+                this.vdom[i] = ARGS[i](this.mainEl[i]);
+            }
+            this.vdom.tag = this.mainEl.tagName;
+            this.vdom.dataset = { ...this.vdom.dataset, ...this.mainEl.dataset };
         }
         this.original = this.mainEl.innerHTML;
         this.el = document.createDocumentFragment();
@@ -511,8 +525,6 @@ class render {
                         dataset: {}
                     };
                 card.classList.add(...(i.type || []), ...(config.type || []));
-                temp.type = [...(i.type || []), ...(config.type || [])];
-                temp.tag = card.tagName;
                 if (i.expire) {
                     setTimeout((function () {
                         card.innerHTML = "";
@@ -547,31 +559,25 @@ class render {
                 if (i.data) for (let k in i.data) {
                     card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, replacement));
                 }
-                for (let i in card.dataset) temp.dataset[i] = card.dataset[i];
                 this.beforePlugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
                 if (first == 0 && i.varAs) {
                     this.asVar(card, i.varAs, traceback);
                     if (this.statusCode !== 0) return;
                 }
-                temp.id = card.id;
                 if (i.text) card.title = this.preCompileStr(i.text, traceback, replacement);
-                temp.title = card.title;
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
                 applyStyles(card, i.style);
-                temp.style = { ...card.style };
                 for (let j in (i.events || {})) {
                     this.addListener(j, i, card, traceback);
                     if (this.statusCode !== 0) return;
                 }
-                temp.events = { ...i.events };
                 card.innerHTML += this.preCompileStr(
                     (i.content || ""),
                     traceback, replacement
                 );
-                temp.innerHTML = card.innerHTML;
                 if (this.statusCode !== 0) return;
                 for (let j in i) {
                     if (keyword.has(j)) continue;
@@ -580,6 +586,13 @@ class render {
                 }
                 temp.children.push(...this.pushComponent(i, card, traceback, replacement));
                 if (this.statusCode !== 0) return;
+                {
+                    for (let i in ARGS) {
+                        temp[i] = ARGS[i](card[i]);
+                    }
+                    temp.tag = card.tagName;
+                    temp.dataset = { ...temp.dataset, ...card.dataset };
+                }
                 vdom.push(temp);
             }
         } else
@@ -587,11 +600,9 @@ class render {
                 const card = $$(i.tag || config.tag || "div"),
                     temp = {
                         children: [],
-                        tag: card.tagName,
                         dataset: {}
                     };
                 card.classList.add(...(i.type || []), ...(config.type || []));
-                temp.classList = Array.from(card.classList);
                 if (i.expire) {
                     setTimeout((function () {
                         card.innerHTML = "";
@@ -623,31 +634,25 @@ class render {
                 if (i.data) for (let k in i.data) {
                     card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, i.inherit || {}));
                 }
-                for (let i in card.dataset) temp.dataset[i] = card.dataset[i];
                 this.beforePlugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
                 if (k == 0 && i.varAs) {
                     this.asVar(card, i.varAs, traceback);
                     if (this.statusCode !== 0) return;
                 }
-                temp.id = card.id;
                 if (i.text) card.title = this.preCompileStr(i.text, traceback, i.inherit || {});
-                temp.title = card.title;
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
                 applyStyles(card, i.style);
-                temp.style = { ...i.style };
                 for (let j in (i.events || {})) {
                     this.addListener(j, i, card, traceback);
                     if (this.statusCode !== 0) return;
                 }
-                temp.events = { ...i.events };
                 card.innerHTML += this.preCompileStr(
                     (i.content || ""),
                     traceback, i.inherit || {}
                 );
-                temp.innerHTML = card.innerHTML;
                 if (this.statusCode !== 0) return;
                 for (let j in i) {
                     if (keyword.has(j)) continue;
@@ -656,6 +661,13 @@ class render {
                 }
                 temp.children.push(...this.pushComponent(i, card, traceback, i.inherit));
                 if (this.statusCode !== 0) return;
+                {
+                    for (let i in ARGS) {
+                        temp[i] = ARGS[i](card[i]);
+                    }
+                    temp.tag = card.tagName;
+                    temp.dataset = { ...temp.dataset, ...card.dataset };
+                }
                 vdom.push(temp);
             }
         return {
@@ -940,19 +952,15 @@ class render {
                     const el = $$(j.tag || config.tag || "div"),
                         temp = {
                             children: [],
-                            tagName: el.tagName,
                             dataset: {}
                         };
                     el.classList.add(...(j.type || []), ...(config.type || []));
-                    temp.classList = Array.from(el.classList);
                     applyStyles(el, j.style);
-                    temp.style = { ...j.style };
                     let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     for (let evt in j.events) {
                         this.addListener(evt, j, el, myTraceback);
                         if (this.statusCode !== 0) return;
                     }
-                    temp.events = { ...j.events };
                     const replace = { ...replacement, ...j.inherit, key: k, item: obj[k], ...own };
                     for (let parm in j) {
                         if (keyword.has(parm)) continue;
@@ -962,7 +970,6 @@ class render {
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, replace
                     );
-                    temp.innerHTML = el.innerHTML;
                     if (this.statusCode !== 0) return;
                     if (j.expire) {
                         setTimeout((function () {
@@ -993,23 +1000,27 @@ class render {
                         this.pipes[j.pipe.name] = j.pipe;
                     }
                     if (j.text) el.title = this.preCompileStr(j.text, myTraceback, replace);
-                    temp.title = el.title;
                     if (j.data) for (let k in j.data) {
-                        el.setAttribute(key, this.preCompileStr(j.data[k], myTraceback, replace));
+                        el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, replace));
                     }
-                    for (let i in el.dataset) temp.dataset[i] = el.dataset[i];
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
                     if (first == 0) {
                         this.asVar(el, j.varAs, myTraceback);
                         if (this.statusCode !== 0) return;
                     }
-                    temp.id = el.id;
                     todo.appendChild(el);
                     this.plugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
                     temp.children.push(...this.pushComponent(j, el, myTraceback, replace));
                     if (this.statusCode !== 0) return;
+                    {
+                        for (let i in ARGS) {
+                            temp[i] = ARGS[i](el[i]);
+                        }
+                        temp.tag = el.tagName;
+                        temp.dataset = { ...temp.dataset, ...el.dataset };
+                    }
                     vdom.push(temp);
                 }
             } else {
@@ -1017,27 +1028,23 @@ class render {
                     const el = $$(j.tag || config.tag || "div"),
                         temp = {
                             children: [],
-                            tag: el.tagName,
                             dataset: {}
                         };
                     el.classList.add(...(j.type || []), ...(config.type || []));
-                    temp.classList = Array.from(el.classList);
                     applyStyles(el, j.style);
-                    temp.style = { ...j.style };
                     let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     for (let evt in j.events) {
                         this.addListener(evt, j, el, myTraceback);
                         if (this.statusCode !== 0) return;
                     }
-                    temp.events = { ...j.events };
                     for (let parm in j) {
                         if (keyword.has(parm)) continue;
                         el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, { ...replacement, ...j.inherit, ...own }));
+                        temp[parm] = el[parm];
                     }
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, { ...replacement, ...j.inherit, ...own }
                     );
-                    temp.innerHTML = el.innerHTML;
                     if (this.statusCode !== 0) return;
                     if (j.expire) {
                         setTimeout((function () {
@@ -1068,11 +1075,9 @@ class render {
                         this.pipes[j.pipe.name] = j.pipe;
                     }
                     if (j.text) el.title = this.preCompileStr(j.text, myTraceback, { ...replacement, ...j.inherit, ...own });
-                    temp.title = el.title;
                     if (j.data) for (let k in j.data) {
                         el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, { ...replacement, ...j.inherit, ...own }));
                     }
-                    for (let i in el.dataset) temp.dataset[i] = el.dataset[i];
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
                     if (k == 0) {
@@ -1084,6 +1089,13 @@ class render {
                     if (this.statusCode !== 0) return;
                     temp.children.push(...this.pushComponent(j, el, myTraceback, { ...replacement, ...j.inherit, ...own }));
                     if (this.statusCode !== 0) return;
+                    {
+                        for (let i in ARGS) {
+                            temp[i] = ARGS[i](el[i]);
+                        }
+                        temp.tag = el.tagName;
+                        temp.dataset = { ...temp.dataset, ...el.dataset };
+                    }
                     vdom.push(temp);
                 }
             }
@@ -1106,6 +1118,10 @@ class render {
     clear() {
         removeChild(this.mainEl);
         this.mainEl.innerHTML = this.original;
+        this.vdom = {
+            children: [],
+            dataset: {}
+        };
         vars.clear();
         for (let i of ["content", "toolbar", "userbar", "footer"]) vars.add(i);
     }
