@@ -88,8 +88,6 @@ function removeChild(el) {
     }
 }
 
-function emptyFunc() { }
-
 function camel2array(data) {
     let result = [],
         word = [];
@@ -106,7 +104,7 @@ function camel2array(data) {
 
 function array2camel(data) {
     let result = [],
-        sec = true,
+        sec,
         first = false;
     for (let i of data) {
         sec = true;
@@ -147,8 +145,7 @@ function max(data) {
 }
 
 // Ezy
-const head = document.head,
-    body = document.body;
+const body = document.body;
 
 const Ezy = {
     plugins: [],
