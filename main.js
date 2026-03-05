@@ -475,6 +475,24 @@ class render {
             i(this.data);
         }
     }
+    removeVdom(data, vdom = this.vdom) {
+        for (let i = vdom.children.length; i > 0; i--) {
+            if (vdom.children[i - 1] == data) {
+                delete vdom.children[i - 1];
+                return true;
+            }
+            if (this.removeVdom(data, vdom.children[i - 1])) return true;
+        }
+    }
+    editVdom(data, func, vdom = this.vdom) {
+        for (let i = vdom.children.length; i > 0; i--) {
+            if (vdom.children[i - 1] == data) {
+                func(vdom.children[i - 1]);
+                return true;
+            }
+            if (this.removeVdom(data, vdom.children[i - 1])) return true;
+        }
+    }
     sectionRender = (sectionData, parentElement, sectionName, title, createElement, special = false) => {
         const traceback = `page ${title} -> ${sectionName}`;
         if (!sectionData) {
@@ -557,6 +575,7 @@ class render {
                         setTimeout(() => {
                             if (i.expire.expired) i.expire.expired();
                         });
+                        this.removeVdom(temp);
                     }).bind(this), i.expire.date - new Date());
                 }
                 Ezy.validateValidation(this, card, i.validate, traceback);
@@ -635,6 +654,7 @@ class render {
                         setTimeout(() => {
                             if (i.expire.expired) i.expire.expired();
                         });
+                        this.removeVdom(temp);
                     }).bind(this), i.expire.date - new Date());
                 }
                 Ezy.validateValidation(this, card, i.validate, traceback);
@@ -1003,6 +1023,7 @@ class render {
                             setTimeout(() => {
                                 if (j.expire.expired) j.expire.expired();
                             });
+                            this.removeVdom(temp);
                         }).bind(this), j.expire.date - new Date());
                     }
                     Ezy.validateValidation(this, el, j.validate, traceback);
@@ -1078,6 +1099,7 @@ class render {
                             setTimeout(() => {
                                 if (j.expire.expired) j.expire.expired();
                             });
+                            this.removeVdom(temp);
                         }).bind(this), j.expire.date - new Date());
                     }
                     Ezy.validateValidation(this, el, j.validate, traceback);
@@ -1116,7 +1138,6 @@ class render {
                     {
                         for (let i in ARGS) {
                             temp[i] = ARGS[i](el[i]);
-                            if (i === "style" && temp[i]) log(temp[i]);
                         }
                         temp.tag = el.tagName;
                         temp.dataset = { ...temp.dataset, ...el.dataset };
