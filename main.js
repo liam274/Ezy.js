@@ -63,6 +63,10 @@ const dictionary = {
 // class
 
 class unknownVariableError extends Error {
+    constructor(...data) {
+        super(...data);
+        this.name = "unknownVariableError";
+    }
     getName() {
         return "unknownVariableError";
     }
@@ -73,16 +77,19 @@ class unknownVariableError extends Error {
 function applyStyles(el, styles) {
     if (!styles) return;
     for (let prop in styles) {
-        el.style[prop] = styles[prop];
+        el.style.setProperty(camel2array(prop).join("-"), styles[prop]);
     }
 }
 
 function removeChild(el) {
     let list = [...el.children];
     for (let i of list) {
+        /*
         el.removeChild(i);
         removeChild(i);
         // i.remove();
+        // */
+        el.replaceChildren(i)
     }
 }
 
