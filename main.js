@@ -185,33 +185,33 @@ const Ezy = {
     validatePipe(obj, data, traceback) {
         if (!data.pipe.receive || typeof data.pipe.receive !== "object") {
             error(`[ezy.js] CRITICAL ERROR: Pipe Error: Error when rendering, expected object[string,function], found ${data.pipe.receive}, in ${traceback}`);
-            return obj.set(8);
+            return obj.set(errors.PIPE_ERROR);
         }
         for (const i in data.pipe.receive) {
             const sobj = data.pipe.receive[i];
             if (typeof sobj.func !== "function") {
                 error(`[ezy.js] CRITICAL ERROR: Structure Error: Error when piping, expected data.pipe.receive.*.func as function, found ${typeof sobj.func}, in ${traceback}`);
-                return obj.set(1);
+                return obj.set(errors.STRUCTURE_ERROR);
             }
             if (!Array.isArray(sobj.data)) {
                 error(`[ezy.js] CRITICAL ERROR: Structure Error: Error when piping, expected data.pipe.receive.*.data as array, found ${typeof sobj.data}, in ${traceback}`);
-                return obj.set(1);
+                return obj.set(errors.STRUCTURE_ERROR);
             }
         }
         if (!data.pipe.name) {
             error(`[ezy.js] CRITICAL ERROR: Structure Error: Error when piping, expected data.pipe.name, in ${traceback}`);
-            return obj.set(1);
+            return obj.set(errors.STRUCTURE_ERROR);
         }
     },
     validateComponentIf(obj, item, traceback) {
         if (item) {
             if (!obj.varage[item]) {
                 error(`[ezy.js] CRITICAL ERROR: Value Error: render.varage[component.if] not found, in ${traceback}`);
-                return obj.set(5);
+                return obj.set(errors.VALUE_ERROR);
             }
             if (typeof obj.varage[item] !== "function") {
                 error(`[ezy.js] CRITICAL ERROR: Value Error: expected render.varage[component.if] as function, found ${typeof obj.varage[item]}, in ${traceback}`);
-                return obj.set(5);
+                return obj.set(errors.VALUE_ERROR);
             }
             return !obj.varage[item]();
         }
@@ -232,12 +232,12 @@ const Ezy = {
                 }
                 else {
                     error(`[ezy.js] CRITICAL ERROR: Render Error: Error when rendering, expected component.validate in Ezy as function, found ${typeof Ezy[validate]}, in ${traceback}`);
-                    return obj.set(3);
+                    return obj.set(errors.RENDER_ERROR);
                 }
             }
             else {
                 error(`[ezy.js] CRITICAL ERROR: Render Error: Error when rendering, Ezy[component.validate] not found, in ${traceback}`);
-                return obj.set(3);
+                return obj.set(errors.RENDER_ERROR);
             }
         }
     },
@@ -380,7 +380,8 @@ const varage = {},// variable storage (?cold joke)
         }
     };
 const MAXWAIT = 60000,
-    HTTP_NOT_FOUND = 404;
+    HTTP_NOT_FOUND = 404,
+    SECOND = 1000;
 // eslint-disable-next-line no-unused-vars
 class render {
     constructor(el, data, maxWait = MAXWAIT, namespace = {}) {
@@ -395,7 +396,7 @@ class render {
         };
         if (!data) {
             this.set(errors.STRUCTURE_ERROR);
-            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", 404, this.maxWait);
+            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND, this.maxWait);
             return this;
         }
         for (const i in required) {
@@ -406,7 +407,7 @@ class render {
         }
         if (!this.data.main) {
             this.set(errors.STRUCTURE_ERROR);
-            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure attribute \"main\" missing.", 404, this.maxWait);
+            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure attribute \"main\" missing.", HTTP_NOT_FOUND, this.maxWait);
             return this;
         }
         this.config = data.config || {};
@@ -441,10 +442,10 @@ class render {
         }
         if (!this.data) {
             this.set(errors.STRUCTURE_ERROR);
-            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", 404, this.maxWait);
+            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND, this.maxWait);
             return;
         }
-        this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", 404, this.maxWait);
+        this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", HTTP_NOT_FOUND, this.maxWait);
         this.clear();
         this.varage = { ...varage, ...(this.data.data || {}) };
         this.statusCode = 0;
@@ -461,7 +462,7 @@ class render {
             clearTimeout(this.oldTimeout);
         }
         // eslint-disable-next-line no-undef
-        this.oldTimeout = setTimeout(() => { this.interval = true; this.loop(); }, 1000 - ((+new Date()) % 1000));
+        this.oldTimeout = setTimeout(() => { this.interval = true; this.loop(); }, SECOND - ((+new Date()) % SECOND));
         this.main();
         if (this.statusCode !== 0) {
             return;
