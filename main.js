@@ -84,12 +84,7 @@ function applyStyles(el, styles) {
 function removeChild(el) {
     let list = [...el.children];
     for (let i of list) {
-        /*
-        el.removeChild(i);
-        removeChild(i);
-        // i.remove();
-        // */
-        el.replaceChildren(i)
+        el.replaceChildren(i);
     }
 }
 
