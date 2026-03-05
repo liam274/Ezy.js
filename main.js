@@ -51,37 +51,7 @@ const keyword = new Set([
     6: "eval error",
     7: "classify error",
     8: "pipe error"
-},
-    htmlKeywords = new Set([
-        "nodeType", "nodeName", "nodeValue", "ownerDocument", "parentNode", "parentElement",
-        "childNodes", "children", "firstChild", "lastChild", "previousSibling", "nextSibling",
-        "attributes", "isConnected", "textContent", "innerText", "outerText",
-        "tagName", "id", "className", "classList", "style", "dataset", "outerHTML",
-        "hidden", "tabIndex", "accessKey", "draggable", "spellcheck", "contentEditable",
-        "isContentEditable", "offsetParent", "offsetTop", "offsetLeft", "offsetWidth", "offsetHeight",
-        "clientTop", "clientLeft", "clientWidth", "clientHeight", "scrollTop", "scrollLeft",
-        "scrollWidth", "scrollHeight", "scrollIntoView", "scrollIntoViewIfNeeded",
-        "onabort", "onblur", "oncancel", "oncanplay", "oncanplaythrough", "onchange", "onclick",
-        "onclose", "oncontextmenu", "oncuechange", "ondblclick", "ondrag", "ondragend",
-        "ondragenter", "ondragleave", "ondragover", "ondragstart", "ondrop", "ondurationchange",
-        "onemptied", "onended", "onerror", "onfocus", "onformdata", "oninput", "oninvalid",
-        "onkeydown", "onkeypress", "onkeyup", "onload", "onloadeddata", "onloadedmetadata",
-        "onloadstart", "onmousedown", "onmouseenter", "onmouseleave", "onmousemove", "onmouseout",
-        "onmouseover", "onmouseup", "onmousewheel", "onpause", "onplay", "onplaying",
-        "onprogress", "onratechange", "onreset", "onresize", "onscroll", "onseeked", "onseeking",
-        "onselect", "onstalled", "onsubmit", "onsuspend", "ontimeupdate", "ontoggle",
-        "onvolumechange", "onwaiting", "onwheel", "onauxclick", "ongotpointercapture",
-        "onlostpointercapture", "onpointerdown", "onpointermove", "onpointerup", "onpointercancel",
-        "onpointerover", "onpointerout", "onpointerenter", "onpointerleave",
-        "appendChild", "removeChild", "replaceChild", "insertBefore", "cloneNode", "hasChildNodes",
-        "addEventListener", "removeEventListener", "dispatchEvent", "getAttribute", "setAttribute",
-        "removeAttribute", "hasAttribute", "getAttributeNS", "setAttributeNS", "removeAttributeNS",
-        "hasAttributeNS", "getBoundingClientRect", "getClientRects", "getElementsByClassName",
-        "getElementsByTagName", "getElementsByTagNameNS", "querySelector", "querySelectorAll",
-        "matches", "closest", "contains", "insertAdjacentHTML", "insertAdjacentText",
-        "insertAdjacentElement", "requestFullscreen", "requestPointerLock", "scroll", "scrollTo",
-        "scrollBy", "focus", "blur", "click"
-    ]);
+};
 
 const dictionary = {
     time: ["i", "index", "renderIndex"], // maintain counts of independent elements (Which means those who is independent on times duplication)
@@ -339,7 +309,7 @@ Ezy.navigate = function (href) {
         }
     }
     if (full) location.href = href;
-};
+}
 
 // render
 
@@ -501,7 +471,7 @@ class render {
             }
             todo.appendChild(el);
             this.systemPlot.time++;
-            vdom.push(obj);
+            vdom.push(...obj);
         }
         parentElement.appendChild(todo);
         return vdom;
@@ -537,9 +507,12 @@ class render {
                 first++;
                 const card = $$(i.tag || config.tag || "div"),
                     temp = {
-                        children: []
+                        children: [],
+                        dataset: {}
                     };
                 card.classList.add(...(i.type || []), ...(config.type || []));
+                temp.type = [...(i.type || []), ...(config.type || [])];
+                temp.tag = card.tagName;
                 if (i.expire) {
                     setTimeout((function () {
                         card.innerHTML = "";
@@ -574,48 +547,51 @@ class render {
                 if (i.data) for (let k in i.data) {
                     card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, replacement));
                 }
+                for (let i in card.dataset) temp.dataset[i] = card.dataset[i];
                 this.beforePlugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
                 if (first == 0 && i.varAs) {
                     this.asVar(card, i.varAs, traceback);
                     if (this.statusCode !== 0) return;
                 }
-                if (i.text) {
-                    card.title = this.preCompileStr(i.text, traceback, replacement);
-                    vdom.title = card.title;
-                }
+                temp.id = card.id;
+                if (i.text) card.title = this.preCompileStr(i.text, traceback, replacement);
+                temp.title = card.title;
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
                 applyStyles(card, i.style);
+                temp.style = { ...card.style };
                 for (let j in (i.events || {})) {
                     this.addListener(j, i, card, traceback);
                     if (this.statusCode !== 0) return;
                 }
+                temp.events = { ...i.events };
                 card.innerHTML += this.preCompileStr(
                     (i.content || ""),
                     traceback, replacement
                 );
+                temp.innerHTML = card.innerHTML;
                 if (this.statusCode !== 0) return;
                 for (let j in i) {
                     if (keyword.has(j)) continue;
                     card.setAttribute(j, this.preCompileStr(i[j], traceback, replacement));
+                    temp[j] = card[j];
                 }
-                temp.children.push(this.pushComponent(i, card, traceback, replacement));
+                temp.children.push(...this.pushComponent(i, card, traceback, replacement));
                 if (this.statusCode !== 0) return;
-                for (let i in card) {
-                    if (htmlKeywords.has(i)) continue;
-                    if (card[i]) temp[i] = card[i];
-                }
                 vdom.push(temp);
             }
         } else
             for (let k = 0; k < (i.times || 1); k++) {
                 const card = $$(i.tag || config.tag || "div"),
                     temp = {
-                        children: []
+                        children: [],
+                        tag: card.tagName,
+                        dataset: {}
                     };
                 card.classList.add(...(i.type || []), ...(config.type || []));
+                temp.classList = Array.from(card.classList);
                 if (i.expire) {
                     setTimeout((function () {
                         card.innerHTML = "";
@@ -647,36 +623,39 @@ class render {
                 if (i.data) for (let k in i.data) {
                     card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, i.inherit || {}));
                 }
+                for (let i in card.dataset) temp.dataset[i] = card.dataset[i];
                 this.beforePlugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
                 if (k == 0 && i.varAs) {
                     this.asVar(card, i.varAs, traceback);
                     if (this.statusCode !== 0) return;
                 }
+                temp.id = card.id;
                 if (i.text) card.title = this.preCompileStr(i.text, traceback, i.inherit || {});
+                temp.title = card.title;
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
                 if (this.statusCode !== 0) return;
                 applyStyles(card, i.style);
+                temp.style = { ...i.style };
                 for (let j in (i.events || {})) {
                     this.addListener(j, i, card, traceback);
                     if (this.statusCode !== 0) return;
                 }
+                temp.events = { ...i.events };
                 card.innerHTML += this.preCompileStr(
                     (i.content || ""),
                     traceback, i.inherit || {}
                 );
+                temp.innerHTML = card.innerHTML;
                 if (this.statusCode !== 0) return;
                 for (let j in i) {
                     if (keyword.has(j)) continue;
                     card.setAttribute(j, this.preCompileStr(i[j], traceback, i.inherit));
+                    temp[j] = card[j];
                 }
-                temp.children.push(this.pushComponent(i, card, traceback, i.inherit));
+                temp.children.push(...this.pushComponent(i, card, traceback, i.inherit));
                 if (this.statusCode !== 0) return;
-                for (let i in card) {
-                    if (htmlKeywords.has(i)) continue;
-                    if (card[i]) temp[i] = card[i];
-                }
                 vdom.push(temp);
             }
         return {
@@ -960,23 +939,30 @@ class render {
                     first++;
                     const el = $$(j.tag || config.tag || "div"),
                         temp = {
-                            children: []
+                            children: [],
+                            tagName: el.tagName,
+                            dataset: {}
                         };
                     el.classList.add(...(j.type || []), ...(config.type || []));
+                    temp.classList = Array.from(el.classList);
                     applyStyles(el, j.style);
+                    temp.style = { ...j.style };
                     let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     for (let evt in j.events) {
                         this.addListener(evt, j, el, myTraceback);
                         if (this.statusCode !== 0) return;
                     }
+                    temp.events = { ...j.events };
                     const replace = { ...replacement, ...j.inherit, key: k, item: obj[k], ...own };
                     for (let parm in j) {
                         if (keyword.has(parm)) continue;
                         el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, replace));
+                        temp[parm] = el[parm];
                     }
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, replace
                     );
+                    temp.innerHTML = el.innerHTML;
                     if (this.statusCode !== 0) return;
                     if (j.expire) {
                         setTimeout((function () {
@@ -1007,39 +993,43 @@ class render {
                         this.pipes[j.pipe.name] = j.pipe;
                     }
                     if (j.text) el.title = this.preCompileStr(j.text, myTraceback, replace);
+                    temp.title = el.title;
                     if (j.data) for (let k in j.data) {
-                        el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, replace));
+                        el.setAttribute(key, this.preCompileStr(j.data[k], myTraceback, replace));
                     }
+                    for (let i in el.dataset) temp.dataset[i] = el.dataset[i];
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
                     if (first == 0) {
                         this.asVar(el, j.varAs, myTraceback);
                         if (this.statusCode !== 0) return;
                     }
+                    temp.id = el.id;
                     todo.appendChild(el);
                     this.plugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
-                    temp.children.push(this.pushComponent(j, el, myTraceback, replace));
+                    temp.children.push(...this.pushComponent(j, el, myTraceback, replace));
                     if (this.statusCode !== 0) return;
-                    for (let _ in el) {
-                        if (htmlKeywords.has(_)) continue;
-                        if (el[_]) temp[_] = el[_];
-                    }
                     vdom.push(temp);
                 }
             } else {
                 for (let k = 0; k < (j.times || 1); k++) {
                     const el = $$(j.tag || config.tag || "div"),
                         temp = {
-                            children: []
+                            children: [],
+                            tag: el.tagName,
+                            dataset: {}
                         };
                     el.classList.add(...(j.type || []), ...(config.type || []));
+                    temp.classList = Array.from(el.classList);
                     applyStyles(el, j.style);
+                    temp.style = { ...j.style };
                     let myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     for (let evt in j.events) {
                         this.addListener(evt, j, el, myTraceback);
                         if (this.statusCode !== 0) return;
                     }
+                    temp.events = { ...j.events };
                     for (let parm in j) {
                         if (keyword.has(parm)) continue;
                         el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, { ...replacement, ...j.inherit, ...own }));
@@ -1047,6 +1037,7 @@ class render {
                     el.innerHTML = this.preCompileStr(
                         (j.content || ""), myTraceback, { ...replacement, ...j.inherit, ...own }
                     );
+                    temp.innerHTML = el.innerHTML;
                     if (this.statusCode !== 0) return;
                     if (j.expire) {
                         setTimeout((function () {
@@ -1077,9 +1068,11 @@ class render {
                         this.pipes[j.pipe.name] = j.pipe;
                     }
                     if (j.text) el.title = this.preCompileStr(j.text, myTraceback, { ...replacement, ...j.inherit, ...own });
+                    temp.title = el.title;
                     if (j.data) for (let k in j.data) {
                         el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, { ...replacement, ...j.inherit, ...own }));
                     }
+                    for (let i in el.dataset) temp.dataset[i] = el.dataset[i];
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
                     if (k == 0) {
@@ -1089,12 +1082,8 @@ class render {
                     todo.appendChild(el);
                     this.plugComponent(el, myTraceback);
                     if (this.statusCode !== 0) return;
-                    temp.children.push(this.pushComponent(j, el, myTraceback, { ...replacement, ...j.inherit, ...own }));
+                    temp.children.push(...this.pushComponent(j, el, myTraceback, { ...replacement, ...j.inherit, ...own }));
                     if (this.statusCode !== 0) return;
-                    for (let _ in el) {
-                        if (htmlKeywords.has(_)) continue;
-                        if (el[_]) temp[_] = el[_];
-                    }
                     vdom.push(temp);
                 }
             }
@@ -1199,6 +1188,5 @@ class render {
         if (this.loadPage.parent.contains(this.loadPage.obj))
             this.loadPage.parent.removeChild(this.loadPage.obj);
         this.loadPage = undefined;
-
     }
 }
