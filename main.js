@@ -490,7 +490,7 @@ class render {
                 func(vdom.children[i - 1]);
                 return true;
             }
-            if (this.removeVdom(data, vdom.children[i - 1])) return true;
+            if (this.editVdom(data, func, vdom.children[i - 1])) return true;
         }
     }
     sectionRender = (sectionData, parentElement, sectionName, title, createElement, special = false) => {
@@ -572,10 +572,10 @@ class render {
                         card.innerHTML = "";
                         card.parentNode.removeChild(card);
                         if (i.pipe) delete this.pipes[i.pipe.name];
+                        this.removeVdom(temp);
                         setTimeout(() => {
                             if (i.expire.expired) i.expire.expired();
                         });
-                        this.removeVdom(temp);
                     }).bind(this), i.expire.date - new Date());
                 }
                 Ezy.validateValidation(this, card, i.validate, traceback);
@@ -651,10 +651,10 @@ class render {
                         card.innerHTML = "";
                         card.parentNode.removeChild(card);
                         if (i.pipe) delete this.pipes[i.pipe.name];
+                        this.removeVdom(temp);
                         setTimeout(() => {
                             if (i.expire.expired) i.expire.expired();
                         });
-                        this.removeVdom(temp);
                     }).bind(this), i.expire.date - new Date());
                 }
                 Ezy.validateValidation(this, card, i.validate, traceback);
@@ -1020,10 +1020,10 @@ class render {
                             el.innerHTML = "";
                             el.parentNode.removeChild(el);
                             if (j.pipe) delete this.pipes[j.pipe.name];
+                            this.removeVdom(temp);
                             setTimeout(() => {
                                 if (j.expire.expired) j.expire.expired();
                             });
-                            this.removeVdom(temp);
                         }).bind(this), j.expire.date - new Date());
                     }
                     Ezy.validateValidation(this, el, j.validate, traceback);
@@ -1096,10 +1096,10 @@ class render {
                             el.innerHTML = "";
                             if (el.parentNode && el.parentNode.contains(el)) el.parentNode.removeChild(el);
                             if (j.pipe) delete this.pipes[j.pipe.name];
+                            this.removeVdom(temp);
                             setTimeout(() => {
                                 if (j.expire.expired) j.expire.expired();
                             });
-                            this.removeVdom(temp);
                         }).bind(this), j.expire.date - new Date());
                     }
                     Ezy.validateValidation(this, el, j.validate, traceback);
