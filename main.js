@@ -1447,4 +1447,4 @@ class render {
     }
 };
 
-console.log("[ezy.js] Welcome using Ezy.js framework!");
+log("[ezy.js] Welcome using Ezy.js framework!");
