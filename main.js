@@ -65,6 +65,11 @@ const dictionary = {
 },
     required = {// store required in namespace, and tell the default
     };
+
+const UPPERCASE_REGEX = /[A-Z]/g,
+    ALPHABET_REGEX = /^[a-zA-Z]+$/,
+    EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    DATE_REGEX = /^(3[01]|[12][0-9]|0?[1-9])(\/|-)(1[0-2]|0?[1-9])\2([0-9]{2})?[0-9]{2}$/;
 // class
 
 class unknownVariableError extends Error {
@@ -79,6 +84,8 @@ class unknownVariableError extends Error {
 
 // global functions
 
+const camel2array = (data) => data.replace(UPPERCASE_REGEX, "-$&").toLowerCase().split("-");
+
 function applyStyles(el, styles) {
     if (!styles) {
         return;
@@ -89,27 +96,9 @@ function applyStyles(el, styles) {
 }
 
 function removeChild(el) {
-    for (const i of [...el.children]) {
+    for (const i of el.children) {
         el.replaceChildren(i);
     }
-}
-
-function camel2array(data) {
-    const result = [],
-        word = [];
-    for (const i of data) {
-        if (i === i.toLocaleUpperCase() && /[A-Za-z]/.test(i)) {
-            result.push(word.join(""));
-            word.length = 0;
-            word.push(i.toLocaleLowerCase());
-        } else {
-            word.push(i);
-        }
-    }
-    if (word.length) {
-        result.push(word.join(""));
-    }
-    return result;
 }
 
 function array2camel(data) {
@@ -174,13 +163,13 @@ const Ezy = {
         return Number.isInteger(Number(data));
     },
     isAlphabet(data) {
-        return /^[a-zA-Z]+$/.test(data);
+        return ALPHABET_REGEX.test(data);
     },
     isEmail(data) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data);
+        return EMAIL_REGEX.test(data);
     },
     isDate(data) {
-        return /^(3[01]|[12][0-9]|0?[1-9])(\/|-)(1[0-2]|0?[1-9])\2([0-9]{2})?[0-9]{2}$/.test(data);
+        return DATE_REGEX.test(data);
     },
     validatePipe(obj, data, traceback) {
         if (!data.pipe.receive || typeof data.pipe.receive !== "object") {
@@ -240,52 +229,6 @@ const Ezy = {
                 return obj.set(errors.RENDER_ERROR);
             }
         }
-    },
-    split(data, chars, dis) {
-        const spliters = new Set(chars),
-            disallows = {},
-            result = [],
-            stack = [],
-            secondResult = [];
-        for (const i of dis) {
-            disallows[i[0]] = i[1];
-            disallows[i[1]] = i[0];
-        }
-        let last = "";
-        const temporary = [];
-        for (const char of data) {
-            if (spliters.has(char) && equal(stack)) {
-                secondResult.push(temporary.join(""));
-                if (last !== char) {
-                    result.push([...secondResult]);
-                    secondResult.length = 0;
-                }
-                temporary.length = 0;
-                last = char;
-                continue;
-            }
-            if (char in disallows) {
-                if (stack.length !== 0 && char in stack[stack.length - 1]) {
-                    stack[stack.length - 1][char]++;
-                } else {
-                    if (!equal([stack[stack.length - 1]])) {
-                        throw new Error(`[ezy.js] CRITICAL ERROR: Parse Error: Error when parsing, unclosed ${max(stack[stack.length - 1])}.`);
-                    }
-                    const _ = {};
-                    _[char] = 1;
-                    _[disallows[char]] = 0;
-                    stack.push(_);
-                }
-            }
-            temporary.push(char);
-        }
-        if (temporary) {
-            secondResult.push(temporary.join(""));
-        }
-        if (secondResult) {
-            result.push([...secondResult]);
-        }
-        return result;
     },
     flat(data) {
         const result = [];
@@ -915,11 +858,11 @@ class render {
                         }
                         first = false;
                     } else {
-                        name = Ezy.flat(Ezy.split(name, [":"], [["{", "}"], ["\"", "\""], ["'", "'"]]));
+                        name = name.split(":");
                         if (extraScope[name[0]]) {
                             if (typeof extraScope[name[0]] === "function") {
                                 result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
-                                    traceback, { ...extraScope, result: result });
+                                    traceback, { ...extraScope, result });
                             }
                             else {
                                 error(`[ezy.js] CRITICAL ERROR: Parse Error: Error when parsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`);
@@ -948,11 +891,11 @@ class render {
                 // eslint-disable-next-line no-useless-assignment
                 first = false;
             } else {
-                name = Ezy.flat(Ezy.split(name, [":"], [["{", "}"], ["\"", "\""], ["'", "'"]]));
+                name = name.split(":");
                 if (extraScope[name[0]]) {
                     if (typeof extraScope[name[0]] === "function") {
                         result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
-                            traceback, { ...extraScope, result: result });
+                            traceback, { ...extraScope, result });
                     }
                     else {
                         error(`[ezy.js] CRITICAL ERROR: Parse Error: Error when parsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`);
@@ -1503,3 +1446,5 @@ class render {
         this.loadPage = undefined;
     }
 };
+
+console.log("[ezy.js] Welcome using Ezy.js framework!");
