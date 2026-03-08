@@ -3,7 +3,7 @@
 "use strict";
 
 /*
-    ezy.js
+    @file ezy.js
     by Liam Lei
     Started from 2026.02.11
 
@@ -31,7 +31,8 @@
 const log = console.log,
     $ = document.querySelector.bind(document),
     $$ = document.createElement.bind(document),
-    error = console.error.bind(console);
+    error = console.error.bind(console),
+    warn = console.warn.bind(console);
 function removePrefix(str, prefix) {
     return str.startsWith(prefix) ? str.slice(prefix.length) : str;
 }
@@ -83,9 +84,19 @@ class unknownVariableError extends Error {
 };
 
 // global functions
-
+/**
+ * Change camelcase to array
+ * @param {String} data - Input a string that's in camel case
+ * @returns {string[]} Output a string array that split via uppercases
+ */
 const camel2array = (data) => data.replace(UPPERCASE_REGEX, "-$&").toLowerCase().split("-");
 
+/**
+ * Apply style to element
+ * @param {Node} el - Element that needs to apply style
+ * @param {object} styles - Styles that needs to be applied
+ * @returns null
+ */
 function applyStyles(el, styles) {
     if (!styles) {
         return;
@@ -95,12 +106,20 @@ function applyStyles(el, styles) {
     }
 }
 
+/**
+ * Remove every child of an element
+ * @param {Node} el - Element
+ */
 function removeChild(el) {
     for (const i of el.children) {
         el.replaceChildren(i);
     }
 }
-
+/**
+ * Join array to camelcase
+ * @param {string[]} data
+ * @returns {string}
+ */
 function array2camel(data) {
     const result = [];
     let sec,
@@ -116,43 +135,15 @@ function array2camel(data) {
     return result.join("");
 }
 
-function equal(data) {
-    let last;
-    for (const i of data) {
-        last = null;
-        for (const k in i) {
-            if (i[k] === null) {
-                return "NULL IS NOT ACCEPTED";
-            }
-            if (last === null) {
-                last = i[k];
-                continue;
-            }
-            if (last !== i[k]) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-function max(data) {
-    let maxV = "",
-        max = -Infinity;
-    for (const i in data) {
-        if (data[i] > max) {
-            maxV = i;
-            max = data[i];
-        }
-    }
-    return maxV;
-}
-
 // Ezy
 const body = document.body;
 
 const Ezy = {
     plugins: [],
+    /**
+     * Add plugins
+     * @param {Object} plugin - plugin object
+     */
     add(plugin) {
         this.plugins.push(plugin);
     },
@@ -230,6 +221,11 @@ const Ezy = {
             }
         }
     },
+    /**
+     * Flat an array
+     * @param {Array} data - High-dimensional arrays
+     * @returns {Array} - flatted array
+     */
     flat(data) {
         const result = [];
         for (const i of data) {
@@ -242,6 +238,10 @@ const Ezy = {
         }
         return result;
     },
+    /**
+     * Alert the data
+     * @param {Object} data
+     */
     alert(data) {
         const barrier = $$("div");
         barrier.classList.add("alert-barrier");
@@ -280,7 +280,10 @@ routeGuard.guards.push(function (href) {
         allow: routeGuard.builtin.has(href)
     };
 });
-
+/**
+ * Use routeGuard.guards to check whether should redirect or not
+ * @param {string} href - destination
+ */
 Ezy.navigate = function (href) {
     let full = true;
     for (const guard of routeGuard.guards) {
@@ -324,9 +327,18 @@ const varage = {},// variable storage (?cold joke)
     };
 const MAXWAIT = 60000,
     HTTP_NOT_FOUND = 404,
+    HTTP_TIMEOUT = 408,
     SECOND = 1000;
 // eslint-disable-next-line no-unused-vars
 class render {
+    /**
+     * The constructor of class *render*
+     * @param {Node} el - The main element that act as root
+     * @param {Object} data - The data that used to render
+     * @param {Number} maxWait - how much to wait for parm data to be definded
+     * @param {Object} namespace - historical issues, just avoid it
+     * @returns {render}
+     */
     constructor(el, data, maxWait = MAXWAIT, namespace = {}) {
         this.maxWait = maxWait;
         this.data = data;
@@ -350,7 +362,8 @@ class render {
         }
         if (!this.data.main) {
             this.set(errors.STRUCTURE_ERROR);
-            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure attribute \"main\" missing.", HTTP_NOT_FOUND, this.maxWait);
+            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure attribute \"main\" missing.", HTTP_NOT_FOUND,
+                this.maxWait, "Resource page.data.main not found");
             return this;
         }
         this.config = data.config || {};
@@ -375,6 +388,10 @@ class render {
             return this;
         }
     }
+    /**
+     * reRender the entire page. ***PLEASE CHECK THE STATUS CODE***
+     * @returns null
+     */
     reRender() {
         if (this.config && !this.config.keepConsole) {
             console.clear();
@@ -385,10 +402,11 @@ class render {
         }
         if (!this.data) {
             this.set(errors.STRUCTURE_ERROR);
-            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND, this.maxWait);
+            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
+                this.maxWait);
             return;
         }
-        this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", HTTP_NOT_FOUND, this.maxWait);
+        this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", HTTP_TIMEOUT, this.maxWait, "Page render timeout");
         this.clear();
         this.varage = { ...varage, ...(this.data.data || {}) };
         this.statusCode = 0;
@@ -416,12 +434,16 @@ class render {
         this.clearLoading();
         log(`[ezy.js] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
     }
+    /**
+     * main proc. ***CALLING IT IS NOT SUGGESTED***
+     * @returns null
+     */
     main() {
         this.statusCode = 0;
         if (this.data.onStart) {
             this.preRender(this.data.onStart);
         } else {
-            console.warn("[ezy.js] MAJOR SUGGESTION: : Suggest adding onStart function list to handle preprocess");
+            warn("[ezy.js] MAJOR SUGGESTION: : Suggest adding onStart function list to handle preprocess");
         }
         for (const i of Ezy.plugins) {
             i.onStart?.(this.data);
@@ -429,7 +451,7 @@ class render {
         if (!this.data.main) {
             this.set(errors.STRUCTURE_ERROR);
             error("[ezy.js] CRITICAL ERROR: Structure Error: Data structure incomplete.");
-            this.loadPage = this.loadingPage("", HTTP_NOT_FOUND, this.maxWait, "page.data.main");
+            this.loadPage = this.loadingPage("", HTTP_NOT_FOUND, this.maxWait, "Resouce page.data.main not found");
             return;
         }
         this.mainRender(this.data.main);
@@ -443,7 +465,7 @@ class render {
             }
         }
         else {
-            console.warn("[ezy.js] MINOR SUGGESSION: : Suggest adding onLoad function list to handle onLoad process");
+            warn("[ezy.js] MINOR SUGGESSION: : Suggest adding onLoad function list to handle onLoad process");
         }
         for (const i of Ezy.plugins) {
             i.onLoad?.(this.data);
@@ -452,6 +474,9 @@ class render {
             return;
         }
     }
+    /**
+     * A loop that use requestAnimationFrame to implement. Calling it is not suggested
+     */
     loop() {
         for (const i of this.mains) {
             i.func(i.obj, i.el);
@@ -463,6 +488,13 @@ class render {
             this.frameID = requestAnimationFrame(this.loop.bind(this));
         }
     }
+    /**
+     * pipe a message. ***PLEASE CHECK THE STATUS CODE***
+     * @param {string} sender - The one who sends
+     * @param {string} receiver - The one who recieves
+     * @param {Any} data - Data
+     * @returns {void}
+     */
     pipe2(sender, receiver, data) {
         if (!(sender in this.pipes)) {
             error(`[ezy.js] CRITICAL ERROR: Pipe Error: Error when piping, trying to send message from ${sender}, not found in this.pipes`);
@@ -479,9 +511,19 @@ class render {
         const obj = this.pipes[receiver].receive[sender];
         obj.func(data, ...obj.data);
     }
+    /**
+     * edit variables
+     * @param {string} key
+     * @param {Any} data
+     */
     edit(key, data) {
         this.varage[key] = data;
     }
+    /**
+     * Read variables
+     * @param {string} key
+     * @returns {Any}
+     */
     read(key) {
         if (key in this.varage) {
             return this.varage[key];
@@ -490,11 +532,21 @@ class render {
             throw new unknownVariableError(`[ezy.js] Critical Error: Variable Error: Variable "${key}" not found`);
         }
     }
+    /**
+     * being called before main render proc. ***CALLING IT IS NOT SUGGESTED***
+     * @param {Object} data
+     */
     preRender(data) {
         for (const i of data.funcs) {
             i(this.data);
         }
     }
+    /**
+     * Remove virtual DOM
+     * @param {Object} data
+     * @param {Object} vdom
+     * @returns {boolean}
+     */
     removeVdom(data, vdom = this.vdom) {
         for (let i = vdom.children.length; i > 0; i--) {
             if (vdom.children[i - 1] === data) {
@@ -505,19 +557,37 @@ class render {
                 return true;
             }
         }
+        return false;
     }
+    /**
+     * Edit virtual DOM
+     * @param {Object} data
+     * @param {function(Object, number)} func - The function that will be editing the children. It should recieve
+     * @param {Object} vdom
+     * @returns {boolean}
+     */
     editVdom(data, func, vdom = this.vdom) {
         for (let i = vdom.children.length; i > 0; i--) {
             if (vdom.children[i - 1] === data) {
-                func(vdom.children[i - 1]);
+                func(vdom.children, i - 1);
                 return true;
             }
             if (this.editVdom(data, func, vdom.children[i - 1])) {
                 return true;
             }
         }
+        return false;
     }
-    sectionRender = (sectionData, parentElement, sectionName, title, createElement, special = false) => {
+    /**
+     * ***CALLING IT IS NOT SUGGESTED***
+     * @param {Object} sectionData
+     * @param {Node} parentElement
+     * @param {string} sectionName
+     * @param {string} title
+     * @param {function(string, Object, Object)} createElement
+     * @returns {Object|void}
+     */
+    sectionRender = (sectionData, parentElement, sectionName, title, createElement) => {
         const traceback = `page ${title} -> ${sectionName}`;
         if (!sectionData) {
             error(`[ezy.js] CRITICAL ERROR: Value Error: function found first parameter in ${sectionData}, expected object, in ${traceback}`);
@@ -548,22 +618,6 @@ class render {
                 error(`[ezy.js] CRITICAL ERROR: Value Error: argument-function "createElement" return unexpected value, expected {el:Node(or NodeLike object),obj:vdom}, in page ${traceback}`);
                 return this.set(errors.VALUE_ERROR);
             }
-            if (!special) {
-                this.beforePlugComponent(el, traceback);
-                if (this.statusCode !== 0) {
-                    return;
-                }
-                if (item.varAs) {
-                    this.asVar(el, i, traceback);
-                }
-                if (this.statusCode !== 0) {
-                    return;
-                }
-                this.plugComponent(el, traceback);
-                if (this.statusCode !== 0) {
-                    return;
-                }
-            }
             todo.appendChild(el);
             this.systemPlot.time++;
             vdom.push(...obj);
@@ -571,6 +625,13 @@ class render {
         parentElement.appendChild(todo);
         return vdom;
     };
+    /**
+     * ***CALLING IT IS NOT SUGGESTED***
+     * @param {string} _
+     * @param {Object} i
+     * @param {Object} config
+     * @returns {void|Object}
+     */
     contentRender = (_, i, config) => {
         const title = this.data.main.title,
             traceback = `page ${title} -> content`,
@@ -811,15 +872,29 @@ class render {
             obj: vdom
         };
     };
+    /**
+     * main render proc, it's a historical problem. ***CALLING IT IS NOT SUGGESTED***
+     * @param {Object} pageData
+     * @returns null
+     */
     mainRender(pageData) {
-        this.vdom.children.push(...this.sectionRender(pageData, this.el, pageData.name || "", pageData.title || "", this.contentRender, true));
-        if (this.statusCode !== 0) {
-            return;
-        }
+        // Ezy.js is firstly a function, and this its body.
+        this.vdom.children.push(...this.sectionRender(pageData, this.el, pageData.name || "", pageData.title || "", this.contentRender));
     }
+    /**
+     * Set status code. ***CALLING IT IS NOT SUGGESTED***, unless you want to control the render flow.
+     * @param {number} code
+     */
     set(code) {
         this.statusCode = code;
     }
+    /**
+     * ***CALLING IT IS NOT SUGGESTED***
+     * @param {string} expr
+     * @param {string} traceback
+     * @param {Object} extraScope
+     * @returns Any
+     */
     evaluateExpression(expr, traceback, extraScope) {
         expr = expr.trim();
         if (!expr) {
@@ -918,7 +993,7 @@ class render {
             return result === undefined ? "" : String(result);
         } catch (e) {
             if (e instanceof ReferenceError) {
-                console.warn(`[ezy.js] Warning: Variable not defined in "${expr}" at ${traceback}`);
+                warn(`[ezy.js] Warning: Variable not defined in "${expr}" at ${traceback}`);
                 return "";
             }
             error(`[ezy.js] CRITICAL ERROR: Eval Error: Failed to evaluate "${expr}" in ${traceback}`, e);
@@ -926,6 +1001,14 @@ class render {
             return "";
         }
     }
+    /**
+     * Compile string
+     * @param {string} data
+     * @param {string} traceback
+     * @param {Object} replacement
+     * @param {Object} pipeData
+     * @returns {string|void}
+     */
     preCompileStr(data, traceback, replacement = {}, pipeData = {}) {
         const result = [];
         let skip = false,
@@ -1076,6 +1159,14 @@ class render {
         }
         return result.join("");
     }
+    /**
+     * ***CALLING IT IS NOT SUGGESTED***
+     * @param {Object} i
+     * @param {Node} parentNode
+     * @param {string} traceback
+     * @param {Object} replacement
+     * @returns {Object}
+     */
     pushComponent(i, parentNode, traceback, replacement = {}) {
         const own = {
             time: 0
@@ -1328,6 +1419,13 @@ class render {
         }
         return vdom;
     }
+    /**
+     * This function will promise that the Ezy.js will not collide the id. Without other JavaScript actions, you may use the varAs as the variable name to access the DOM.
+     * @param {Node} el - The element that you wanted to stored in variable
+     * @param {string} varAs - The variable name that you want to use to access el
+     * @param {string} traceback
+     * @returns null
+     */
     asVar(el, varAs, traceback) {
         if (varAs) {
             if (vars.has(varAs)) {
@@ -1338,6 +1436,9 @@ class render {
             el.id = varAs;
         }
     }
+    /**
+     * Clear the datas.
+     */
     clear() {
         removeChild(this.mainEl);
         this.mainEl.innerHTML = this.original;
@@ -1346,10 +1447,13 @@ class render {
             dataset: {}
         };
         vars.clear();
-        for (const i of ["content", "toolbar", "userbar", "footer"]) {
-            vars.add(i);
-        }
     }
+    /**
+     * ***CALLING IT IS NOT SUGGESTED***
+     * @param {Node} el
+     * @param {string} traceback
+     * @returns null
+     */
     plugComponent(el, traceback) {
         for (const i of Ezy.plugins) {
             i.onComponentLoad?.(this, el, traceback);
@@ -1358,6 +1462,12 @@ class render {
             }
         }
     }
+    /**
+     * ***CALLING IT IS NOT SUGGESTED***
+     * @param {Node} el
+     * @param {string} traceback
+     * @returns null
+     */
     beforePlugComponent(el, traceback) {
         for (const i of Ezy.plugins) {
             i.beforeComponentLoad?.(this, el, traceback);
@@ -1366,6 +1476,14 @@ class render {
             }
         }
     }
+    /**
+     * ***CALLING IT IS NOT SUGGESTED***
+     * @param {string} j - Event name
+     * @param {Object} i - render.data son object
+     * @param {Node} el - Node that wants to have listeners
+     * @param {string} traceback
+     * @returns null
+     */
     addListener(j, i, el, traceback) {
         const obj = i.events[j],
             { listener } = obj;
@@ -1389,7 +1507,16 @@ class render {
             });
         }
     }
-    loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "page.data", parentNode = body) {// hell meme
+    /**
+     * Add a loading page to the give node.
+     * @param {string} msg - Shown message on the error page, if timeout
+     * @param {number} errorCode - The HTTP error code on the error page, if timeout
+     * @param {number} guillotine - Timeout time limit
+     * @param {string} reason - Timeout for what
+     * @param {Node} parentNode
+     * @returns {Object}
+     */
+    loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = body) {// dark joke
         const pot = $$("div");
         pot.classList.add("flex", "horizontal-mid", "vertical-mid", "bg-white");
         pot.style.width = "100%";
@@ -1408,7 +1535,14 @@ class render {
             }, guillotine)
         };
     }
-    errorPage(msg, errorCode, reason = "page.data", parentNode = body) {
+    /**
+     * ***CALLING IT IS NOT SUGGESTED***
+     * @param {string} msg
+     * @param {number} errorCode
+     * @param {string} reason
+     * @param {Node} parentNode
+     */
+    errorPage(msg, errorCode, reason, parentNode = body) {
         error(msg);
         const pot = $$("div");
         pot.classList.add("flex", "bg-white", "horizontal-mid", "vertical-mid");
@@ -1424,7 +1558,7 @@ class render {
         div.style.width = "auto";
         div.style.height = "auto";
         const another = $$("div");
-        another.innerHTML = `Resource ${reason} not found`;
+        another.innerHTML = reason;
         another.style.fontSize = "18px";
         another.style.color = "black";
         another.style.padding = "0 50px";
@@ -1434,6 +1568,10 @@ class render {
         pot.appendChild(another);
         parentNode.appendChild(pot);
     }
+    /**
+     * Clear the loading page. Please call it if you don't need the loading page any longer.
+     * @returns null
+     */
     clearLoading() {
         if (!this.loadPage) {
             return;
