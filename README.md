@@ -8,6 +8,17 @@ Note that this framework is ***NOT*** designed to build pages independently. Ple
 Developers MUST detect the statusCode after reRender, as it might returns error code. Notice that if the statusCode is not zero, the obj created might not be *render*.
 Note that based on considerations of flexibilty, *Ezy.js* will not be responsible for XSS security or any other HTML-related attacks. If you want to implement such defenses, please use PHP or any other possible backend language to pre-render contents.
 
+## Deployment
+If you want to try my framework, you may git clone the project:
+```shell
+git clone https://github.com/liam274/Ezy.js.git
+```
+and deploy via python:
+```shell
+python -m http.server 8000
+```
+in the main directory.
+
 ## Data Structure
 
 ### Root
