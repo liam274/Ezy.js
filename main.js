@@ -547,7 +547,7 @@ export class render {
      * @returns {Object|void}
      */
     sectionRender = (sectionData, parentElement, sectionName, title, createElement) => {
-        const traceback = `page ${title} -> ${sectionName}`;
+        const traceback = `${title} -> ${sectionName}`;
         if (!sectionData) {
             Ezy.formatError(`function found first parameter in ${sectionData}, expected object, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
             return this.set(errors.VALUE_ERROR);
@@ -595,7 +595,7 @@ export class render {
      */
     contentRender = (_, i, config) => {
         const title = this.data.main.title,
-            traceback = `page ${title} -> content`,
+            traceback = `${title}`,
             vdom = [];
         if (typeof i === "string") {
             if (!this.classify) {
