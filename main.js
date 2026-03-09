@@ -217,8 +217,8 @@ export const Ezy = {
      * @param {number} level
      * @param {string} error
      */
-    formatError(message, level, error) {
-        error(`[ezy.js] ${errorLevels[level]}: ${error.toLocaleUpperCase()}: ${message}`);
+    formatError(message, level, _error) {
+        error(`[ezy.js] ${errorLevels[level]}: ${_error.toLocaleUpperCase()}: ${message}`);
     }
 };
 
@@ -526,17 +526,22 @@ export class render {
     /**
      * Remove virtual DOM
      * @param {Object} data
-     * @param {Object} vdom
+     * @param {Object} rootVdom
      * @returns {boolean}
      */
-    removeVdom(data, vdom = this.vdom) {
-        for (let i = vdom.children.length; i > 0; i--) {
-            if (vdom.children[i - 1] === data) {
-                delete vdom.children[i - 1];
-                return true;
-            }
-            if (this.removeVdom(data, vdom.children[i - 1])) {
-                return true;
+    removeVdom(data, rootVdom = this.vdom) {
+        const stack = [rootVdom];
+        while (stack.length > 0) {
+            const currentNode = stack.pop();
+            for (let i = currentNode.children.length - 1; i >= 0; i--) {
+                const child = currentNode.children[i];
+                if (child === data) {
+                    currentNode.children.splice(i, 1);
+                    return true;
+                }
+                if (child && child.children) {
+                    stack.push(child);
+                }
             }
         }
         return false;
@@ -926,7 +931,7 @@ export class render {
                             else {
                                 Ezy.formatError(`Error when parsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`,
                                     errorLevels.CRITICAL_ERROR, "Parse Error");
-                                return this.set(error.PHARSING_ERROR);
+                                return this.set(errors.PHARSING_ERROR);
                             }
                         }
                         else {
