@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable no-undef */
+import * as ezy from "./main.js";
 // data
 const pageData = {
     onStart: {
@@ -58,7 +59,7 @@ const pageData = {
                                 onclick: {
                                     listener: [
                                         (e) => {
-                                            Ezy.navigate(e.target.dataset.href);
+                                            ezy.Ezy.navigate(e.target.dataset.href);
                                         }
                                     ]
                                 }
@@ -81,7 +82,7 @@ const pageData = {
                                 onclick: {
                                     listener: [
                                         (e) => {
-                                            Ezy.navigate(e.target.dataset.href);
+                                            ezy.Ezy.navigate(e.target.dataset.href);
                                         }
                                     ]
                                 }
@@ -139,7 +140,7 @@ const pageData = {
                             events: {
                                 onclick: {
                                     preventDefault: false,
-                                    listener: [() => Ezy.alert({ title: "Ezy.js", content: "Hi, how are you today?" })]
+                                    listener: [() => ezy.Ezy.alert({ title: "Ezy.js", content: "Hi, how are you today?" })]
                                 }
                             }
                         }
@@ -205,7 +206,7 @@ const pageData = {
                     events: {
                         onclick: {
                             preventDefault: false,
-                            listener: [() => Ezy.navigate("https://github.com/liam274/Ezy.js/")]
+                            listener: [() => ezy.Ezy.navigate("https://github.com/liam274/Ezy.js/")]
                         }
                     }
                 }
@@ -228,17 +229,17 @@ const pageData = {
         }
     }
 };
-routeGuard.guards.push(function (data) {
-    if (routeGuard.builtin.has(data)) {
+ezy.routeGuard.guards.push(function (data) {
+    if (ezy.routeGuard.builtin.has(data)) {
         return { allow: true };
     } else {
         return { allow: false, href: "notFound.html" };
     }
 });
 for (const i of ["index.html", "doc.html", "setting.html", "experiment.html"]) {
-    routeGuard.builtin.add(i);
+    ezy.routeGuard.builtin.add(i);
 }
-new render("head", {
+new ezy.render("head", {
     main: [
         {
             tag: "title",
@@ -246,5 +247,5 @@ new render("head", {
         }
     ]
 });
-const proc = new render(body, pageData);
+const proc = new ezy.render(ezy.body, pageData);
 proc.reRender();

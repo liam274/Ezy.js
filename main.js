@@ -28,7 +28,7 @@
             + many web knowledges
 */
 
-const log = console.log,
+export const log = console.log,
     $ = document.querySelector.bind(document),
     $$ = document.createElement.bind(document),
     error = console.error.bind(console),
@@ -37,7 +37,7 @@ function removePrefix(str, prefix) {
     return str.startsWith(prefix) ? str.slice(prefix.length) : str;
 }
 
-const keyword = new Set([
+export const keyword = new Set([
     "type", "component", "tag",
     "events", "style", "varAs",
     "listener", "times", "title",
@@ -59,13 +59,11 @@ const keyword = new Set([
     ID_ERROR: 11
 };
 
-const dictionary = {
+export const dictionary = {
     time: ["i", "index", "renderIndex"], // maintain counts of independent elements (Which means those who is independent on times duplication)
     key: ["key"],
     item: ["item", "value"]
-},
-    required = {// store required in namespace, and tell the default
-    };
+};
 
 const UPPERCASE_REGEX = /[A-Z]/g,
     ALPHABET_REGEX = /^[a-zA-Z]+$/,
@@ -89,7 +87,7 @@ class unknownVariableError extends Error {
  * @param {String} data - Input a string that's in camel case
  * @returns {string[]} Output a string array that split via uppercases
  */
-const camel2array = (data) => data.replace(UPPERCASE_REGEX, "-$&").toLowerCase().split("-");
+export const camel2array = (data) => data.replace(UPPERCASE_REGEX, "-$&").toLowerCase().split("-");
 
 /**
  * Apply style to element
@@ -97,7 +95,7 @@ const camel2array = (data) => data.replace(UPPERCASE_REGEX, "-$&").toLowerCase()
  * @param {object} styles - Styles that needs to be applied
  * @returns null
  */
-function applyStyles(el, styles) {
+export function applyStyles(el, styles) {
     if (!styles) {
         return;
     }
@@ -110,7 +108,7 @@ function applyStyles(el, styles) {
  * Remove every child of an element
  * @param {Node} el - Element
  */
-function removeChild(el) {
+export function removeChild(el) {
     for (const i of el.children) {
         el.removeChild(i);
         removeChild(i);
@@ -122,7 +120,7 @@ function removeChild(el) {
  * @param {string[]} data
  * @returns {string}
  */
-function array2camel(data) {
+export function array2camel(data) {
     const result = [];
     let sec,
         first = false;
@@ -138,9 +136,9 @@ function array2camel(data) {
 }
 
 // Ezy
-const body = document.body;
+export const body = document.body;
 
-const Ezy = {
+export const Ezy = {
     plugins: [],
     /**
      * Add plugins
@@ -287,7 +285,7 @@ Ezy.errors = ["MINOR ERROR", "MAJOR ERROR", "CRITICAL ERROR"];
 
 // Route Guard
 
-const routeGuard = {
+export const routeGuard = {
     builtin: new Set([]),
     guards: []
 };
@@ -341,12 +339,11 @@ const varage = {},// variable storage (?cold joke)
             return { ...data };
         }
     };
-const MAXWAIT = 60000,
+export const MAXWAIT = 60000,
     HTTP_NOT_FOUND = 404,
     HTTP_TIMEOUT = 408,
     SECOND = 1000;
-// eslint-disable-next-line no-unused-vars
-class render {
+export class render {
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -369,9 +366,6 @@ class render {
             this.set(errors.STRUCTURE_ERROR);
             this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND, this.maxWait);
             return this;
-        }
-        for (const i in required) {
-            namespace[i] = namespace[i] || required[i];
         }
         if (data.classify) {
             this.classify = data.classify;
@@ -1607,4 +1601,4 @@ class render {
     }
 };
 
-log("[ezy.js] Welcome using Ezy.js framework!");
+log("[ezy.js] Welcome to the world of Ezy.js framework!");

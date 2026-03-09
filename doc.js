@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+import * as ezy from "./main.js";
 // data
 const pageData = {
     onStart: {
@@ -55,7 +56,7 @@ const pageData = {
                                 onclick: {
                                     listener: [
                                         (e) => {
-                                            Ezy.navigate(e.target.dataset.href);
+                                            ezy.Ezy.navigate(e.target.dataset.href);
                                         }
                                     ]
                                 }
@@ -78,7 +79,7 @@ const pageData = {
                                 onclick: {
                                     listener: [
                                         (e) => {
-                                            Ezy.navigate(e.target.dataset.href);
+                                            ezy.Ezy.navigate(e.target.dataset.href);
                                         }
                                     ]
                                 }
@@ -190,17 +191,17 @@ const pageData = {
         }
     ]
 };
-routeGuard.guards.push(function (data) {
-    if (routeGuard.builtin.has(data)) {
+ezy.routeGuard.guards.push(function (data) {
+    if (ezy.routeGuard.builtin.has(data)) {
         return { allow: true };
     } else {
         return { allow: false, href: "notFound.html" };
     }
 });
 for (const i of ["index.html", "doc.html", "setting.html", "experiment.html"]) {
-    routeGuard.builtin.add(i);
+    ezy.routeGuard.builtin.add(i);
 }
-new render("head", {
+new ezy.render("head", {
     main: [
         {
             tag: "title",
@@ -208,5 +209,5 @@ new render("head", {
         }
     ]
 });
-const proc = new render(body, pageData);
+const proc = new ezy.render(ezy.body, pageData);
 proc.reRender();
