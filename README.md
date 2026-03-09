@@ -5,8 +5,25 @@
 Note that this framework is ***NOT*** designed to build pages independently. Please use other backend languages to support the project, or any other ways you prefer.
 
 ## Attention
-Developers MUST detect the statusCode after reRender, as it might returns error code. Notice that if the statusCode is not zero, the obj created might not be *render*.
+Developers **MUST** detect the statusCode after reRender, as it might returns error code. Notice that if the statusCode is not zero, the obj created might not be *render*.
 Note that based on considerations of flexibilty, *Ezy.js* will not be responsible for XSS security or any other HTML-related attacks. If you want to implement such defenses, please use PHP or any other possible backend language to pre-render contents.
+
+## Hello, world!
+Here's a small "Hello world" example, for you to step forward:
+```JavaScript
+import * as ezy from "./main.js";
+const proc=new ezy.render(// In case you want to reuse this object.
+    ezy.body,// This is the body element of the HTML page
+    {
+        main:[
+            {
+                tag:"h1",
+                content:"Hello, world!"
+            }
+        ]
+    }
+);
+```
 
 ## Deployment
 If you want to try my framework, you may git clone the project:
