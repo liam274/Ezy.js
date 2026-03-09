@@ -2,6 +2,8 @@
 /* eslint-disable indent */
 "use strict";
 
+import * as utils from "./utils.js";
+
 /*
     @file ezy.js
     by Liam Lei
@@ -64,11 +66,6 @@ export const dictionary = {
     key: ["key"],
     item: ["item", "value"]
 };
-
-const UPPERCASE_REGEX = /[A-Z]/g,
-    ALPHABET_REGEX = /^[a-zA-Z]+$/,
-    EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    DATE_REGEX = /^(3[01]|[12][0-9]|0?[1-9])(\/|-)(1[0-2]|0?[1-9])\2([0-9]{2})?[0-9]{2}$/;
 // class
 
 class unknownVariableError extends Error {
@@ -80,60 +77,6 @@ class unknownVariableError extends Error {
         return "unknownVariableError";
     }
 };
-
-// global functions
-/**
- * Change camelcase to array
- * @param {String} data - Input a string that's in camel case
- * @returns {string[]} Output a string array that split via uppercases
- */
-export const camel2array = (data) => data.replace(UPPERCASE_REGEX, "-$&").toLowerCase().split("-");
-
-/**
- * Apply style to element
- * @param {Node} el - Element that needs to apply style
- * @param {object} styles - Styles that needs to be applied
- * @returns null
- */
-export function applyStyles(el, styles) {
-    if (!styles) {
-        return;
-    }
-    for (const prop in styles) {
-        el.style.setProperty(camel2array(prop).join("-"), styles[prop]);
-    }
-}
-
-/**
- * Remove every child of an element
- * @param {Node} el - Element
- */
-export function removeChild(el) {
-    for (const i of el.children) {
-        el.removeChild(i);
-        removeChild(i);
-        i.id = "";
-    }
-}
-/**
- * Join array to camelcase
- * @param {string[]} data
- * @returns {string}
- */
-export function array2camel(data) {
-    const result = [];
-    let sec,
-        first = false;
-    for (const i of data) {
-        sec = true;
-        for (const char of i) {
-            result.push(sec && first ? char.toLocaleUpperCase() : char);
-            sec = false;
-        }
-        first = true;
-    }
-    return result.join("");
-}
 
 // Ezy
 export const body = document.body;
@@ -154,13 +97,13 @@ export const Ezy = {
         return Number.isInteger(Number(data));
     },
     isAlphabet(data) {
-        return ALPHABET_REGEX.test(data);
+        return utils.ALPHABET_REGEX.test(data);
     },
     isEmail(data) {
-        return EMAIL_REGEX.test(data);
+        return utils.EMAIL_REGEX.test(data);
     },
     isDate(data) {
-        return DATE_REGEX.test(data);
+        return utils.DATE_REGEX.test(data);
     },
     validatePipe(obj, data, traceback) {
         if (!data.pipe.receive || typeof data.pipe.receive !== "object") {
@@ -260,7 +203,7 @@ export const Ezy = {
         confirm.innerHTML = "OK";
         confirm.classList.add("alert-button");
         confirm.addEventListener("click", () => {
-            removeChild(barrier);
+            utils.removeChild(barrier);
             body.removeChild(barrier);
             barrier.remove();
         });
@@ -328,7 +271,7 @@ const varage = {},// variable storage (?cold joke)
             const result = {};
             for (const i in data) {
                 if (Ezy.isInt(i)) {
-                    const got = array2camel(data[i].split("-"));
+                    const got = utils.array2camel(data[i].split("-"));
                     result[got] = data[got];
                 }
             }
@@ -721,7 +664,7 @@ export class render {
                 };
                 if (i.data) {
                     for (const k in i.data) {
-                        card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, replacement));
+                        card.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, replacement));
                     }
                 }
                 this.beforePlugComponent(card, traceback);
@@ -742,7 +685,7 @@ export class render {
                 if (this.statusCode !== 0) {
                     return;
                 }
-                applyStyles(card, i.style);
+                utils.applyStyles(card, i.style);
                 for (const j in (i.events || {})) {
                     this.addListener(j, i, card, traceback);
                     if (this.statusCode !== 0) {
@@ -823,7 +766,7 @@ export class render {
                 }
                 if (i.data) {
                     for (const k in i.data) {
-                        card.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, i.inherit || {}));
+                        card.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, i.inherit || {}));
                     }
                 }
                 this.beforePlugComponent(card, traceback);
@@ -844,7 +787,7 @@ export class render {
                 if (this.statusCode !== 0) {
                     return;
                 }
-                applyStyles(card, i.style);
+                utils.applyStyles(card, i.style);
                 for (const j in (i.events || {})) {
                     this.addListener(j, i, card, traceback);
                     if (this.statusCode !== 0) {
@@ -1226,7 +1169,7 @@ export class render {
                             dataset: {}
                         };
                     el.classList.add(...(j.type || []), ...(config.type || []));
-                    applyStyles(el, j.style);
+                    utils.applyStyles(el, j.style);
                     const myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     for (const evt in j.events) {
                         this.addListener(evt, j, el, myTraceback);
@@ -1290,7 +1233,7 @@ export class render {
                     }
                     if (j.data) {
                         for (const k in j.data) {
-                            el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, replace));
+                            el.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, replace));
                         }
                     }
                     this.beforePlugComponent(el, myTraceback);
@@ -1329,7 +1272,7 @@ export class render {
                             dataset: {}
                         };
                     el.classList.add(...(j.type || []), ...(config.type || []));
-                    applyStyles(el, j.style);
+                    utils.applyStyles(el, j.style);
                     const myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     for (const evt in j.events) {
                         this.addListener(evt, j, el, myTraceback);
@@ -1394,7 +1337,7 @@ export class render {
                     }
                     if (j.data) {
                         for (const k in j.data) {
-                            el.setAttribute(`data-${camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, { ...replacement, ...j.inherit, ...own }));
+                            el.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, { ...replacement, ...j.inherit, ...own }));
                         }
                     }
                     this.beforePlugComponent(el, myTraceback);
@@ -1456,7 +1399,7 @@ export class render {
         for (const i of vars) {
             window[i].id = "";
         }
-        removeChild(this.mainEl);
+        utils.removeChild(this.mainEl);
         this.mainEl.innerHTML = this.original;
         this.vdom = {
             children: [],
