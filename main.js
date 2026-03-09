@@ -296,6 +296,7 @@ export class render {
     #varage = {};
     #frameID = undefined;
     #builds = [];
+    #oldBoys = {};
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -343,7 +344,6 @@ export class render {
             this.vdom.dataset = { ...this.vdom.dataset, ...this.mainEl.dataset };
         }
         this.original = this.mainEl.innerHTML;
-        this.el = document.createDocumentFragment();
         this.reRender();
         if (this.statusCode !== 0) {
             return this;
@@ -400,12 +400,12 @@ export class render {
             this.#builds.push(s);
             head.appendChild(s);
         }
-        this.main();
+        const el = this.main();
         if (this.statusCode !== 0) {
             return;
         }
-        if (this.el) {
-            this.mainEl.appendChild(this.el);
+        if (el) {
+            this.mainEl.appendChild(el);
         }
         this.clearLoading();
         log(`[ezy.js] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
@@ -430,7 +430,7 @@ export class render {
             this.loadPage = this.loadingPage("", HTTP_NOT_FOUND, this.maxWait, "Resouce page.data.main not found");
             return;
         }
-        this.mainRender(this.data.main);
+        const el = this.mainRender(this.data.main);
         if (this.statusCode !== 0) {
             return;
         }
@@ -449,6 +449,7 @@ export class render {
         if (this.statusCode !== 0) {
             return;
         }
+        return el;
     }
     /**
      * A loop that use requestAnimationFrame to implement. Calling it is not suggested
@@ -493,7 +494,12 @@ export class render {
      * @param {Any} data
      */
     edit(key, data) {
+        const before = this.#varage[key];
+        if (before === data) {
+            return;
+        }
         this.#varage[key] = data;
+        this.#oldBoys = {};
     }
     /**
      * Read variables
@@ -569,8 +575,7 @@ export class render {
             Ezy.formatError(`function found first parameter in ${sectionData}, expected object, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
             return this.set(errors.VALUE_ERROR);
         }
-        const todo = document.createDocumentFragment(),
-            vdom = [];
+        const vdom = [];
         this.systemPlot.time = 0;
         for (const i in sectionData) {
             const item = sectionData[i];
@@ -596,11 +601,10 @@ export class render {
                 Ezy.formatError(`argument-function "createElement" return unexpected value, expected {el:Node(or NodeLike object),obj:vdom}, in page ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
                 return this.set(errors.VALUE_ERROR);
             }
-            todo.appendChild(el);
+            parentElement.appendChild(el);
             this.systemPlot.time++;
             vdom.push(...obj);
         }
-        parentElement.appendChild(todo);
         return vdom;
     };
     /**
@@ -857,7 +861,9 @@ export class render {
      */
     mainRender(pageData) {
         // Ezy.js is firstly a function, and this its body.
-        this.vdom.children.push(...this.sectionRender(pageData, this.el, pageData.name || "", pageData.title || "", this.contentRender));
+        const el = document.createDocumentFragment();
+        this.vdom.children.push(...this.sectionRender(pageData, el, pageData.name || "", pageData.title || "", this.contentRender));
+        return el;
     }
     /**
      * Set status code. ***CALLING IT IS NOT SUGGESTED***, unless you want to control the render flow.
@@ -982,6 +988,13 @@ export class render {
             return "";
         }
     }
+    #setOldBoys(name, val, bool) {
+        if (bool) {
+            this.#oldBoys[name] = val;
+        } else {
+            return val;
+        }
+    }
     /**
      * Compile string
      * @param {string} data
@@ -999,8 +1012,9 @@ export class render {
             doubleStop = false,
             varName = [];
         replacement = { ...this.systemPlot, ...replacement };
-        const newReplacement = {};
-        const _varage = { ...this.#varage, ...pipeData };
+        const newReplacement = {},
+            _varage = { ...this.#varage, ...pipeData },
+            local = {};
         for (const i in replacement) {
             for (const t of (dictionary[i] || [i])) {
                 newReplacement[t] = replacement[i];
@@ -1023,17 +1037,26 @@ export class render {
             if ((stop && !longVar) || (doubleStop && longVar)) {
                 varName = varName.join("").trim();
                 const _var = stop ? _varage : newReplacement;
-                if (_var[varName]) {
+                if (varName in this.#oldBoys) {
+                    result.push(this.#oldBoys[varName]);
+                } else if (varName in local) {
+                    result.push(local[varName]);
+                } else if (_var[varName]) {
                     if ((typeof _var[varName]) === "function") {
-                        result.push(String(_var[varName]()));
+                        const temp = String(_var[varName]());
+                        result.push(temp);
+                        local[varName] = this.#setOldBoys(varName, temp, stop) || local[varName];
                     }
                     else {
-                        result.push(String(_var[varName]));
+                        const temp = String(_var[varName]);
+                        result.push(temp);
+                        local[varName] = this.#setOldBoys(varName, temp, stop) || local[varName];
                     }
-                }
-                else {
+                } else {
                     try {
-                        result.push(String(this.evaluateExpression(varName, traceback, _var)));
+                        const temp = String(this.evaluateExpression(varName, traceback, _var));
+                        result.push(temp);
+                        local[varName] = this.#setOldBoys(varName, temp, stop) || local[varName];
                     } catch (e) {
                         Ezy.formatError(`Error when trying to eval expression ${varName}, as below, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Eval Error");
                         error(e);
@@ -1118,14 +1141,22 @@ export class render {
             return this.set(errors.FORMAT_ERROR);
         }
         varName = varName.join("").trim();
-        if (stop || doubleStop) {
+        if (varName in this.#oldBoys) {
+            result.push(this.#oldBoys[varName]);
+        } else if (varName in local) {
+            result.push(local[varName]);
+        } else if (stop || doubleStop) {
             const _var = stop ? _varage : newReplacement;
             if (_var[varName]) {
                 if ((typeof _var[varName]) === "function") {
-                    result.push(String(_var[varName]()));
+                    const temp = String(_var[varName]());
+                    result.push(temp);
+                    local[varName] = this.#setOldBoys(varName, temp, stop) || local[varName];
                 }
                 else {
-                    result.push(String(_var[varName]));
+                    const temp = String(_var[varName]);
+                    result.push(temp);
+                    local[varName] = this.#setOldBoys(varName, temp, stop) || local[varName];
                 }
             }
             else {
@@ -1432,6 +1463,7 @@ export class render {
             val.parentNode.removeChild(val);
             return false;
         });
+        this.#oldBoys = {};
         vars.clear();
     }
     /**
