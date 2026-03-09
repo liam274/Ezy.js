@@ -6,3 +6,4 @@ todo.md
 eslint.config.js
 node_modules/*
 compiler/*
+*.zip
