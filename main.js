@@ -112,7 +112,9 @@ function applyStyles(el, styles) {
  */
 function removeChild(el) {
     for (const i of el.children) {
-        el.replaceChildren(i);
+        el.removeChild(i);
+        removeChild(i);
+        i.id = "";
     }
 }
 /**
@@ -1367,9 +1369,7 @@ class render {
                             this.removeVdom(temp);
                             // eslint-disable-next-line no-undef
                             setTimeout(() => {
-                                if (j.expire.expired) {
-                                    j.expire.expired();
-                                }
+                                j.expire.expired?.();
                             });
                         }).bind(this), j.expire.date - this.historyRender);
                     }
@@ -1459,6 +1459,9 @@ class render {
      * Clear the datas.
      */
     clear() {
+        for (const i of vars) {
+            window[i].id = "";
+        }
         removeChild(this.mainEl);
         this.mainEl.innerHTML = this.original;
         this.vdom = {
