@@ -437,7 +437,7 @@ class render {
             clearTimeout(this.oldTimeout);
         }
         // eslint-disable-next-line no-undef
-        this.oldTimeout = setTimeout(() => { this.interval = true; this.loop(); }, SECOND - ((+new Date()) % SECOND));
+        this.oldTimeout = setTimeout(() => { this.interval = true; this.loop(); }, SECOND - ((this.historyRender) % SECOND));
         this.main();
         if (this.statusCode !== 0) {
             return;
@@ -696,7 +696,7 @@ class render {
                         setTimeout(() => {
                             i.expire.expired?.();
                         });
-                    }).bind(this), i.expire.date - new Date());
+                    }).bind(this), i.expire.date - this.historyRender);
                 }
                 Ezy.validateValidation(this, card, i.validate, traceback);
                 if (this.statusCode !== 0) {
@@ -801,7 +801,7 @@ class render {
                         setTimeout(() => {
                             i.expire.expired?.();
                         });
-                    }).bind(this), i.expire.date - new Date());
+                    }).bind(this), i.expire.date - this.historyRender);
                 }
                 Ezy.validateValidation(this, card, i.validate, traceback);
                 if (this.statusCode !== 0) {
@@ -1265,7 +1265,7 @@ class render {
                             setTimeout(() => {
                                 j.expire.expired?.();
                             });
-                        }).bind(this), j.expire.date - new Date());
+                        }).bind(this), j.expire.date - this.historyRender);
                     }
                     Ezy.validateValidation(this, el, j.validate, traceback);
                     if (this.statusCode !== 0) {
@@ -1371,7 +1371,7 @@ class render {
                                     j.expire.expired();
                                 }
                             });
-                        }).bind(this), j.expire.date - new Date());
+                        }).bind(this), j.expire.date - this.historyRender);
                     }
                     Ezy.validateValidation(this, el, j.validate, traceback);
                     if (this.statusCode !== 0) {
