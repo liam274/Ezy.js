@@ -126,17 +126,17 @@ export const Ezy = {
             return obj.set(errors.STRUCTURE_ERROR);
         }
     },
-    validateComponentIf(obj, item, traceback) {
+    validateComponentIf(obj, varage, item, traceback) {
         if (item) {
-            if (!obj.varage[item]) {
-                Ezy.formatError(`render.varage[component.if] not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
+            if (!varage[item]) {
+                Ezy.formatError(`render.#varage[component.if] not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
                 return obj.set(errors.VALUE_ERROR);
             }
-            if (typeof obj.varage[item] !== "function") {
-                Ezy.formatError(`expected render.varage[component.if] as function, found ${typeof obj.varage[item]}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
+            if (typeof varage[item] !== "function") {
+                Ezy.formatError(`expected render.#varage[component.if] as function, found ${typeof varage[item]}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
                 return obj.set(errors.VALUE_ERROR);
             }
-            return !obj.varage[item]();
+            return !varage[item]();
         }
     },
     validateValidation(obj, el, validate, traceback) {
@@ -557,7 +557,7 @@ export class render {
         this.systemPlot.time = 0;
         for (const i in sectionData) {
             const item = sectionData[i];
-            if (Ezy.validateComponentIf(this, item.if, traceback)) {
+            if (Ezy.validateComponentIf(this, this.#varage, item.if, traceback)) {
                 continue;
             }
             if (this.statusCode !== 0) {
@@ -1150,7 +1150,7 @@ export class render {
                 }
                 j = this.classify[j];
             }
-            if (Ezy.validateComponentIf(this, j.if, traceback)) {
+            if (Ezy.validateComponentIf(this, this.#varage, j.if, traceback)) {
                 continue;
             }
             if (this.statusCode !== 0) {
