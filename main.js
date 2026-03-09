@@ -79,7 +79,8 @@ class unknownVariableError extends Error {
 };
 
 // Ezy
-export const body = document.body;
+export const body = document.body,
+    head = document.head;
 
 export const Ezy = {
     plugins: [],
@@ -294,6 +295,7 @@ export const MAXWAIT = 60000,
 export class render {
     #varage = {};
     #frameID = undefined;
+    #builds = [];
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -383,6 +385,21 @@ export class render {
         }
         // eslint-disable-next-line no-undef
         this.oldTimeout = setTimeout(() => { this.interval = true; this.loop(); }, SECOND - ((this.historyRender) % SECOND));
+        if (this.config.style) {
+            const s = $$("style"),
+                c = [];
+            for (const j in this.config.style) {
+                const val = this.config.style[j],
+                    d = [];
+                for (const i in val) {
+                    d.push(`${utils.camel2array(i).join("-")}: ${val[i]};`);
+                }
+                c.push(`${j}{${d.join("")}}`);
+            }
+            s.innerHTML = c.join("");
+            this.#builds.push(s);
+            head.appendChild(s);
+        }
         this.main();
         if (this.statusCode !== 0) {
             return;
@@ -1411,6 +1428,10 @@ export class render {
             children: [],
             dataset: {}
         };
+        this.#builds = this.#builds.filter((val) => {
+            val.parentNode.removeChild(val);
+            return false;
+        });
         vars.clear();
     }
     /**

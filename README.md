@@ -26,7 +26,7 @@ In the root data, we have:
 - **main**, will be rendered as LRP.
 - **onStart**, which is a list, its element will be executed before LRP is rendered.
 - **onLoad**, which is a list, be executed after LRP is rendered.
-- **config**, store configrations to the page
+- **config**, store configrations to the page.
 - **data**, store the datas that should be in varage. It's safier then simply `varage.varName`, since it make sure it will be in the `render.varage`.
 
 ### Components

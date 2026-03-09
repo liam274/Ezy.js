@@ -5,6 +5,25 @@ const pageData = {
     onStart: {
         funcs: []
     },
+    config: {
+        style: {
+            ".right-hand": {
+                display: "inline-flex",
+                justifyContent: "space-between",
+                flexDirection: "column",
+                alignItems: "flex-end",
+                height: "100%",
+                width: "50%"
+            },
+            ".left-hand": {
+                display: "inline-flex",
+                justifyContent: "space-between",
+                flexDirection: "column",
+                height: "100%",
+                width: "50%"
+            }
+        }
+    },
     data: {
         author: "liam",
         abc: () => true,
@@ -111,13 +130,7 @@ const pageData = {
                             ],
                             component: [
                                 {
-                                    style: {
-                                        display: "inline-flex",
-                                        justifyContent: "space-between",
-                                        flexDirection: "column",
-                                        height: "100%",
-                                        width: "50%"
-                                    },
+                                    type: ["left-hand"],
                                     component: [
                                         {
                                             tag: "h2",
@@ -133,14 +146,7 @@ const pageData = {
                                     ]
                                 },
                                 {
-                                    style: {
-                                        display: "inline-flex",
-                                        justifyContent: "space-between",
-                                        flexDirection: "column",
-                                        alignItems: "flex-end",
-                                        height: "100%",
-                                        width: "50%"
-                                    },
+                                    type: ["right-hand"],
                                     component: [
                                         {
                                             tag: "button",
