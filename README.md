@@ -71,7 +71,7 @@ The rendering engine will render it as classList. Note that it's expected as lis
 The rendering Engine will choose div as tagName, if tag is not definded.
 - event & listener:
 The rendering Engine will use element.addEventlistener to plug in events in events. Data Structure:
-``` javascript
+``` JavaScript
 {
     eventName: {
         listener: [func1,func2,func3],// functions that you want to call in order, when the event is triggered
@@ -97,14 +97,14 @@ The innerHTML that will be set.
 It will be inherited by its components
 - validate:
 Switch class via the given validation function name.
-```Javascript
+```JavaScript
 {
     validate: "validationFunctionName"
 }
 ```
 - expire:
 Type in object. It has subattributes like date, expired. The component will be removed on the nearest second in date(ceiling), and when expired, it will first let the UI update, then execute the expired function.
-```Javascript
+```JavaScript
 {
     expire:{
         date:new Date(),// Date Object or number is fine
@@ -116,7 +116,7 @@ Type in object. It has subattributes like date, expired. The component will be r
 It will loops through the given object to render components.
 - pipes:
 You can use pipes to send messages. Reciver **MUST** have pipe definded.
-```Javascript
+```JavaScript
 {
     pipes: {
         receive: {
@@ -137,11 +137,11 @@ Configuration to the element and its children(first-level children only).
 
 - Ezy.navigate:
 We ***strongly*** suggest to use this function instead of location.href or other behaviours.
-```Javascript
+```JavaScript
 Ezy.navigate(href);// This function will be as the route guard, choosing to redirect the href or other behaviours.
 ```
 For example:
-```Javascript
+```JavaScript
 let allowPages=["exists.html"];
 for(let i of allowPages) routeGuard.builtins.add(i);
 routeGuard.guards.push(
