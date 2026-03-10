@@ -292,6 +292,11 @@ span {
     margin: 12px;
 }
 
+.confirm-btns-container {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
 .alert-button:hover {
     background-color: #0f0f0f;
     border-color: #6e6e6e;

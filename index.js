@@ -143,6 +143,20 @@ const pageData = {
                                     listener: [() => ezy.Ezy.dialog.alert({ title: "Ezy.js", content: "Hi, how are you today?" })]
                                 }
                             }
+                        },
+                        {
+                            tag: "button",
+                            content: "Ezy.dialog.confirm",
+                            events: {
+                                onclick: {
+                                    preventDefault: false,
+                                    listener: [() => ezy.Ezy.dialog.confirm({
+                                        title: "Ezy.js",
+                                        content: "Hi, can I use the alert in browser?",
+                                        func: (yes) => yes ? alert("hooray!") : ""
+                                    })]
+                                }
+                            }
                         }
                     ],
                     type: ["card", "metal"],

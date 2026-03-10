@@ -251,16 +251,10 @@ export const Ezy = {
             content.innerHTML = data.content;
             content.classList.add("alert-content");
             back.appendChild(content);
-            const confirm = $$("button"),
-                cancel = $$("button");;
-            cancel.innerHTML = "Cancel";
-            cancel.classList.add("alert-button");
-            cancel.addEventListener("click", () => {
-                data.func(false, ...(data.props || []));
-                utils.removeChild(barrier);
-                body.removeChild(barrier);
-                barrier.remove();
-            });
+            const backk = $$("div"),
+                confirm = $$("button"),
+                cancel = $$("button");
+            backk.classList.add("confirm-btns-container");
             confirm.innerHTML = "OK";
             confirm.classList.add("alert-button");
             confirm.addEventListener("click", () => {
@@ -269,7 +263,17 @@ export const Ezy = {
                 body.removeChild(barrier);
                 barrier.remove();
             });
-            back.appendChild(confirm);
+            backk.appendChild(confirm);
+            cancel.innerHTML = "Cancel";
+            cancel.classList.add("alert-button");
+            cancel.addEventListener("click", () => {
+                data.func(false, ...(data.props || []));
+                utils.removeChild(barrier);
+                body.removeChild(barrier);
+                barrier.remove();
+            });
+            backk.appendChild(cancel);
+            back.appendChild(backk);
             body.appendChild(barrier);
         }
     },
