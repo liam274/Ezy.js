@@ -95,17 +95,19 @@ export const Ezy = {
     render() {
         // implementation here
     },
-    isInt(data) {
-        return Number.isInteger(Number(data));
-    },
-    isAlphabet(data) {
-        return utils.ALPHABET_REGEX.test(data);
-    },
-    isEmail(data) {
-        return utils.EMAIL_REGEX.test(data);
-    },
-    isDate(data) {
-        return utils.DATE_REGEX.test(data);
+    validates: {
+        isInt(data) {
+            return Number.isInteger(Number(data));
+        },
+        isAlphabet(data) {
+            return utils.ALPHABET_REGEX.test(data);
+        },
+        isEmail(data) {
+            return utils.EMAIL_REGEX.test(data);
+        },
+        isDate(data) {
+            return utils.DATE_REGEX.test(data);
+        }
     },
     validatePipe(obj, data, traceback) {
         if (!data.pipe.receive || typeof data.pipe.receive !== "object") {
@@ -142,11 +144,15 @@ export const Ezy = {
         }
     },
     validateValidation(obj, el, validate, traceback) {
-        if (validate && typeof validate === "string") {
-            if (Ezy[validate]) {
-                if (typeof Ezy[validate] === "function") {
+        if (validate) {
+            if (typeof validate !== "string") {
+                Ezy.formatError(`Error when rendering, expected component.validate as string, found ${typeof validate}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
+                return obj.set(errors.VALUE_ERROR);
+            }
+            if (Ezy.validates[validate]) {
+                if (typeof Ezy.validates[validate] === "function") {
                     el.addEventListener("input", function (e) {
-                        if (Ezy[validate](e.target.value)) {
+                        if (Ezy.validates[validate](e.target.value)) {
                             el.classList.add("valid");
                             el.classList.remove("invalid");
                         } else {
@@ -275,7 +281,7 @@ const varage = {},// variable storage (?cold joke)
         style: (data) => {
             const result = {};
             for (const i in data) {
-                if (Ezy.isInt(i)) {
+                if (Ezy.validates.isInt(i)) {
                     const got = utils.array2camel(data[i].split("-"));
                     result[got] = data[got];
                 }
@@ -284,9 +290,6 @@ const varage = {},// variable storage (?cold joke)
         },
         title: (data) => data,
         events: (data) => {
-            return { ...data };
-        },
-        config: (data) => {
             return { ...data };
         }
     };
@@ -345,6 +348,7 @@ export class render {
             }
             this.vdom.tag = this.mainEl.tagName;
             this.vdom.dataset = { ...this.vdom.dataset, ...this.mainEl.dataset };
+            this.vdom.config = { ...this.config };
         }
         this.original = this.mainEl.innerHTML;
         this.reRender();
@@ -687,7 +691,7 @@ export class render {
                         });
                     }).bind(this), i.expire.date - this.historyRender);
                 }
-                Ezy.validateValidation(this, card, i.validate, traceback);
+                Ezy.validateValidation(this, card, i.validate || "", traceback);
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -766,6 +770,7 @@ export class render {
                     }
                     temp.tag = card.tagName;
                     temp.dataset = { ...temp.dataset, ...card.dataset };
+                    temp.config = { ...i.config };
                 };
                 vdom.push(temp);
             }
@@ -790,7 +795,7 @@ export class render {
                         });
                     }).bind(this), i.expire.date - this.historyRender);
                 }
-                Ezy.validateValidation(this, card, i.validate, traceback);
+                Ezy.validateValidation(this, card, i.validate || "", traceback);
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -866,6 +871,7 @@ export class render {
                     }
                     temp.tag = card.tagName;
                     temp.dataset = { ...temp.dataset, ...card.dataset };
+                    temp.config = { ...i.config };
                 };
                 vdom.push(temp);
             }
@@ -1279,7 +1285,7 @@ export class render {
                             });
                         }).bind(this), j.expire.date - this.historyRender);
                     }
-                    Ezy.validateValidation(this, el, j.validate, traceback);
+                    Ezy.validateValidation(this, el, j.validate || "", traceback);
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1334,6 +1340,7 @@ export class render {
                         }
                         temp.tag = el.tagName;
                         temp.dataset = { ...temp.dataset, ...el.dataset };
+                        temp.config = { ...i.config };
                     };
                     vdom.push(temp);
                 }
@@ -1381,7 +1388,7 @@ export class render {
                             });
                         }).bind(this), j.expire.date - this.historyRender);
                     }
-                    Ezy.validateValidation(this, el, j.validate, traceback);
+                    Ezy.validateValidation(this, el, j.validate || "", traceback);
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1436,6 +1443,7 @@ export class render {
                         }
                         temp.tag = el.tagName;
                         temp.dataset = { ...temp.dataset, ...el.dataset };
+                        temp.config = { ...i.config };
                     };
                     vdom.push(temp);
                 }
