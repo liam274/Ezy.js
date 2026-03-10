@@ -49,7 +49,7 @@ In the root data, we have:
 #### Config Attributes
 - keepConsole <br />
 Expect type: boolean<br />
-Function: To disable the `console.clear()` in every reRendering.
+Function: To disable the `console.clear()` in every reRender.
 - style
 Expect type: Object<br />
 Function: Define styles for the entire document, reducing the time consum of repeating inline style renders.<br />
