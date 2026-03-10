@@ -136,11 +136,11 @@ const pageData = {
                         },
                         {
                             tag: "button",
-                            content: "Ezy.alert",
+                            content: "Ezy.dialog.alert",
                             events: {
                                 onclick: {
                                     preventDefault: false,
-                                    listener: [() => ezy.Ezy.alert({ title: "Ezy.js", content: "Hi, how are you today?" })]
+                                    listener: [() => ezy.Ezy.dialog.alert({ title: "Ezy.js", content: "Hi, how are you today?" })]
                                 }
                             }
                         }

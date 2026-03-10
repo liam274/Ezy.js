@@ -246,7 +246,7 @@ span {
     border: 1px solid #3a3a3a;
     border-radius: 24px;
     width: 40%;
-    height: 40%;
+    aspect-ratio: 2/1;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
 }
 
@@ -272,12 +272,10 @@ span {
     line-height: 1.6;
     text-align: center;
     border-bottom: 1px solid #3a3a3a;
+    border-bottom-width: 0;
 }
 
 .alert-button {
-    position: absolute;
-    bottom: 20px;
-    right: 24px;
     background-color: black;
     border: 1px solid #4a4a4a;
     border-radius: 40px;
@@ -290,6 +288,8 @@ span {
     transition: all 0.2s ease;
     letter-spacing: 0.5px;
     font-family: monospace;
+    align-self: flex-end;
+    margin: 12px;
 }
 
 .alert-button:hover {

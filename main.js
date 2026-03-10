@@ -203,34 +203,75 @@ export const Ezy = {
         }
         return result;
     },
-    /**
-     * Alert the data
-     * @param {Object} data
-     */
-    alert(data) {
-        const barrier = $$("div");
-        barrier.classList.add("alert-barrier");
-        const back = $$("div");
-        back.classList.add("alert-back");
-        barrier.appendChild(back);
-        const title = $$("div");
-        title.classList.add("alert-title");
-        title.innerHTML = data.title;
-        back.appendChild(title);
-        const content = $$("div");
-        content.innerHTML = data.content;
-        content.classList.add("alert-content");
-        back.appendChild(content);
-        const confirm = $$("button");
-        confirm.innerHTML = "OK";
-        confirm.classList.add("alert-button");
-        confirm.addEventListener("click", () => {
-            utils.removeChild(barrier);
-            body.removeChild(barrier);
-            barrier.remove();
-        });
-        back.appendChild(confirm);
-        body.appendChild(barrier);
+    dialog: {
+        /**
+         * Alert the data
+         * @param {Object} data
+         */
+        alert(data) {
+            const barrier = $$("div");
+            barrier.classList.add("alert-barrier");
+            const back = $$("div");
+            back.classList.add("alert-back");
+            barrier.appendChild(back);
+            const title = $$("div");
+            title.classList.add("alert-title");
+            title.innerHTML = data.title;
+            back.appendChild(title);
+            const content = $$("div");
+            content.innerHTML = data.content;
+            content.classList.add("alert-content");
+            back.appendChild(content);
+            const confirm = $$("button");
+            confirm.innerHTML = "OK";
+            confirm.classList.add("alert-button");
+            confirm.addEventListener("click", () => {
+                utils.removeChild(barrier);
+                body.removeChild(barrier);
+                barrier.remove();
+            });
+            back.appendChild(confirm);
+            body.appendChild(barrier);
+        },
+        /**
+         * Ask for confirm
+         * @param {Object<string,function(boolean,...any)|string>} data
+         */
+        confirm(data) {
+            const barrier = $$("div");
+            barrier.classList.add("alert-barrier");
+            const back = $$("div");
+            back.classList.add("alert-back");
+            barrier.appendChild(back);
+            const title = $$("div");
+            title.classList.add("alert-title");
+            title.innerHTML = data.title;
+            back.appendChild(title);
+            const content = $$("div");
+            content.innerHTML = data.content;
+            content.classList.add("alert-content");
+            back.appendChild(content);
+            const confirm = $$("button"),
+                cancel = $$("button");;
+            cancel.innerHTML = "Cancel";
+            cancel.classList.add("alert-button");
+            cancel.addEventListener("click", () => {
+                data.func(false, ...(data.props || []));
+                utils.removeChild(barrier);
+                body.removeChild(barrier);
+                barrier.remove();
+            });
+            confirm.innerHTML = "OK";
+            confirm.classList.add("alert-button");
+            confirm.addEventListener("click", () => {
+                data.func(true, ...(data.props || []));
+                utils.removeChild(barrier);
+                body.removeChild(barrier);
+                barrier.remove();
+            });
+            back.appendChild(confirm);
+            body.appendChild(barrier);
+        }
     },
     /**
      * format error message
