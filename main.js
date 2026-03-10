@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable consistent-return */
 /* eslint-disable indent */
 "use strict";
@@ -218,7 +219,7 @@ export const Ezy = {
      * @param {string} error
      */
     formatError(message, level, _error) {
-        error(`[ezy.js] ${errorLevels[level]}: ${_error.toLocaleUpperCase()}: ${message}`);
+        error(`[ezy.js] ${Ezy.errors[level]}: ${_error.toLocaleUpperCase()}: ${message}`);
     }
 };
 
@@ -253,14 +254,12 @@ Ezy.navigate = function (href) {
         const result = guard(href);
         if (!result.allow) {
             if (result.href) {
-                // eslint-disable-next-line no-undef
                 location.href = result.href;
             }
             full = false;
         }
     }
     if (full) {
-        // eslint-disable-next-line no-undef
         location.href = href;
     }
 };
@@ -297,6 +296,7 @@ export class render {
     #frameID = undefined;
     #builds = [];
     #oldBoys = {};
+    #typeExtend = {};
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -361,6 +361,9 @@ export class render {
         if (this.loadPage) {
             this.clearLoading();
         }
+        if (this.#frameID) {
+            cancelAnimationFrame(this.#frameID);
+        }
         if (!this.data) {
             this.set(errors.STRUCTURE_ERROR);
             this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
@@ -380,11 +383,11 @@ export class render {
         }
         this.interval = false;
         if (this.oldTimeout) {
-            // eslint-disable-next-line no-undef
             clearTimeout(this.oldTimeout);
         }
-        // eslint-disable-next-line no-undef
-        this.oldTimeout = setTimeout(() => { this.interval = true; this.loop(); }, SECOND - ((this.historyRender) % SECOND));
+        this.oldTimeout = setTimeout(() => {
+            this.interval = true; this.loop();
+        }, SECOND - ((this.historyRender) % SECOND));
         if (this.config.style) {
             const s = $$("style"),
                 c = [];
@@ -399,6 +402,16 @@ export class render {
             s.innerHTML = c.join("");
             this.#builds.push(s);
             head.appendChild(s);
+        }
+        if (this.config.typeExtend) {
+            for (const i in this.config.typeExtend) {
+                const val = this.config.typeExtend[i];
+                if (!Array.isArray(val)) {
+                    Ezy.formatError(`Expected Array, found ${typeof val}.`, errorLevels.CRITICAL_ERROR, "Value Error");
+                    return this.set(errors.VALUE_ERROR);
+                }
+                this.#typeExtend[i] = [...val];
+            }
         }
         const el = this.main();
         if (this.statusCode !== 0) {
@@ -458,10 +471,8 @@ export class render {
         for (const i of this.mains) {
             i.func(i.obj, i.el);
         }
-        // eslint-disable-next-line no-undef
         cancelAnimationFrame(this.#frameID);
         if (this.interval) {
-            // eslint-disable-next-line no-undef
             this.#frameID = requestAnimationFrame(this.loop.bind(this));
         }
     }
@@ -601,7 +612,6 @@ export class render {
                 return this.set(errors.VALUE_ERROR);
             }
             const { el, obj } = temp;
-            // eslint-disable-next-line no-undef
             if (!(el instanceof Node)) {
                 Ezy.formatError(`argument-function "createElement" return unexpected value, expected {el:Node(or NodeLike object),obj:vdom}, in page ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
                 return this.set(errors.VALUE_ERROR);
@@ -612,6 +622,13 @@ export class render {
         }
         return vdom;
     };
+    #extendType(...data) {
+        const result = [];
+        for (const i of data) {
+            result.push(...(this.#typeExtend[i] || [i]));
+        }
+        return result;
+    }
     /**
      * ***CALLING IT IS NOT SUGGESTED***
      * @param {string} _
@@ -653,9 +670,8 @@ export class render {
                         children: [],
                         dataset: {}
                     };
-                card.classList.add(...(i.type || []), ...(config.type || []));
+                card.classList.add(...this.#extendType(...(i.type || []), ...(config.type || [])));
                 if (i.expire) {
-                    // eslint-disable-next-line no-undef
                     setTimeout((function () {
                         card.innerHTML = "";
                         card.parentNode.removeChild(card);
@@ -663,7 +679,6 @@ export class render {
                             delete this.pipes[i.pipe.name];
                         }
                         this.removeVdom(temp);
-                        // eslint-disable-next-line no-undef
                         setTimeout(() => {
                             i.expire.expired?.();
                         });
@@ -758,9 +773,8 @@ export class render {
                         children: [],
                         dataset: {}
                     };
-                card.classList.add(...(i.type || []), ...(config.type || []));
+                card.classList.add(...this.#extendType(...(i.type || []), ...(config.type || [])));
                 if (i.expire) {
-                    // eslint-disable-next-line no-undef
                     setTimeout((function () {
                         card.innerHTML = "";
                         card.parentNode.removeChild(card);
@@ -768,7 +782,6 @@ export class render {
                             delete this.pipes[i.pipe.name];
                         }
                         this.removeVdom(temp);
-                        // eslint-disable-next-line no-undef
                         setTimeout(() => {
                             i.expire.expired?.();
                         });
@@ -1227,7 +1240,7 @@ export class render {
                             children: [],
                             dataset: {}
                         };
-                    el.classList.add(...(j.type || []), ...(config.type || []));
+                    el.classList.add(...this.#extendType(...(j.type || []), ...(config.type || [])));
                     utils.applyStyles(el, j.style);
                     const myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     for (const evt in j.events) {
@@ -1251,7 +1264,6 @@ export class render {
                         return;
                     }
                     if (j.expire) {
-                        // eslint-disable-next-line no-undef
                         setTimeout((function () {
                             el.innerHTML = "";
                             el.parentNode.removeChild(el);
@@ -1259,7 +1271,6 @@ export class render {
                                 delete this.pipes[j.pipe.name];
                             }
                             this.removeVdom(temp);
-                            // eslint-disable-next-line no-undef
                             setTimeout(() => {
                                 j.expire.expired?.();
                             });
@@ -1330,7 +1341,7 @@ export class render {
                             children: [],
                             dataset: {}
                         };
-                    el.classList.add(...(j.type || []), ...(config.type || []));
+                    el.classList.add(...this.#extendType(...(j.type || []), ...(config.type || [])));
                     utils.applyStyles(el, j.style);
                     const myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
                     for (const evt in j.events) {
@@ -1353,7 +1364,6 @@ export class render {
                         return;
                     }
                     if (j.expire) {
-                        // eslint-disable-next-line no-undef
                         setTimeout((function () {
                             el.innerHTML = "";
                             if (el.parentNode && el.parentNode.contains(el)) {
@@ -1363,7 +1373,6 @@ export class render {
                                 delete this.pipes[j.pipe.name];
                             }
                             this.removeVdom(temp);
-                            // eslint-disable-next-line no-undef
                             setTimeout(() => {
                                 j.expire.expired?.();
                             });
@@ -1551,7 +1560,6 @@ export class render {
         return {
             obj: pot,
             parent: parentNode,
-            // eslint-disable-next-line no-undef
             id: setTimeout(() => {
                 parentNode.removeChild(pot);
                 this.errorPage(msg, errorCode, reason, parentNode);
@@ -1599,7 +1607,6 @@ export class render {
         if (!this.loadPage) {
             return;
         }
-        // eslint-disable-next-line no-undef
         clearTimeout(this.loadPage.id);
         if (this.loadPage.parent.contains(this.loadPage.obj)) {
             this.loadPage.parent.removeChild(this.loadPage.obj);

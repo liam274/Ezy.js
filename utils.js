@@ -31,9 +31,7 @@ export function applyStyles(el, styles) {
  * @param {Node} el - Element
  */
 export function removeChild(el) {
-    while (el.firstChild) {
-        el.removeChild(el.firstChild);
-    }
+    el.innerHTML = "";
 }
 /**
  * Join array to camelcase

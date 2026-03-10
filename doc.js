@@ -22,6 +22,9 @@ const pageData = {
                 height: "100%",
                 width: "50%"
             }
+        },
+        typeExtend: {
+            "oiie": ["font-black", "selectable"]
         }
     },
     data: {
@@ -184,7 +187,7 @@ const pageData = {
                             tag: "li",
                             content: "{{item}}",
                             forEach: "fruits",
-                            type: ["font-black", "selectable"]
+                            type: ["oiie"]
                         }
                     ],
                     style: {

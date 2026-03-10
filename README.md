@@ -46,6 +46,17 @@ In the root data, we have:
 - **config**, store configrations to the page.
 - **data**, store the datas that should be in varage. It's safier then simply `varage.varName`, since it make sure it will be in the `render.varage`.
 
+#### Config Attributes
+- keepConsole
+Expect type: boolean
+Function: To disable the `console.clear()` in every reRendering.
+- style
+Expect type: Object
+Function: Define styles for the entire document, reducing the time consum of repeating inline style renders/
+- typeExtend
+Expect type: Object
+Function: pack up style classes, so developers can use one class references to mutliple number of classes.
+
 ### Components
 Except the specific root structure, *Ezy.js* is very dynamic and flexible, which means once you follow a certain pattern, you can build it in the way you like.
 
