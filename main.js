@@ -285,6 +285,9 @@ const varage = {},// variable storage (?cold joke)
         title: (data) => data,
         events: (data) => {
             return { ...data };
+        },
+        config: (data) => {
+            return { ...data };
         }
     };
 export const MAXWAIT = 60000,

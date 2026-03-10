@@ -47,6 +47,9 @@ In the root data, we have:
 - **data**, store the datas that should be in varage. It's safier then simply `varage.varName`, since it make sure it will be in the `render.varage`.
 
 #### Config Attributes
+
+**Attention!** The config mentioned here is the root config, not the virtual DOM config
+
 - keepConsole<br />
 Expect type: boolean<br />
 Function: To disable the `console.clear()` in every reRender.
