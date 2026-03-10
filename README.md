@@ -47,13 +47,13 @@ In the root data, we have:
 - **data**, store the datas that should be in varage. It's safier then simply `varage.varName`, since it make sure it will be in the `render.varage`.
 
 #### Config Attributes
-- keepConsole <br />
+- keepConsole<br />
 Expect type: boolean<br />
 Function: To disable the `console.clear()` in every reRender.
-- style
+- style<br />
 Expect type: Object<br />
 Function: Define styles for the entire document, reducing the time consum of repeating inline style renders.<br />
-- typeExtend
+- typeExtend<br />
 Expect type: Object<br />
 Function: pack up style classes, so developers can use one class references to mutliple number of classes.<br />
 
