@@ -215,6 +215,11 @@ new ezy.render("head", {
         {
             tag: "title",
             content: "Ezy.js: Document"
+        },
+        {
+            tag: "link",
+            rel: "icon",
+            href: "./assets/icon.svg"
         }
     ]
 });

@@ -244,6 +244,11 @@ new ezy.render("head", {
         {
             tag: "title",
             content: "Ezy.js: A modern front-end framework"
+        },
+        {
+            tag: "link",
+            rel: "icon",
+            href: "./assets/icon.svg"
         }
     ]
 });
