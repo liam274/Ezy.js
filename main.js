@@ -107,7 +107,19 @@ export const Ezy = {
         },
         isDate(data) {
             return utils.DATE_REGEX.test(data);
-        }
+        },
+        maxl(data, len) {
+            return data.length <= len;
+        },
+        minl(data, len) {
+            return data.length >= len;
+        },
+        max(data, len) {
+            return data <= len;
+        },
+        min(data, len) {
+            return data <= len;
+        },
     },
     validatePipe(obj, data, traceback) {
         if (!data.pipe.receive || typeof data.pipe.receive !== "object") {
@@ -145,31 +157,33 @@ export const Ezy = {
     },
     validateValidation(obj, el, validate, traceback) {
         if (validate) {
-            if (typeof validate !== "string") {
-                Ezy.formatError(`Error when rendering, expected component.validate as string, found ${typeof validate}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
+            if (!Array.isArray(validate)) {
+                Ezy.formatError(`Error when rendering, expected component.validate as an array, found ${typeof validate}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
                 return obj.set(errors.VALUE_ERROR);
             }
-            if (Ezy.validates[validate]) {
-                if (typeof Ezy.validates[validate] === "function") {
-                    el.addEventListener("input", function (e) {
-                        if (Ezy.validates[validate](e.target.value)) {
-                            el.classList.add("valid");
-                            el.classList.remove("invalid");
+            el.addEventListener("input", function (e) {
+                for (const val of validate) {
+                    const [vali, ...parms] = val.split(":");
+                    if (Ezy.validates[vali]) {
+                        if (typeof Ezy.validates[vali] === "function") {
+                            if (Ezy.validates[vali](e.target.value, ...parms)) {
+                                el.classList.add("valid");
+                                el.classList.remove("invalid");
+                            } else {
+                                el.classList.remove("valid");
+                                el.classList.add("invalid");
+                            }
                         } else {
-                            el.classList.remove("valid");
-                            el.classList.add("invalid");
+                            Ezy.formatError(`Error when rendering, expected component.validate in Ezy as function, found ${typeof Ezy.validates[vali]}, in ${traceback}`,
+                                errorLevels.CRITICAL_ERROR, "Render Error");
+                            return obj.set(errors.RENDER_ERROR);
                         }
-                    });
+                    } else {
+                        Ezy.formatError(`Error when rendering, Ezy[component.validate] not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
+                        return obj.set(errors.RENDER_ERROR);
+                    }
                 }
-                else {
-                    Ezy.formatError(`Error when rendering, expected component.validate in Ezy as function, found ${typeof Ezy[validate]}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
-                    return obj.set(errors.RENDER_ERROR);
-                }
-            }
-            else {
-                Ezy.formatError(`Error when rendering, Ezy[component.validate] not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
-                return obj.set(errors.RENDER_ERROR);
-            }
+            });
         }
     },
     /**

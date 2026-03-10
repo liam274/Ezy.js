@@ -160,7 +160,7 @@ const pageData = {
                         fontWeight: "bold",
                         borderRadius: "5px"
                     },
-                    validate: "isEmail",
+                    validate: ["isEmail", "maxl:20"],
                     placeholder: "subscribe email"
                 },
                 {
