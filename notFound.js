@@ -13,4 +13,4 @@ new ezy.render("head", {
     ]
 });
 const proc = new ezy.render(ezy.body, { main: [] });
-proc.errorPage("[ezy.js] CRITICAL ERROR: Page Error: Page not found.", ezy.HTTP_NOT_FOUND, "page");
+proc.errorPage("[ezy.js] CRITICAL ERROR: Page Error: Page not found.", ezy.HTTP_NOT_FOUND, "Page not found");
