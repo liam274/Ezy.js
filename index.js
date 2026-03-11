@@ -204,36 +204,6 @@ const pageData = {
         }
     ],
     classify: {
-        cardie: {
-            component: [
-                {
-                    tag: "h1",
-                    content: "{{key}}"
-                },
-                {
-                    tag: "p",
-                    content: "{{value}}"
-                },
-                {
-                    tag: "button",
-                    content: "Get Started",
-                    events: {
-                        onclick: {
-                            preventDefault: false,
-                            listener: [() => ezy.Ezy.navigate("https://github.com/liam274/Ezy.js/")]
-                        }
-                    }
-                }
-            ],
-            type: ["card", "metal"],
-            forEach: "details",
-            events: {
-                "contextmenu": {
-                    preventDefault: true,
-                    listener: []
-                }
-            }
-        },
         tit: {
             tag: "h1",
             content: "Ezy.js",
@@ -266,5 +236,37 @@ new ezy.render("head", {
         }
     ]
 });
+ezy.Ezy.component("cardie",
+    {
+        component: [
+            {
+                tag: "h1",
+                content: "{{key}}"
+            },
+            {
+                tag: "p",
+                content: "{{value}}"
+            },
+            {
+                tag: "button",
+                content: "Get Started",
+                events: {
+                    onclick: {
+                        preventDefault: false,
+                        listener: [() => ezy.Ezy.navigate("https://github.com/liam274/Ezy.js/")]
+                    }
+                }
+            }
+        ],
+        type: ["card", "metal"],
+        forEach: "details",
+        events: {
+            "contextmenu": {
+                preventDefault: true,
+                listener: []
+            }
+        }
+    }
+);
 const proc = new ezy.render(ezy.body, pageData);
 proc.reRender();

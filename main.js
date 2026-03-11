@@ -258,19 +258,19 @@ export const Ezy = {
             confirm.innerHTML = "OK";
             confirm.classList.add("alert-button");
             confirm.addEventListener("click", () => {
-                data.func(true, ...(data.props || []));
                 utils.removeChild(barrier);
                 body.removeChild(barrier);
                 barrier.remove();
+                data.func(true, ...(data.props || []));
             });
             backk.appendChild(confirm);
             cancel.innerHTML = "Cancel";
             cancel.classList.add("alert-button");
             cancel.addEventListener("click", () => {
-                data.func(false, ...(data.props || []));
                 utils.removeChild(barrier);
                 body.removeChild(barrier);
                 barrier.remove();
+                data.func(false, ...(data.props || []));
             });
             backk.appendChild(cancel);
             back.appendChild(backk);
@@ -278,14 +278,29 @@ export const Ezy = {
         }
     },
     /**
-     * format error message
+     * format error message. ***CALLING THIS FUNCTION IS NOT SUGGEGSTED***
      * @param {string} message
      * @param {number} level
      * @param {string} error
      */
     formatError(message, level, _error) {
         error(`[ezy.js] ${Ezy.errors[level]}: ${_error.toLocaleUpperCase()}: ${message}`);
-    }
+    },
+    /**
+     * Public Classify
+     * @param {string} name - Classify Name
+     * @param {Object} def - Component Object
+     */
+    component(name, def) {
+        if (typeof name !== "string") {
+            throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected Ezy.component(name: string, def: Object), found name as ${typeof name}`);
+        }
+        if (typeof def !== "object") {
+            throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected Ezy.component(name: string, def: Object), found def as ${typeof def}`);
+        }
+        this.components[name] = def;
+    },
+    components: {}
 };
 
 export const errorLevels = Object.freeze(
@@ -711,11 +726,11 @@ export class render {
                 Ezy.formatError(`Error when trying to use classify component without classify dictionary, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
                 return this.set(errors.CLASSIFY_ERROR);
             }
-            if (!this.classify[i]) {
+            if (!(this.classify[i] || Ezy.components[i])) {
                 Ezy.formatError(`Error when trying to use classify component "${i}" without definition, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
                 return this.set(errors.CLASSIFY_ERROR);
             }
-            i = this.classify[i];
+            i = this.classify[i] || Ezy.components[i];
         }
         const todo = document.createDocumentFragment();
         if (i.forEach) {
@@ -1278,11 +1293,11 @@ export class render {
                     Ezy.formatError(`Error when trying to use classify component without classify dictionary, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
                     return this.set(errors.CLASSIFY_ERROR);
                 }
-                if (!this.classify[j]) {
+                if (!(this.classify[j] || Ezy.components[j])) {
                     Ezy.formatError(`Error when trying to use classify component "${j}" without definition, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
                     return this.set(errors.CLASSIFY_ERROR);
                 }
-                j = this.classify[j];
+                j = this.classify[j] || Ezy.components[j];
             }
             if (Ezy.validateComponentIf(this, this.#varage, j.if, traceback)) {
                 continue;
