@@ -135,6 +135,8 @@ This is a function that will be executed in every milisecond, reciving the compo
 will be stored as data-* attributes.
 - config:
 Configuration to the element and its children(first-level children only).
+- belt:
+***BELT SYNTAX***. You can use `belt.buckle` to bind a varage variable, so when the variable is being changed, the CO will be re-rendered!
 
 ## Builtin functions
 
