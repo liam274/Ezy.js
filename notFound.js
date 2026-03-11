@@ -1,6 +1,6 @@
 import * as ezy from "./main.js";
 new ezy.render("head", {
-    main: [
+    component: [
         {
             tag: "title",
             content: "Page not found 404"

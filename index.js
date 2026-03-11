@@ -37,7 +37,7 @@ const pageData = {
                 href: "user.html"
             }
         }
-    }, main: [
+    }, component: [
         {
             id: "head",
             component: [
@@ -224,7 +224,7 @@ for (const i of ["index.html", "doc.html", "setting.html", "experiment.html"]) {
     ezy.routeGuard.builtin.add(i);
 }
 new ezy.render("head", {
-    main: [
+    component: [
         {
             tag: "title",
             content: "Ezy.js: A modern front-end framework"
@@ -235,7 +235,7 @@ new ezy.render("head", {
             href: "./assets/icon.svg"
         }
     ]
-});
+}, 1000);
 ezy.Ezy.component("cardie",
     {
         component: [
@@ -268,5 +268,5 @@ ezy.Ezy.component("cardie",
         }
     }
 );
-const proc = new ezy.render(ezy.body, pageData);
+const proc = new ezy.render(ezy.body, pageData, 1000);
 proc.reload();

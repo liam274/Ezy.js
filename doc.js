@@ -56,7 +56,7 @@ const pageData = {
                 href: "user.html"
             }
         }
-    }, main: [
+    }, component: [
         {
             id: "head",
             component: [
@@ -211,7 +211,7 @@ for (const i of ["index.html", "doc.html", "setting.html", "experiment.html"]) {
     ezy.routeGuard.builtin.add(i);
 }
 new ezy.render("head", {
-    main: [
+    component: [
         {
             tag: "title",
             content: "Ezy.js: Document"

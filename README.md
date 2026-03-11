@@ -15,7 +15,7 @@ import * as ezy from "./main.js";
 const proc=new ezy.render(// In case you want to reuse this object.
     ezy.body,// This is the body element of the HTML page
     {
-        main:[
+        component:[
             {
                 tag:"h1",
                 content:"Hello, world!"
@@ -40,7 +40,7 @@ in the main directory.
 
 ### Root
 In the root data, we have:
-- **main**, will be rendered as LRP.
+- **component**, will be rendered as LRP.
 - **onStart**, which is a list, its element will be executed before LRP is rendered.
 - **onLoad**, which is a list, be executed after LRP is rendered.
 - **config**, store configrations to the page.

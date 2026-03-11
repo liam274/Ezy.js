@@ -394,18 +394,19 @@ export class render {
             children: [],
             dataset: {}
         };
+        this.loadPage = [];
         if (!data) {
             this.set(errors.STRUCTURE_ERROR);
-            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND, this.maxWait);
+            this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND, this.maxWait));
             return this;
         }
         if (data.classify) {
             this.classify = data.classify;
         }
-        if (!this.data.main) {
+        if (!this.data.component) {
             this.set(errors.STRUCTURE_ERROR);
-            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure attribute \"main\" missing.", HTTP_NOT_FOUND,
-                this.maxWait, "Resource page.data.main not found");
+            this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure attribute \"component\" missing.", HTTP_NOT_FOUND,
+                this.maxWait, "Resource page.data.component not found"));
             return this;
         }
         this.config = data.config || {};
@@ -438,21 +439,18 @@ export class render {
         if (this.config && !this.config.keepConsole) {
             console.clear();
         }
-        this.historyRender = +new Date();
-        if (this.loadPage) {
-            this.clearLoading();
-        }
         if (this.#frameID) {
             cancelAnimationFrame(this.#frameID);
         }
+        this.historyRender = +new Date();
         if (!this.data) {
             this.set(errors.STRUCTURE_ERROR);
-            this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
-                this.maxWait);
+            this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
+                this.maxWait));
             return;
         }
-        this.loadPage = this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", HTTP_TIMEOUT, this.maxWait, "Page render timeout");
-        this.clear();
+        this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", HTTP_TIMEOUT, this.maxWait, "Page render timeout"));
+        this.clear(this.mainEl, true);
         this.#varage = { ...varage, ...(this.data.data || {}) };
         this.statusCode = 0;
         this.systemPlot = {
@@ -494,51 +492,71 @@ export class render {
                 this.#typeExtend[i] = [...val];
             }
         }
-        const el = this.main();
+        this.render(this.data, this.mainEl);
+        if (this.loadPage.length) {
+            for (const i of this.loadPage) {
+                this.clearLoading(i);
+            }
+            this.loadPage.length = 0;
+        }
+        log(`[ezy.js] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
+    }
+    render(data, root) {
+        if (!data) {
+            this.set(errors.STRUCTURE_ERROR);
+            this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
+                this.maxWait, root));
+            return;
+        }
+        const el = this.main(data, root);
         if (this.statusCode !== 0) {
             return;
         }
         if (el) {
-            this.mainEl.appendChild(el);
+            root.appendChild(el);
         }
-        this.clearLoading();
-        log(`[ezy.js] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
+        if (this.loadPage.length) {
+            for (const i of this.loadPage) {
+                this.clearLoading(i);
+            }
+            this.loadPage.length = 0;
+        }
     }
     /**
      * main proc. ***CALLING IT IS NOT SUGGESTED***
      * @returns null
      */
-    main() {
+    main(data, root) {
         this.statusCode = 0;
-        if (this.data.onStart) {
-            this.preRender(this.data.onStart);
+        if (data.onStart) {
+            this.preRender(data.onStart);
         } else {
             warn("[ezy.js] MAJOR SUGGESTION: : Suggest adding onStart function list to handle preprocess");
         }
         for (const i of Ezy.plugins) {
-            i.onStart?.(this.data);
+            i.onStart?.(data);
         }
-        if (!this.data.main) {
+        if (!data) {
             this.set(errors.STRUCTURE_ERROR);
             Ezy.formatError("Data structure incomplete.", errorLevels.CRITICAL_ERROR, "Structure Error");
-            this.loadPage = this.loadingPage("", HTTP_NOT_FOUND, this.maxWait, "Resouce page.data.main not found");
+            this.loadingPage("", HTTP_NOT_FOUND, this.maxWait, "Resouce data not found", root);
             return;
         }
-        const el = this.mainRender(this.data.main);
+        const el = this.mainRender(data);
         if (this.statusCode !== 0) {
             return;
         }
         log(`[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`);
-        if (this.data.onLoad) {
-            for (const i of this.data.onLoad) {
-                i(this.data);
+        if (data.onLoad) {
+            for (const i of data.onLoad) {
+                i(data);
             }
         }
         else {
             warn("[ezy.js] MINOR SUGGESSION: : Suggest adding onLoad function list to handle onLoad process");
         }
         for (const i of Ezy.plugins) {
-            i.onLoad?.(this.data);
+            i.onLoad?.(data);
         }
         if (this.statusCode !== 0) {
             return;
@@ -718,7 +736,7 @@ export class render {
      * @returns {void|Object}
      */
     contentRender = (_, i, config) => {
-        const title = this.data.main.title,
+        const title = this.data.component.title,
             traceback = `${title}`,
             vdom = [];
         if (typeof i === "string") {
@@ -963,7 +981,7 @@ export class render {
     mainRender(pageData) {
         // Ezy.js is firstly a function, and this its body.
         const el = document.createDocumentFragment();
-        this.vdom.children.push(...this.sectionRender(pageData, el, pageData.name || "", pageData.title || "", this.contentRender));
+        this.vdom.children.push(...this.sectionRender(pageData.component, el, pageData.name || "", pageData.title || "", this.contentRender));
         return el;
     }
     /**
@@ -1688,15 +1706,12 @@ export class render {
      * Clear the loading page. Please call it if you don't need the loading page any longer.
      * @returns null
      */
-    clearLoading() {
-        if (!this.loadPage) {
+    clearLoading(loadPage) {
+        if (!loadPage) {
             return;
         }
-        clearTimeout(this.loadPage.id);
-        if (this.loadPage.parent.contains(this.loadPage.obj)) {
-            this.loadPage.parent.removeChild(this.loadPage.obj);
-        }
-        this.loadPage = undefined;
+        clearTimeout(loadPage.id);
+        loadPage.obj.remove();
     }
 };
 
