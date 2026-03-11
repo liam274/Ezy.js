@@ -265,8 +265,19 @@ ezy.Ezy.component("cardie",
                 preventDefault: true,
                 listener: []
             }
+        },
+        belt: {
+            buckle: "details"
         }
     }
 );
 const proc = new ezy.render(ezy.body, pageData, 1000);
-proc.reload();
+// proc.reload();
+setTimeout(() => {
+    proc.edit("details", {
+        "Introduce to Ezy": "{ezy} is a modern, clean, and efficient framework. Projects can be easily written in JSON. So the networking will be more efficent",
+        "Why Ezy?": "{ezy} is lightweight, easy-learning and have incrediable functions: 2+2={2+2}",
+        "How to get start?": "{ezy} is <b>FREE!</b> You can use it wherever you'd like to.",
+        "It works!": "It works!!!"
+    });
+}, 10000);

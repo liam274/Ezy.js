@@ -47,7 +47,7 @@ export const keyword = new Set([
     "if", "content", "inherit",
     "validate", "expire", "text",
     "forEach", "innerHTML", "config",
-    "data"
+    "data", "belt"
 ]), errors = {
     STRUCTURE_ERROR: 1,
     ASVAR_REWRITE_ERROR: 2,
@@ -59,7 +59,8 @@ export const keyword = new Set([
     PIPE_ERROR: 8,
     RENDER_ERROR: 9,
     PHARSING_ERROR: 10,
-    ID_ERROR: 11
+    ID_ERROR: 11,
+    TYPE_ERROR: 12
 };
 
 export const dictionary = {
@@ -149,8 +150,8 @@ export const Ezy = {
                 return obj.set(errors.VALUE_ERROR);
             }
             if (typeof varage[item] !== "function") {
-                Ezy.formatError(`expected render.#varage[component.if] as function, found ${typeof varage[item]}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
-                return obj.set(errors.VALUE_ERROR);
+                Ezy.formatError(`expected render.#varage[component.if] as function, found ${typeof varage[item]}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                return obj.set(errors.TYPE_ERROR);
             }
             return !varage[item]();
         }
@@ -158,8 +159,8 @@ export const Ezy = {
     validateValidation(obj, el, validate, traceback) {
         if (validate) {
             if (!Array.isArray(validate)) {
-                Ezy.formatError(`Error when rendering, expected component.validate as an array, found ${typeof validate}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
-                return obj.set(errors.VALUE_ERROR);
+                Ezy.formatError(`Error when rendering, expected component.validate as an array, found ${typeof validate}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                return obj.set(errors.TYPE_ERROR);
             }
             el.addEventListener("input", function (e) {
                 for (const val of validate) {
@@ -227,7 +228,6 @@ export const Ezy = {
             confirm.classList.add("alert-button");
             confirm.addEventListener("click", () => {
                 utils.removeChild(barrier);
-                body.removeChild(barrier);
                 barrier.remove();
             });
             back.appendChild(confirm);
@@ -259,7 +259,6 @@ export const Ezy = {
             confirm.classList.add("alert-button");
             confirm.addEventListener("click", () => {
                 utils.removeChild(barrier);
-                body.removeChild(barrier);
                 barrier.remove();
                 data.func(true, ...(data.props || []));
             });
@@ -268,7 +267,6 @@ export const Ezy = {
             cancel.classList.add("alert-button");
             cancel.addEventListener("click", () => {
                 utils.removeChild(barrier);
-                body.removeChild(barrier);
                 barrier.remove();
                 data.func(false, ...(data.props || []));
             });
@@ -300,7 +298,25 @@ export const Ezy = {
         }
         this.components[name] = def;
     },
-    components: {}
+    components: {},
+    /**
+     *
+     * @param {string} data
+     * @param {object} set
+     * @returns {Proxy}
+     */
+    watchout(data, set) {
+        return new Proxy(
+            data, {
+            set(target, key, value) {
+                set.early?.(target, key, value);
+                target[key] = value;
+                set.late?.(target, key, value);
+                return true;
+            }
+        }
+        );
+    }
 };
 
 export const errorLevels = Object.freeze(
@@ -343,7 +359,6 @@ Ezy.navigate = function (href) {
         location.href = href;
     }
 };
-
 // render
 
 const varage = {},// variable storage (?cold joke)
@@ -377,6 +392,7 @@ export class render {
     #builds = [];
     #oldBoys = {};
     #typeExtend = {};
+    #listen2 = {};
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -451,7 +467,15 @@ export class render {
         }
         this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", HTTP_TIMEOUT, this.maxWait, "Page render timeout"));
         this.clear(this.mainEl, true);
-        this.#varage = { ...varage, ...(this.data.data || {}) };
+        this.#varage = Ezy.watchout({ ...varage, ...(this.data.data || {}) }, {
+            late: (function (_, key) {
+                if (key in this.#listen2) {
+                    const [obj, el] = this.#listen2[key];
+                    el.innerHTML = "";
+                    this.render(obj, el);
+                }
+            }).bind(this)
+        });
         this.statusCode = 0;
         this.systemPlot = {
             time: 0
@@ -486,8 +510,8 @@ export class render {
             for (const i in this.config.typeExtend) {
                 const val = this.config.typeExtend[i];
                 if (!Array.isArray(val)) {
-                    Ezy.formatError(`Expected Array, found ${typeof val}.`, errorLevels.CRITICAL_ERROR, "Value Error");
-                    return this.set(errors.VALUE_ERROR);
+                    Ezy.formatError(`Expected Array, found ${typeof val}.`, errorLevels.CRITICAL_ERROR, "Type Error");
+                    return this.set(errors.TYPE_ERROR);
                 }
                 this.#typeExtend[i] = [...val];
             }
@@ -602,14 +626,15 @@ export class render {
      * edit variables
      * @param {string} key
      * @param {Any} data
+     * @returns {boolean}
      */
     edit(key, data) {
-        const before = this.#varage[key];
-        if (before === data) {
-            return;
+        if (this.#varage[key] === data) {
+            return false;
         }
         this.#varage[key] = data;
         this.#oldBoys = {};
+        return true;
     }
     /**
      * Read variables
@@ -681,26 +706,26 @@ export class render {
      * @param {Node} parentElement
      * @param {string} sectionName
      * @param {string} title
-     * @param {function(string, Object, Object)} createElement
+     * @param {function(string, Object, Object, Object)} createElement
      * @returns {Object|void}
      */
     sectionRender = (sectionData, parentElement, sectionName, title, createElement) => {
         const traceback = `${title} -> ${sectionName}`;
         if (!sectionData) {
-            Ezy.formatError(`function found first parameter in ${sectionData}, expected object, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
-            return this.set(errors.VALUE_ERROR);
+            Ezy.formatError(`function found first parameter in ${sectionData}, expected object, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+            return this.set(errors.TYPE_ERROR);
         }
         const vdom = [];
         this.systemPlot.time = 0;
-        for (const i in sectionData) {
-            const item = sectionData[i];
+        for (const i in sectionData.component) {
+            const item = sectionData.component[i];
             if (Ezy.validateComponentIf(this, this.#varage, item.if, traceback)) {
                 continue;
             }
             if (this.statusCode !== 0) {
                 return;
             }
-            const temp = createElement(i, item, i.config || {});
+            const temp = createElement(i, item, i.config || {}, sectionData, parentElement);
             if (this.statusCode !== 0) {
                 return;
             }
@@ -735,7 +760,7 @@ export class render {
      * @param {Object} config
      * @returns {void|Object}
      */
-    contentRender = (_, i, config) => {
+    contentRender = (_, i, config, fatherData, fatherElement) => {
         const title = this.data.component.title,
             traceback = `${title}`,
             vdom = [];
@@ -773,7 +798,7 @@ export class render {
                 if (i.expire) {
                     setTimeout((function () {
                         card.innerHTML = "";
-                        card.parentNode.removeChild(card);
+                        card.remove();
                         if (i.pipe) {
                             delete this.pipes[i.pipe.name];
                         }
@@ -816,6 +841,15 @@ export class render {
                 this.beforePlugComponent(card, traceback);
                 if (this.statusCode !== 0) {
                     return;
+                }
+                if (i.belt) {
+                    if (typeof i.belt.buckle !== "string") {
+                        Ezy.formatError(`Expected component.belt.buckle as string, found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                        return this.set(errors.TYPE_ERROR);
+                    }
+                    if (i.belt.buckle in this.#varage) {
+                        this.#listen2[i.belt.buckle] = [fatherData, fatherElement];
+                    }
                 }
                 if (first === 0 && i.varAs) {
                     this.asVar(card, i.varAs, traceback);
@@ -877,7 +911,7 @@ export class render {
                 if (i.expire) {
                     setTimeout((function () {
                         card.innerHTML = "";
-                        card.parentNode.removeChild(card);
+                        card.remove();
                         if (i.pipe) {
                             delete this.pipes[i.pipe.name];
                         }
@@ -917,6 +951,15 @@ export class render {
                 this.beforePlugComponent(card, traceback);
                 if (this.statusCode !== 0) {
                     return;
+                }
+                if (i.belt) {
+                    if (typeof i.belt.buckle !== "string") {
+                        Ezy.formatError(`Expected component.belt.buckle as string, found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                        return this.set(errors.TYPE_ERROR);
+                    }
+                    if (i.belt.buckle in this.#varage) {
+                        this.#listen2[i.belt.buckle] = [fatherData, fatherElement];
+                    }
                 }
                 if (k === 0 && i.varAs) {
                     this.asVar(card, i.varAs, traceback);
@@ -981,7 +1024,7 @@ export class render {
     mainRender(pageData) {
         // Ezy.js is firstly a function, and this its body.
         const el = document.createDocumentFragment();
-        this.vdom.children.push(...this.sectionRender(pageData.component, el, pageData.name || "", pageData.title || "", this.contentRender));
+        this.vdom.children.push(...this.sectionRender(pageData, el, pageData.name || "", pageData.title || "", this.contentRender));
         return el;
     }
     /**
@@ -1367,7 +1410,7 @@ export class render {
                     if (j.expire) {
                         setTimeout((function () {
                             el.innerHTML = "";
-                            el.parentNode.removeChild(el);
+                            el.remove();
                             if (j.pipe) {
                                 delete this.pipes[j.pipe.name];
                             }
@@ -1410,6 +1453,15 @@ export class render {
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) {
                         return;
+                    }
+                    if (j.belt) {
+                        if (typeof j.belt.buckle !== "string") {
+                            Ezy.formatError(`Expected component.belt.buckle as string, found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                            return this.set(errors.TYPE_ERROR);
+                        }
+                        if (j.belt.buckle in this.#varage) {
+                            this.#listen2[j.belt.buckle] = [i, parentNode];
+                        }
                     }
                     if (first === 0) {
                         this.asVar(el, j.varAs, myTraceback);
@@ -1468,9 +1520,7 @@ export class render {
                     if (j.expire) {
                         setTimeout((function () {
                             el.innerHTML = "";
-                            if (el.parentNode && el.parentNode.contains(el)) {
-                                el.parentNode.removeChild(el);
-                            }
+                            el.remove();
                             if (j.pipe) {
                                 delete this.pipes[j.pipe.name];
                             }
@@ -1513,6 +1563,15 @@ export class render {
                     this.beforePlugComponent(el, myTraceback);
                     if (this.statusCode !== 0) {
                         return;
+                    }
+                    if (j.belt) {
+                        if (typeof j.belt.buckle !== "string") {
+                            Ezy.formatError(`Expected component.belt.buckle as string, found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                            return this.set(errors.TYPE_ERROR);
+                        }
+                        if (j.belt.buckle in this.#varage) {
+                            this.#listen2[j.belt.buckle] = [i, parentNode];
+                        }
                     }
                     if (k === 0) {
                         this.asVar(el, j.varAs, myTraceback);
@@ -1577,7 +1636,7 @@ export class render {
             dataset: {}
         };
         this.#builds = this.#builds.filter((val) => {
-            val.parentNode.removeChild(val);
+            val.remove();
             return false;
         });
         this.#oldBoys = {};
@@ -1655,16 +1714,15 @@ export class render {
         const pot = $$("div");
         pot.classList.add("flex", "horizontal-mid", "vertical-mid", "bg-white");
         pot.style.width = "100%";
-        pot.style.height = "100%";
+        pot.style.height = parentNode === body ? "100vh" : "100%";
         const temp = $$("img");
         temp.src = "./assets/loading.svg";
         pot.appendChild(temp);
         parentNode.appendChild(pot);
         return {
             obj: pot,
-            parent: parentNode,
             id: setTimeout(() => {
-                parentNode.removeChild(pot);
+                pot.remove();
                 this.errorPage(msg, errorCode, reason, parentNode);
             }, guillotine)
         };
@@ -1681,7 +1739,7 @@ export class render {
         const pot = $$("div");
         pot.classList.add("flex", "bg-white", "horizontal-mid", "vertical-mid");
         pot.style.width = "100%";
-        pot.style.height = "100%";
+        pot.style.height = parentNode === body ? "100vh" : "100%";
         const div = $$("div");
         div.innerHTML = errorCode || "404";
         div.style.fontSize = "20px";
