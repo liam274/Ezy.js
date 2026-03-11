@@ -425,16 +425,16 @@ export class render {
             this.vdom.config = { ...this.config };
         }
         this.original = this.mainEl.innerHTML;
-        this.reRender();
+        this.reload();
         if (this.statusCode !== 0) {
             return this;
         }
     }
     /**
-     * reRender the entire page. ***PLEASE CHECK THE STATUS CODE***
+     * reload the entire page. ***PLEASE CHECK THE STATUS CODE***
      * @returns null
      */
-    reRender() {
+    reload() {
         if (this.config && !this.config.keepConsole) {
             console.clear();
         }

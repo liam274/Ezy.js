@@ -4,6 +4,11 @@ new ezy.render("head", {
         {
             tag: "title",
             content: "Page not found 404"
+        },
+        {
+            tag: "link",
+            rel: "icon",
+            href: "./assets/icon.svg"
         }
     ]
 });

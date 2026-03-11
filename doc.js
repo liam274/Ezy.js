@@ -224,4 +224,4 @@ new ezy.render("head", {
     ]
 });
 const proc = new ezy.render(ezy.body, pageData);
-proc.reRender();
+proc.reload();

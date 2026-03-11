@@ -269,4 +269,4 @@ ezy.Ezy.component("cardie",
     }
 );
 const proc = new ezy.render(ezy.body, pageData);
-proc.reRender();
+proc.reload();
