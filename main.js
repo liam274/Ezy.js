@@ -549,14 +549,20 @@ export class render {
             log(`[ezy.js] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
         }
     }
+    /**
+     * render at any node that you'd like to
+     * @param {Object} data
+     * @param {Node} root - Root element
+     * @returns null
+     */
     render(data, root) {
         if (!data) {
             this.set(errors.STRUCTURE_ERROR);
             this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
-                this.maxWait, root));
+                this.maxWait, "Resource page.data not found", root));
             return;
         }
-        const el = this.main(data, root);
+        const el = this.#main(data);
         if (this.statusCode !== 0) {
             return;
         }
@@ -570,11 +576,7 @@ export class render {
             this.loadPage.length = 0;
         }
     }
-    /**
-     * main proc. ***CALLING IT IS NOT SUGGESTED***
-     * @returns null
-     */
-    main(data, root) {
+    #main(data) {
         this.statusCode = 0;
         if (data.onStart) {
             this.preRender(data.onStart);
@@ -583,12 +585,6 @@ export class render {
         }
         for (const i of Ezy.plugins) {
             i.onStart?.(data);
-        }
-        if (!data) {
-            this.set(errors.STRUCTURE_ERROR);
-            Ezy.formatError("Data structure incomplete.", errorLevels.CRITICAL_ERROR, "Structure Error");
-            this.loadingPage("", HTTP_NOT_FOUND, this.maxWait, "Resouce data not found", root);
-            return;
         }
         const el = this.mainRender(data);
         if (this.statusCode !== 0) {
@@ -602,7 +598,7 @@ export class render {
             }
         }
         else if (this.#debug) {
-            warn("[ezy.js] MINOR SUGGESSION: : Suggest adding onLoad function list to handle onLoad process");
+            warn("[ezy.js] MINOR SUGGESTION: : Suggest adding onLoad function list to handle onLoad process");
         }
         for (const i of Ezy.plugins) {
             i.onLoad?.(data);
@@ -1571,7 +1567,7 @@ export class render {
                         }
                         temp.tag = el.tagName;
                         temp.dataset = { ...temp.dataset, ...el.dataset };
-                        temp.config = { ...i.config };
+                        temp.config = { ...i.config, ...j.config };
                         vdom.push(temp);
                     } else {
                         vdom.push(...temp.children);
@@ -1705,7 +1701,7 @@ export class render {
                         }
                         temp.tag = el.tagName;
                         temp.dataset = { ...temp.dataset, ...el.dataset };
-                        temp.config = { ...i.config };
+                        temp.config = { ...i.config, ...j.config };
                         vdom.push(temp);
                     } else {
                         vdom.push(...temp.children);
