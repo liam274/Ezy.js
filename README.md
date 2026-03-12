@@ -172,7 +172,7 @@ Ezy.navigate("doesNotExists.html");// will be redirected to notFound.html
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.
 - CO(Component Object)
 - First-level children:
-In the following sample, #a and #b is the first-level children of #root, while #b is the first-level children of #a.
+In the following sample, `#a` and `#b` is the first-level children of `#root`, while `#b` is the first-level children of `#a`.
 ```HTML
 <div id="root">
     <div id="a">
