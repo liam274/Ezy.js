@@ -17,6 +17,6 @@ If you discover a security issue in Ezy.js, please **do not** open a public issu
 
 We will acknowledge your report within 48 hours and work with you to understand and address the issue. We appreciate your responsible disclosure and will credit you in the release notes (unless you prefer to remain anonymous).
 
-For sensitive information, you may encrypt your message using our PGP key: [\[link to key\]](https://keys.openpgp.org/search?q=ezyjsdeveloper%40gmail.com).
+For sensitive information, you may encrypt your message using our PGP key: [link to key](https://keys.openpgp.org/search?q=ezyjsdeveloper%40gmail.com).
 
 Thank you for helping keep Ezy.js safe! OuO
