@@ -2,11 +2,12 @@
 
 ## Introduce
 *Ezy.js* is a modern framework that developes in raw JavaScript. It allows **flexible** and **dynamic** page rendering via **JS** code and **JSON** file structure.
+
 Note that this framework is ***NOT*** designed to build pages independently. Please use other backend languages to support the project, or any other ways you prefer.
 
 ## Attention
-Developers **MUST** detect the statusCode after reRender, as it might returns error code. Notice that if the statusCode is not zero, the obj created might not be *render*.
-Note that based on considerations of flexibilty, *Ezy.js* will not be fully responsible for XSS security or any other HTML-related attacks. If you want to implement such defenses, please view the lower config attributes, or using PHP or any other possible backend language to pre-render contents.
+- Developers **MUST** detect the statusCode after reRender, as it might returns error code.
+- Note that based on considerations of flexibilty, *Ezy.js* will not be fully responsible for XSS security or any other HTML-related attacks. If you want to implement such defenses, please view the lower config attributes, or using PHP or any other possible backend language to pre-render contents.
 
 ## Hello, world!
 Here's a small "Hello world" example, for you to step forward:
@@ -27,15 +28,15 @@ const proc=new ezy.render(// In case you want to reuse this object.
 
 ## Deployment
 If you want to try my framework, you may git clone the project:
-```shell
+```bash
 git clone https://github.com/liam274/Ezy.js.git
 ```
 and deploy via python:
-```shell
+```bash
 python -m http.server 80
 ```
 or npx(Which is better for the router functions since python does not support that):
-```shell
+```bash
 npx serve -s .
 ```
 in the main directory.
