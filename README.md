@@ -84,6 +84,7 @@ Except the specific root structure, *Ezy.js* is very dynamic and flexible, which
 *Ezy.js* is mainly about CO. Every attributes introduced in the certain list can be applied to CO.
 #### Introduce to attributes:
 | attribute name | Description | example |
+| -------------- | ----------- | ------- |
 | component | Component is a list, expected with objects included, which is called CO. |  |
 | type | The rendering engine will render it as classList. Note that it's expected as list. |  |
 | tag | The rendering Engine will choose div as tagName, if tag is not definded. |  |
