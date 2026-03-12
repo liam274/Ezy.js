@@ -780,7 +780,6 @@ export class render {
      * @returns {void|Object}
      */
     contentRender = (_, i, config, fatherData, fatherElement) => {
-        config = { ...config, ...(i.config || {}) };
         const title = fatherData.title || "",
             traceback = `${title}`,
             vdom = [];
@@ -925,7 +924,7 @@ export class render {
                         temp[j] = card[j];
                     }
                 }
-                temp.children.push(...this.pushComponent(i, card, traceback, config, replacement));
+                temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, replacement));
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -1065,7 +1064,7 @@ export class render {
                         temp[j] = card[j];
                     }
                 }
-                temp.children.push(...this.pushComponent(i, card, traceback, config, i.inherit));
+                temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
                 if (this.statusCode !== 0) {
                     return;
                 }
