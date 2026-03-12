@@ -57,7 +57,7 @@ In the root data, we have:
 
 - keepConsole<br />
 Expect type: boolean<br />
-Function: To disable the `console.clear()` in every reRender.
+Function: To disable the `console.clear()` in every reload.
 - style<br />
 Expect type: Object<br />
 Function: Define styles for the entire document, reducing the time consum of repeating inline style renders.<br />
@@ -81,17 +81,13 @@ Function: Define the default tag for childrens, if is not mentioned.
 ### Components
 Except the specific root structure, *Ezy.js* is very dynamic and flexible, which means once you follow a certain pattern, you can build it in the way you like.
 
-#### Introduce to attributes:
-- component:
-Component is a list, expected with objects included, which is called CO.
-- CO:
 *Ezy.js* is mainly about CO. Every attributes introduced in the certain list can be applied to CO.
-- type:
-The rendering engine will render it as classList. Note that it's expected as list.
-- tag:
-The rendering Engine will choose div as tagName, if tag is not definded.
-- event & listener:
-The rendering Engine will use element.addEventlistener to plug in events in events. Data Structure:
+#### Introduce to attributes:
+| attribute name | Description | example |
+| component | Component is a list, expected with objects included, which is called CO. |  |
+| type | The rendering engine will render it as classList. Note that it's expected as list. |  |
+| tag | The rendering Engine will choose div as tagName, if tag is not definded. |  |
+| event & listener | The rendering Engine will use element.addEventlistener to plug in events in events. |
 ``` JavaScript
 {
     eventName: {
@@ -99,7 +95,7 @@ The rendering Engine will use element.addEventlistener to plug in events in even
         preventDefault: false// rather you want to preventDefault action, or not.
     }
 }
-```
+```  |
 - style:
 Type in Object. Its key should be in camel case. The rendering engine will try to plug key as css attribute while value as object.
 - varAs:
