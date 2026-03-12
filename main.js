@@ -224,23 +224,23 @@ export const Ezy = {
          * Alert the data
          * @param {Object} data
          */
-        alert(data) {
+        log(data) {
             const barrier = $$("div");
-            barrier.classList.add("alert-barrier");
+            barrier.classList.add("log-barrier");
             const back = $$("div");
-            back.classList.add("alert-back");
+            back.classList.add("log-back");
             barrier.appendChild(back);
             const title = $$("div");
-            title.classList.add("alert-title");
+            title.classList.add("log-title");
             title.innerHTML = data.title;
             back.appendChild(title);
             const content = $$("div");
             content.innerHTML = data.content;
-            content.classList.add("alert-content");
+            content.classList.add("log-content");
             back.appendChild(content);
             const confirm = $$("button");
             confirm.innerHTML = "OK";
-            confirm.classList.add("alert-button");
+            confirm.classList.add("log-button");
             confirm.addEventListener("click", () => {
                 utils.removeChild(barrier);
                 barrier.remove();
@@ -254,24 +254,24 @@ export const Ezy = {
          */
         confirm(data) {
             const barrier = $$("div");
-            barrier.classList.add("alert-barrier");
+            barrier.classList.add("log-barrier");
             const back = $$("div");
-            back.classList.add("alert-back");
+            back.classList.add("log-back");
             barrier.appendChild(back);
             const title = $$("div");
-            title.classList.add("alert-title");
+            title.classList.add("log-title");
             title.innerHTML = data.title;
             back.appendChild(title);
             const content = $$("div");
             content.innerHTML = data.content;
-            content.classList.add("alert-content");
+            content.classList.add("log-content");
             back.appendChild(content);
             const backk = $$("div"),
                 confirm = $$("button"),
                 cancel = $$("button");
             backk.classList.add("confirm-btns-container");
             confirm.innerHTML = "OK";
-            confirm.classList.add("alert-button");
+            confirm.classList.add("log-button");
             confirm.addEventListener("click", () => {
                 utils.removeChild(barrier);
                 barrier.remove();
@@ -279,7 +279,7 @@ export const Ezy = {
             });
             backk.appendChild(confirm);
             cancel.innerHTML = "Cancel";
-            cancel.classList.add("alert-button");
+            cancel.classList.add("log-button");
             cancel.addEventListener("click", () => {
                 utils.removeChild(barrier);
                 barrier.remove();
@@ -469,7 +469,7 @@ export class render {
      * @returns null
      */
     reload() {
-        if (this.config && !this.config.keepConsole) {
+        if (!this.config?.keepConsole) {
             console.clear();
         }
         if (this.#frameID) {
@@ -493,6 +493,7 @@ export class render {
             late: (function (_, key) {
                 if (key in this.#listen2) {
                     const [obj, el] = this.#listen2[key];
+                    log(obj);
                     el.innerHTML = "";
                     this.render(obj, el);
                 }
@@ -941,6 +942,12 @@ export class render {
             }
         } else {
             for (let k = 0; k < (i.times || 1); k++) {
+                if (config.tag && i.validate) {
+                    log(`time config ${config.tag}`);
+                }
+                if (i.config?.tag && i.validate) {
+                    log(`time i ${i.config.tag}`);
+                }
                 const card = (frag ? document.createDocumentFragment() : $$(i.tag || config.tag || "div")),
                     temp = {
                         children: [],
@@ -1444,7 +1451,7 @@ export class render {
                 let first = -1;
                 for (const k in obj) {
                     first++;
-                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || "div")),
+                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || i.config?.tag || j.config?.tag || "div")),
                         temp = {
                             children: [],
                             dataset: {}
@@ -1575,7 +1582,7 @@ export class render {
                 }
             } else {
                 for (let k = 0; k < (j.times || 1); k++) {
-                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || "div")),
+                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || i.config?.tag || j.config?.tag || "div")),
                         temp = {
                             children: [],
                             dataset: {}
