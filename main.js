@@ -593,7 +593,8 @@ export class render {
         if (this.statusCode !== 0) {
             return;
         }
-        log(`[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`);
+        log(`%c[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`,
+            this.statusCode === 0 ? "font-size: 30px; font-weight: bold;color: #e0e0e0;" : "font-size: 30px; font-weight: bold;color: red;");
         if (data.onLoad) {
             for (const i of data.onLoad) {
                 i(data);
@@ -604,9 +605,6 @@ export class render {
         }
         for (const i of Ezy.plugins) {
             i.onLoad?.(data);
-        }
-        if (this.statusCode !== 0) {
-            return;
         }
         return el;
     }
@@ -1833,4 +1831,4 @@ export class render {
     }
 };
 
-log("[ezy.js] Welcome to the world of Ezy.js framework!");
+log("%c[ezy.js] Welcome to the world of Ezy.js framework!", "font-size: 60px; font-weight: bold;color: yellow;");
