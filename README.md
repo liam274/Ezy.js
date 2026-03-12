@@ -63,6 +63,9 @@ Function: Define styles for the entire document, reducing the time consum of rep
 - typeExtend<br />
 Expect type: Object<br />
 Function: pack up style classes, so developers can use one class references to mutliple number of classes.<br />
+- debug<br />
+Expect type: boolean<br />
+Function: Decided rather showing warnings or not
 
 #### General Config Attributes
 

@@ -408,6 +408,7 @@ export class render {
     #oldBoys = {};
     #typeExtend = {};
     #listen2 = {};
+    #debug = false;
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -472,6 +473,11 @@ export class render {
         }
         if (this.#frameID) {
             cancelAnimationFrame(this.#frameID);
+        }
+        if (this.config.debug) {
+            this.#debug = true;
+        } else {
+            this.#debug = false;
         }
         this.historyRender = +new Date();
         if (!this.data) {
@@ -569,7 +575,7 @@ export class render {
         this.statusCode = 0;
         if (data.onStart) {
             this.preRender(data.onStart);
-        } else {
+        } else if (this.#debug) {
             warn("[ezy.js] MAJOR SUGGESTION: : Suggest adding onStart function list to handle preprocess");
         }
         for (const i of Ezy.plugins) {
@@ -591,7 +597,7 @@ export class render {
                 i(data);
             }
         }
-        else {
+        else if (this.#debug) {
             warn("[ezy.js] MINOR SUGGESSION: : Suggest adding onLoad function list to handle onLoad process");
         }
         for (const i of Ezy.plugins) {
@@ -1174,7 +1180,9 @@ export class render {
             return result === undefined ? "" : String(result);
         } catch (e) {
             if (e instanceof ReferenceError) {
-                warn(`[ezy.js] Warning: Variable not defined in "${expr}" at ${traceback}`);
+                if (this.#debug) {
+                    warn(`[ezy.js] Warning: Variable not defined in "${expr}" at ${traceback}`);
+                }
                 return "";
             }
             Ezy.formatError(`Failed to evaluate "${expr}" in ${traceback}`, errorLevels.CRITICAL_ERROR, "Eval Error");
