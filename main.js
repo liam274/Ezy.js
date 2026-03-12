@@ -115,11 +115,11 @@ export const Ezy = {
         minl(data, len) {
             return data.length >= len;
         },
-        max(data, len) {
-            return data <= len;
+        max(data, limit) {
+            return data <= limit;
         },
-        min(data, len) {
-            return data <= len;
+        min(data, limit) {
+            return data >= limit;
         },
     },
     validatePipe(obj, data, traceback) {
@@ -366,6 +366,7 @@ Ezy.navigate = function (href) {
         if (!result.allow) {
             if (result.href) {
                 location.href = result.href;
+                return;
             }
             full = false;
         }
@@ -487,7 +488,7 @@ export class render {
             return;
         }
         this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", HTTP_TIMEOUT, this.maxWait, "Page render timeout"));
-        this.clear(this.mainEl, true);
+        this.clear();
         this.#varage = Ezy.watchout({ ...varage, ...(this.data.data || {}) }, {
             late: (function (_, key) {
                 if (key in this.#listen2) {
@@ -782,7 +783,7 @@ export class render {
      * @returns {void|Object}
      */
     contentRender = (_, i, config, fatherData, fatherElement) => {
-        const title = this.data.component.title,
+        const title = fatherData.title || "",
             traceback = `${title}`,
             vdom = [];
         if (typeof i === "string") {
@@ -926,19 +927,21 @@ export class render {
                         temp[j] = card[j];
                     }
                 }
-                temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, replacement));
+                temp.children.push(...this.pushComponent(i, card, traceback, config, replacement));
                 if (this.statusCode !== 0) {
                     return;
                 }
-                {
+                if (!frag) {
                     for (const i in ARGS) {
                         temp[i] = ARGS[i](card[i]);
                     }
                     temp.tag = card.tagName;
                     temp.dataset = { ...temp.dataset, ...card.dataset };
-                    temp.config = { ...i.config };
-                };
-                vdom.push(temp);
+                    temp.config = { ...config };
+                    vdom.push(temp);
+                } else {
+                    vdom.push(...temp.children);
+                }
             }
         } else {
             for (let k = 0; k < (i.times || 1); k++) {
@@ -1058,19 +1061,21 @@ export class render {
                         temp[j] = card[j];
                     }
                 }
-                temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
+                temp.children.push(...this.pushComponent(i, card, traceback, config, i.inherit));
                 if (this.statusCode !== 0) {
                     return;
                 }
-                {
+                if (!frag) {
                     for (const i in ARGS) {
                         temp[i] = ARGS[i](card[i]);
                     }
                     temp.tag = card.tagName;
                     temp.dataset = { ...temp.dataset, ...card.dataset };
-                    temp.config = { ...i.config };
-                };
-                vdom.push(temp);
+                    temp.config = { ...config };
+                    vdom.push(temp);
+                } else {
+                    vdom.push(...temp.children);
+                }
             }
         }
         return {
@@ -1452,7 +1457,7 @@ export class render {
                         el.classList.add(...this.#extendType(...(j.type || []), ...(config.type || [])));
                         utils.applyStyles(el, j.style);
                     }
-                    const myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
+                    const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
                     if (!frag) {
                         for (const evt in j.events) {
                             this.addListener(evt, j, el, myTraceback);
@@ -1560,15 +1565,17 @@ export class render {
                     if (this.statusCode !== 0) {
                         return;
                     }
-                    {
+                    if (!frag) {
                         for (const i in ARGS) {
                             temp[i] = ARGS[i](el[i]);
                         }
                         temp.tag = el.tagName;
                         temp.dataset = { ...temp.dataset, ...el.dataset };
                         temp.config = { ...i.config };
-                    };
-                    vdom.push(temp);
+                        vdom.push(temp);
+                    } else {
+                        vdom.push(...temp.children);
+                    }
                 }
             } else {
                 for (let k = 0; k < (j.times || 1); k++) {
@@ -1581,7 +1588,7 @@ export class render {
                         el.classList.add(...this.#extendType(...(j.type || []), ...(config.type || [])));
                         utils.applyStyles(el, j.style);
                     }
-                    const myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
+                    const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
                     if (!frag) {
                         for (const evt in j.events) {
                             this.addListener(evt, j, el, myTraceback);
@@ -1666,7 +1673,7 @@ export class render {
                             return;
                         }
                         if (j.belt) {
-                            if (Array.isArray(j.belt.buckle)) {
+                            if (!Array.isArray(j.belt.buckle)) {
                                 Ezy.formatError(`Expected component.belt.buckle as string, found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                                 return this.set(errors.TYPE_ERROR);
                             }
@@ -1692,15 +1699,17 @@ export class render {
                     if (this.statusCode !== 0) {
                         return;
                     }
-                    {
+                    if (!frag) {
                         for (const i in ARGS) {
                             temp[i] = ARGS[i](el[i]);
                         }
                         temp.tag = el.tagName;
                         temp.dataset = { ...temp.dataset, ...el.dataset };
                         temp.config = { ...i.config };
-                    };
-                    vdom.push(temp);
+                        vdom.push(temp);
+                    } else {
+                        vdom.push(...temp.children);
+                    }
                 }
             }
             own.time++;
