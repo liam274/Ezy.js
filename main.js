@@ -744,7 +744,7 @@ export class render {
             if (this.statusCode !== 0) {
                 return;
             }
-            const temp = createElement(i, item, i.config || {}, sectionData, parentElement);
+            const temp = createElement(i, item, { ...(sectionData.config || {}), ...(i.config || {}) }, sectionData, parentElement);
             if (this.statusCode !== 0) {
                 return;
             }
@@ -780,6 +780,7 @@ export class render {
      * @returns {void|Object}
      */
     contentRender = (_, i, config, fatherData, fatherElement) => {
+        config = { ...config, ...(i.config || {}) };
         const title = fatherData.title || "",
             traceback = `${title}`,
             vdom = [];
@@ -1451,7 +1452,7 @@ export class render {
                 let first = -1;
                 for (const k in obj) {
                     first++;
-                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || i.config?.tag || j.config?.tag || "div")),
+                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || j.config?.tag || "div")),
                         temp = {
                             children: [],
                             dataset: {}
@@ -1582,7 +1583,7 @@ export class render {
                 }
             } else {
                 for (let k = 0; k < (j.times || 1); k++) {
-                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || i.config?.tag || j.config?.tag || "div")),
+                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || j.config?.tag || "div")),
                         temp = {
                             children: [],
                             dataset: {}
