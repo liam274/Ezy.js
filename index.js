@@ -168,14 +168,28 @@ const pageData = {
                     }
                 },
                 {
-                    tag: "input",
-                    type: ["font-black"],
-                    style: {
-                        fontWeight: "bold",
-                        borderRadius: "5px"
-                    },
-                    validate: ["isEmail", "maxl:20"],
-                    placeholder: "subscribe email"
+                    component: [
+                        {
+                            type: ["font-black"],
+                            style: {
+                                fontWeight: "bold",
+                                borderRadius: "5px"
+                            },
+                            validate: {
+                                rules: ["isEmail", "maxl:20"],
+                                required: true,
+                                onCaught: () => alert("lol")
+                            },
+                            placeholder: "subscribe email"
+                        },
+                        {
+                            _type: "submit"
+                        }
+                    ],
+                    tag: "form",
+                    config: {
+                        tag: "input"
+                    }
                 },
                 {
                     tag: "h1",

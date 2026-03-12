@@ -156,33 +156,48 @@ export const Ezy = {
             return !varage[item]();
         }
     },
-    validateValidation(obj, el, validate, traceback) {
-        if (validate) {
-            if (!Array.isArray(validate)) {
-                Ezy.formatError(`Error when rendering, expected component.validate as an array, found ${typeof validate}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+    validateValidation(obj, el, validate, traceback, parentNode) {
+        const { rules, required } = validate;
+        if (rules) {
+            if (!Array.isArray(rules)) {
+                Ezy.formatError(`Error when rendering, expected component.validate as an array, found ${typeof rules}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                 return obj.set(errors.TYPE_ERROR);
             }
-            el.addEventListener("input", function (e) {
-                for (const val of validate) {
-                    const [vali, ...parms] = val.split(":");
-                    if (Ezy.validates[vali]) {
-                        if (typeof Ezy.validates[vali] === "function") {
-                            if (Ezy.validates[vali](e.target.value, ...parms)) {
-                                el.classList.add("valid");
-                                el.classList.remove("invalid");
-                            } else {
-                                el.classList.remove("valid");
-                                el.classList.add("invalid");
+            if (required) {
+                parentNode.addEventListener("submit", function (e) {
+                    for (const val of rules) {
+                        const [vali, ...parms] = val.split(":");
+                        if (Ezy.validates[vali]) {
+                            if (!Ezy.validates[vali](el.value, ...parms)) {
+                                e.preventDefault();
+                                validate?.onCaught();
                             }
                         } else {
-                            Ezy.formatError(`Error when rendering, expected component.validate in Ezy as function, found ${typeof Ezy.validates[vali]}, in ${traceback}`,
-                                errorLevels.CRITICAL_ERROR, "Render Error");
+                            Ezy.formatError(`Error when rendering, Ezy[component.validate] not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
                             return obj.set(errors.RENDER_ERROR);
                         }
+                    }
+                });
+            }
+            el.addEventListener("input", function () {
+                let r = true;
+                for (const val of rules) {
+                    const [vali, ...parms] = val.split(":");
+                    if (Ezy.validates[vali]) {
+                        r = r && Ezy.validates[vali](el.value, ...parms);
                     } else {
                         Ezy.formatError(`Error when rendering, Ezy[component.validate] not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
                         return obj.set(errors.RENDER_ERROR);
                     }
+                }
+                if (r) {
+                    el.classList.add("valid");
+                    el.classList.remove("invalid");
+                    validate?.onValid();
+                } else {
+                    el.classList.remove("valid");
+                    el.classList.add("invalid");
+                    validate?.onInvalid();
                 }
             });
         }
@@ -808,7 +823,7 @@ export class render {
                         });
                     }).bind(this), i.expire.date - this.historyRender);
                 }
-                Ezy.validateValidation(this, card, i.validate || "", traceback);
+                Ezy.validateValidation(this, card, i.validate || "", traceback, fatherElement);
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -861,6 +876,9 @@ export class render {
                 }
                 if (i.text) {
                     card.title = this.preCompileStr(i.text, traceback, replacement);
+                }
+                if (i._type) {
+                    card.type = i._type;
                 }
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
@@ -927,7 +945,7 @@ export class render {
                         });
                     }).bind(this), i.expire.date - this.historyRender);
                 }
-                Ezy.validateValidation(this, card, i.validate || "", traceback);
+                Ezy.validateValidation(this, card, i.validate || "", traceback, fatherElement);
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -977,6 +995,9 @@ export class render {
                 }
                 if (i.text) {
                     card.title = this.preCompileStr(i.text, traceback, i.inherit || {});
+                }
+                if (i._type) {
+                    card.type = i._type;
                 }
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
@@ -1435,7 +1456,7 @@ export class render {
                             });
                         }).bind(this), j.expire.date - this.historyRender);
                     }
-                    Ezy.validateValidation(this, el, j.validate || "", traceback);
+                    Ezy.validateValidation(this, el, j.validate || "", traceback, parentNode);
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1459,6 +1480,9 @@ export class render {
                     }
                     if (j.text) {
                         el.title = this.preCompileStr(j.text, myTraceback, replace);
+                    }
+                    if (j._type) {
+                        el.type = j._type;
                     }
                     if (j.data) {
                         for (const k in j.data) {
@@ -1551,7 +1575,7 @@ export class render {
                             });
                         }).bind(this), j.expire.date - this.historyRender);
                     }
-                    Ezy.validateValidation(this, el, j.validate || "", traceback);
+                    Ezy.validateValidation(this, el, j.validate || "", traceback, parentNode);
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1575,6 +1599,9 @@ export class render {
                     }
                     if (j.text) {
                         el.title = this.preCompileStr(j.text, myTraceback, { ...replacement, ...j.inherit, ...own });
+                    }
+                    if (j._type) {
+                        el.type = j._type;
                     }
                     if (j.data) {
                         for (const k in j.data) {

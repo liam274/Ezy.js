@@ -66,6 +66,9 @@ Function: pack up style classes, so developers can use one class references to m
 - escapeHTML<br />
 Expect type: boolean<br />
 Function: To enable `utils.htmlEscape` on `content` attributes.
+- tag<br />
+Expect type: string<br />
+Function: Define the default tag for childrens, if is not mentioned.
 
 ### Components
 Except the specific root structure, *Ezy.js* is very dynamic and flexible, which means once you follow a certain pattern, you can build it in the way you like.
@@ -109,7 +112,13 @@ It will be inherited by its components
 Switch class via the given validation function name.
 ```JavaScript
 {
-    validate: "validationFunctionName"
+    validate: {
+        rules: ["validationFunctionName","somefunction:arg1:arg2"],
+        required: true,// optional
+        onCaught: function(){},// optional, triggered when father's submit actions is being caught by validate.required
+        onValid: function(){},// optional, triggered when is valid
+        onInvalid: function(){}// optional, triggered when is invalid
+    }
 }
 ```
 - expire:
@@ -144,6 +153,8 @@ will be stored as data-* attributes.
 Configuration to the element and its children(first-level children only).
 - belt:
 ***BELT SYNTAX***. You can use `belt.buckle` to bind a varage variable, so when the variable is being changed, the CO will be re-rendered!
+- _type:
+defines the type attribute in HTML tag
 
 ## Builtin functions
 
