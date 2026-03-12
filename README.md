@@ -32,7 +32,11 @@ git clone https://github.com/liam274/Ezy.js.git
 ```
 and deploy via python:
 ```shell
-python -m http.server 8000
+python -m http.server 80
+```
+or npx(Which is better for the router functions since python does not support that):
+```shell
+npx serve -s .
 ```
 in the main directory.
 
