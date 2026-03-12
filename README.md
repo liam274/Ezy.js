@@ -1,4 +1,4 @@
-# Ezy.js
+# Ezy.js &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/liam274/Ezy.js/blob/main/LICENSE)
 
 ## Introduce
 *Ezy.js* is a modern framework that developes in raw JavaScript. It allows **flexible** and **dynamic** page rendering via **JS** code and **JSON** file structure.
