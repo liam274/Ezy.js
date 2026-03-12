@@ -544,7 +544,9 @@ export class render {
             }
             this.loadPage.length = 0;
         }
-        log(`[ezy.js] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
+        if (this.#debug) {
+            log(`[ezy.js] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
+        }
     }
     render(data, root) {
         if (!data) {
