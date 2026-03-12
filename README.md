@@ -28,7 +28,7 @@ const proc=new ezy.render(// In case you want to reuse this object.
 
 ## Deployment
 If you want to try my framework, you may git clone the project:
-```bash
+```console
 git clone https://github.com/liam274/Ezy.js.git
 ```
 and deploy via python:
@@ -36,7 +36,7 @@ and deploy via python:
 python -m http.server 80
 ```
 or npx(Which is better for the router functions since python does not support that):
-```bash
+```sh
 npx serve -s .
 ```
 in the main directory.
