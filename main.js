@@ -843,12 +843,14 @@ export class render {
                     return;
                 }
                 if (i.belt) {
-                    if (typeof i.belt.buckle !== "string") {
-                        Ezy.formatError(`Expected component.belt.buckle as string, found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                    if (!Array.isArray(i.belt.buckle)) {
+                        Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                         return this.set(errors.TYPE_ERROR);
                     }
-                    if (i.belt.buckle in this.#varage) {
-                        this.#listen2[i.belt.buckle] = [fatherData, fatherElement];
+                    for (const buckle of i.belt.buckle) {
+                        if (buckle in this.#varage) {
+                            this.#listen2[buckle] = [fatherData, fatherElement];
+                        }
                     }
                 }
                 if (first === 0 && i.varAs) {
@@ -957,12 +959,14 @@ export class render {
                     return;
                 }
                 if (i.belt) {
-                    if (typeof i.belt.buckle !== "string") {
-                        Ezy.formatError(`Expected component.belt.buckle as string, found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                    if (!Array.isArray(i.belt.buckle)) {
+                        Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                         return this.set(errors.TYPE_ERROR);
                     }
-                    if (i.belt.buckle in this.#varage) {
-                        this.#listen2[i.belt.buckle] = [fatherData, fatherElement];
+                    for (const buckle of i.belt.buckle) {
+                        if (buckle in this.#varage) {
+                            this.#listen2[buckle] = [fatherData, fatherElement];
+                        }
                     }
                 }
                 if (k === 0 && i.varAs) {
@@ -1466,12 +1470,14 @@ export class render {
                         return;
                     }
                     if (j.belt) {
-                        if (typeof j.belt.buckle !== "string") {
-                            Ezy.formatError(`Expected component.belt.buckle as string, found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                        if (!Array.isArray(j.belt.buckle)) {
+                            Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                             return this.set(errors.TYPE_ERROR);
                         }
-                        if (j.belt.buckle in this.#varage) {
-                            this.#listen2[j.belt.buckle] = [i, parentNode];
+                        for (const buckle of j.belt.buckle) {
+                            if (buckle in this.#varage) {
+                                this.#listen2[buckle] = [i, parentNode];
+                            }
                         }
                     }
                     if (first === 0) {
@@ -1580,12 +1586,14 @@ export class render {
                         return;
                     }
                     if (j.belt) {
-                        if (typeof j.belt.buckle !== "string") {
+                        if (Array.isArray(j.belt.buckle)) {
                             Ezy.formatError(`Expected component.belt.buckle as string, found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                             return this.set(errors.TYPE_ERROR);
                         }
-                        if (j.belt.buckle in this.#varage) {
-                            this.#listen2[j.belt.buckle] = [i, parentNode];
+                        for (const buckle of j.belt.buckle) {
+                            if (buckle in this.#varage) {
+                                this.#listen2[buckle] = [i, parentNode];
+                            }
                         }
                     }
                     if (k === 0) {

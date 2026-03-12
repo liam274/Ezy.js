@@ -267,7 +267,7 @@ ezy.Ezy.component("cardie",
             }
         },
         belt: {
-            buckle: "details"
+            buckle: ["details"]
         }
     }
 );
