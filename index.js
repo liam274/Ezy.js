@@ -290,7 +290,6 @@ ezy.Ezy.component("cardie",
 );
 const proc = new ezy.render(ezy.body, pageData, 1000);
 proc.reload();
-ezy.log(proc.vdom);
 setTimeout(() => {
     proc.edit("details", {
         "Introduce to Ezy": "{ezy} is a modern, clean, and efficient framework. Projects can be easily written in JSON. So the networking will be more efficent",
