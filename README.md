@@ -85,40 +85,41 @@ Except the specific root structure, *Ezy.js* is very dynamic and flexible, which
 #### Introduce to attributes:
 | attribute name | Description | example |
 | -------------- | ----------- | ------- |
-| component | Component is a list, expected with objects included, which is called CO. |
-| type | The rendering engine will render it as classList. Note that it's expected as list. |
-| tag | The rendering Engine will choose div as tagName, if tag is not definded. |
-| event & listener | The rendering Engine will use element.addEventlistener to plug in events in events. | [Example](example.md#event) |
-| style | Type in Object. Its key should be in camel case. The rendering engine will try to plug key as css attribute while value as object. |
-| varAs | If you want to access a variable with name of any, you shell use varAs in the object. The rendering engine will promise to protect rewriting actions via itself, while other Javascript actions it cannot stop. |
-| times | Telling the rendering engine how many copies you want to copy on current component. **NOTE THAT, the rendering engine will not increase the renderIndex during making copies.**|
-| title | Define a component's title|
-| text | Define an element's title HTML attribute|
-| if | Type in function. It will render the component only if the given function is returning true values|
-| content | The innerHTML that will be set.|
-| inherit | It will be inherited by its components|
-| validate | Switch class via the given validation function name. | [Example](example.md#validate) |
-| expire | Type in object. It has subattributes like date, expired. The component will be removed on the nearest second in date(ceiling), and when expired, it will first let the UI update, then execute the expired function. | [Example](example.md#expire) |
-| forEach | It will loops through the given object to render components. |
-| pipes | You can use pipes to send messages. Reciver **MUST** have pipe definded. | [Example](example.md#pipes) |
-| main | This is a function that will be executed in every milisecond, reciving the component object itself as the first argument while the component element as the second. |
-| data | will be stored as `data-*` attributes. |
-| config | Configuration to the element and its children(first-level children only). |
-| belt | ***BELT SYNTAX***. You can use `belt.buckle` to bind a varage variable, so when the variable is being changed, the CO will be re-rendered! |
-| _type | defines the type attribute in HTML tag |
+| `component` | Component is a list, expected with objects included, which is called CO. |
+| `type` | The rendering engine will render it as classList. Note that it's expected as list. |
+| `tag` | The rendering Engine will choose div as tagName, if tag is not definded. |
+| `event & listener` | The rendering Engine will use element.addEventlistener to plug in events in events. | [Example](example.md#event) |
+| `style` | Type in Object. Its key should be in camel case. The rendering engine will try to plug key as css attribute while value as object. |
+| `varAs` | If you want to access a variable with name of any, you shell use varAs in the object. The rendering engine will promise to protect rewriting actions via itself, while other Javascript actions it cannot stop. |
+| `times` | Telling the rendering engine how many copies you want to copy on current component. **NOTE THAT, the rendering engine will not increase the renderIndex during making copies.**|
+| `title` | Define a component's title|
+| `text` | Define an element's title HTML attribute|
+| `if` | Type in function. It will render the component only if the given function is returning true values|
+| `content` | The innerHTML that will be set.|
+| `inherit` | It will be inherited by its components|
+| `validate` | Switch class via the given validation function name. | [Example](example.md#validate) |
+| `expire` | Type in object. It has subattributes like date, expired. The component will be removed on the nearest second in date(ceiling), and when expired, it will first let the UI update, then execute the expired function. | [Example](example.md#expire) |
+| `forEach` | It will loops through the given object to render components. |
+| `pipes` | You can use pipes to send messages. Reciver **MUST** have pipe definded. | [Example](example.md#pipes) |
+| `main` | This is a function that will be executed in every milisecond, reciving the component object itself as the first argument while the component element as the second. |
+| `data` | will be stored as `data-*` attributes. |
+| `config` | Configuration to the element and its children(first-level children only). |
+| `belt` | ***BELT SYNTAX***. You can use `belt.buckle` to bind a varage variable, so when the variable is being changed, the CO will be re-rendered! |
+| `_type` | defines the type attribute in HTML tag |
 
 ## Builtin functions
 
-- Ezy.navigate:
+- `Ezy.navigate`:
 We ***strongly*** suggest to use this function instead of location.href or other behaviours.
 ```JavaScript
 Ezy.navigate(href);// This function will be as the route guard, choosing to redirect the href or other behaviours.
 ```
 For example:
 ```JavaScript
-let allowPages=["exists.html"];
-for(let i of allowPages) routeGuard.builtins.add(i);
-routeGuard.guards.push(
+import "./main.js";
+const allowPages=["exists.html"];
+for(const i of allowPages) ezy.routeGuard.builtins.add(i);
+ezy.routeGuard.guards.push(
     function(data){
         if (routeGuard.builtin.has(data)) {
             return { allow: true };
@@ -127,7 +128,7 @@ routeGuard.guards.push(
         }
     }
 );
-Ezy.navigate("doesNotExists.html");// will be redirected to notFound.html
+ezy.Ezy.navigate("doesNotExists.html");// will be redirected to notFound.html
 ```
 
 ## Specific Terminologies
