@@ -6,7 +6,7 @@ Note that this framework is ***NOT*** designed to build pages independently. Ple
 
 ## Attention
 Developers **MUST** detect the statusCode after reRender, as it might returns error code. Notice that if the statusCode is not zero, the obj created might not be *render*.
-Note that based on considerations of flexibilty, *Ezy.js* will not be responsible for XSS security or any other HTML-related attacks. If you want to implement such defenses, please use PHP or any other possible backend language to pre-render contents.
+Note that based on considerations of flexibilty, *Ezy.js* will not be fully responsible for XSS security or any other HTML-related attacks. If you want to implement such defenses, please view the lower config attributes, or using PHP or any other possible backend language to pre-render contents.
 
 ## Hello, world!
 Here's a small "Hello world" example, for you to step forward:
