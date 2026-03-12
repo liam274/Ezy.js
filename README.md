@@ -60,6 +60,13 @@ Function: Define styles for the entire document, reducing the time consum of rep
 Expect type: Object<br />
 Function: pack up style classes, so developers can use one class references to mutliple number of classes.<br />
 
+#### General Config Attributes
+
+**Attention!** These attributes are supported over **ALL** config objects.
+- escapeHTML<br />
+Expect type: boolean<br />
+Function: To enable `utils.htmlEscape` on `content` attributes.
+
 ### Components
 Except the specific root structure, *Ezy.js* is very dynamic and flexible, which means once you follow a certain pattern, you can build it in the way you like.
 

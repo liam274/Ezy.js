@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 
 
 export const UPPERCASE_REGEX = /[A-Z]/g,
@@ -51,4 +52,19 @@ export function array2camel(data) {
         first = true;
     }
     return result.join("");
+}
+/**
+ * escape html special chars
+ * @param {string} data
+ * @returns {string}
+ */
+export function htmlEscape(data) {
+    const map = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+    };
+    return data.replace(/[&<>"']/g, char => map[char]);
 }

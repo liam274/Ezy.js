@@ -872,10 +872,14 @@ export class render {
                         return;
                     }
                 }
-                card.innerHTML += this.preCompileStr(
+                let r = this.preCompileStr(
                     (i.content || ""),
                     traceback, replacement
                 );
+                if (this.config.escapeHTML || config.escapeHTML || i.config?.escapeHTML) {
+                    r = utils.htmlEscape(r);
+                }
+                card.innerHTML += r;
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -886,7 +890,7 @@ export class render {
                     card.setAttribute(j, this.preCompileStr(i[j], traceback, replacement));
                     temp[j] = card[j];
                 }
-                temp.children.push(...this.pushComponent(i, card, traceback, replacement));
+                temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, replacement));
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -982,10 +986,14 @@ export class render {
                         return;
                     }
                 }
-                card.innerHTML += this.preCompileStr(
+                let r = this.preCompileStr(
                     (i.content || ""),
                     traceback, i.inherit || {}
                 );
+                if (this.config.escapeHTML || config.escapeHTML || i.config?.escapeHTML) {
+                    r = utils.htmlEscape(r);
+                }
+                card.innerHTML += r;
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -996,7 +1004,7 @@ export class render {
                     card.setAttribute(j, this.preCompileStr(i[j], traceback, i.inherit));
                     temp[j] = card[j];
                 }
-                temp.children.push(...this.pushComponent(i, card, traceback, i.inherit));
+                temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -1341,13 +1349,12 @@ export class render {
      * @param {Object} replacement
      * @returns {Object}
      */
-    pushComponent(i, parentNode, traceback, replacement = {}) {
+    pushComponent(i, parentNode, traceback, config = {}, replacement = {}) {
         const own = {
             time: 0
         },
             todo = document.createDocumentFragment();
-        const config = i.config || {},
-            vdom = [];
+        const vdom = [];
         for (let j of (i.component || [])) {
             if (typeof j === "string") {
                 if (!this.classify) {
@@ -1401,9 +1408,13 @@ export class render {
                         el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, replace));
                         temp[parm] = el[parm];
                     }
-                    el.innerHTML = this.preCompileStr(
+                    let r = this.preCompileStr(
                         (j.content || ""), myTraceback, replace
                     );
+                    if (this.config.escapeHTML || config.escapeHTML || j.config?.escapeHTML) {
+                        r = utils.htmlEscape(r);
+                    }
+                    el.innerHTML += r;
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1474,7 +1485,7 @@ export class render {
                     if (this.statusCode !== 0) {
                         return;
                     }
-                    temp.children.push(...this.pushComponent(j, el, myTraceback, replace));
+                    temp.children.push(...this.pushComponent(j, el, myTraceback, { ...config, ...(j.config || {}) }, replace));
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1511,9 +1522,13 @@ export class render {
                         el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, { ...replacement, ...j.inherit, ...own }));
                         temp[parm] = el[parm];
                     }
-                    el.innerHTML = this.preCompileStr(
+                    let r = this.preCompileStr(
                         (j.content || ""), myTraceback, { ...replacement, ...j.inherit, ...own }
                     );
+                    if (this.config.escapeHTML || config.escapeHTML || j.config?.escapeHTML) {
+                        r = utils.htmlEscape(r);
+                    }
+                    el.innerHTML += r;
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1584,7 +1599,7 @@ export class render {
                     if (this.statusCode !== 0) {
                         return;
                     }
-                    temp.children.push(...this.pushComponent(j, el, myTraceback, { ...replacement, ...j.inherit, ...own }));
+                    temp.children.push(...this.pushComponent(j, el, myTraceback, { ...config, ...(j.config || {}) }, { ...replacement, ...j.inherit, ...own }));
                     if (this.statusCode !== 0) {
                         return;
                     }

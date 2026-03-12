@@ -122,6 +122,9 @@ const pageData = {
         },
         {
             id: "content",
+            config: {
+                escapeHTML: true
+            },
             component: [
                 "cardie",
                 {
