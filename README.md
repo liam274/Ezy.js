@@ -106,6 +106,7 @@ Except the specific root structure, *Ezy.js* is very dynamic and flexible, which
 | `config` | Configuration to the element and its children(first-level children only). |
 | `belt` | ***BELT SYNTAX***. You can use `belt.buckle` to bind a varage variable, so when the variable is being changed, the CO will be re-rendered! |
 | `_type` | defines the type attribute in HTML tag |
+| `isFragment` | If it's set as truly values, the framework will use `document.createDocumentFragment()` to create the current element to pick up its components. Other Node-related attributes will be dismissed due to this attribute |
 
 ## Builtin functions
 

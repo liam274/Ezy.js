@@ -47,7 +47,7 @@ export const keyword = new Set([
     "if", "content", "inherit",
     "validate", "expire", "text",
     "forEach", "innerHTML", "config",
-    "data", "belt"
+    "data", "belt", "isFragment"
 ]), errors = {
     STRUCTURE_ERROR: 1,
     ASVAR_REWRITE_ERROR: 2,
@@ -796,7 +796,8 @@ export class render {
             }
             i = this.classify[i] || Ezy.components[i];
         }
-        const todo = document.createDocumentFragment();
+        const todo = document.createDocumentFragment(),
+            frag = i.isFragment || false;
         if (i.forEach) {
             if (this.#varage[i.forEach] === undefined) {
                 Ezy.formatError(`Error when rendering, expected forEach variable, not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
@@ -810,111 +811,120 @@ export class render {
             let first = -1;
             for (const k in obj) {
                 first++;
-                const card = $$(i.tag || config.tag || "div"),
+                const card = (frag ? document.createDocumentFragment() : $$(i.tag || config.tag || "div")),
                     temp = {
                         children: [],
                         dataset: {}
                     };
-                card.classList.add(...this.#extendType(...(i.type || []), ...(config.type || [])));
-                if (i.expire) {
-                    setTimeout((function () {
-                        card.innerHTML = "";
-                        card.remove();
-                        if (i.pipe) {
-                            delete this.pipes[i.pipe.name];
-                        }
-                        this.removeVdom(temp);
-                        setTimeout(() => {
-                            i.expire.expired?.();
-                        });
-                    }).bind(this), i.expire.date - this.historyRender);
-                }
-                Ezy.validateValidation(this, card, i.validate || "", traceback, fatherElement);
-                if (this.statusCode !== 0) {
-                    return;
-                }
-                if (i.main) {
-                    if (typeof i.main !== "function") {
-                        Ezy.formatError(`Error when rendering, expected component.main attribute as function, found ${typeof i.main}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
-                        return this.set(errors.RENDER_ERROR);
+                if (!frag) {
+                    card.classList.add(...this.#extendType(...(i.type || []), ...(config.type || [])));
+                    if (i.expire) {
+                        setTimeout((function () {
+                            card.innerHTML = "";
+                            card.remove();
+                            if (i.pipe) {
+                                delete this.pipes[i.pipe.name];
+                            }
+                            this.removeVdom(temp);
+                            setTimeout(() => {
+                                i.expire.expired?.();
+                            });
+                        }).bind(this), i.expire.date - this.historyRender);
                     }
-                    this.mains.push({
-                        el: card,
-                        obj: i,
-                        func: i.main
-                    });
-                }
-                if (i.pipe) {
-                    Ezy.validatePipe(this, i.pipe, traceback);
+                    Ezy.validateValidation(this, card, i.validate || "", traceback, fatherElement);
                     if (this.statusCode !== 0) {
                         return;
                     }
-                    this.pipes[i.pipe.name] = i.pipe;
+                    if (i.main) {
+                        if (typeof i.main !== "function") {
+                            Ezy.formatError(`Error when rendering, expected component.main attribute as function, found ${typeof i.main}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
+                            return this.set(errors.RENDER_ERROR);
+                        }
+                        this.mains.push({
+                            el: card,
+                            obj: i,
+                            func: i.main
+                        });
+                    }
+                    if (i.pipe) {
+                        Ezy.validatePipe(this, i.pipe, traceback);
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
+                        this.pipes[i.pipe.name] = i.pipe;
+                    }
                 }
                 const replacement = {
                     ...this.systemPlot, ...(i.inherit || {}), key: k, item: obj[k]
                 };
-                if (i.data) {
+                if (i.data && !frag) {
                     for (const k in i.data) {
                         card.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, replacement));
-                    }
-                }
-                this.beforePlugComponent(card, traceback);
-                if (this.statusCode !== 0) {
-                    return;
-                }
-                if (i.belt) {
-                    if (!Array.isArray(i.belt.buckle)) {
-                        Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
-                        return this.set(errors.TYPE_ERROR);
-                    }
-                    for (const buckle of i.belt.buckle) {
-                        if (buckle in this.#varage) {
-                            this.#listen2[buckle] = [fatherData, fatherElement];
+                        if (this.statusCode !== 0) {
+                            return;
                         }
                     }
                 }
-                if (first === 0 && i.varAs) {
-                    this.asVar(card, i.varAs, traceback);
+                if (!frag) {
+                    this.beforePlugComponent(card, traceback);
                     if (this.statusCode !== 0) {
                         return;
                     }
-                }
-                if (i.text) {
-                    card.title = this.preCompileStr(i.text, traceback, replacement);
-                }
-                if (i._type) {
-                    card.type = i._type;
+                    if (i.belt) {
+                        if (!Array.isArray(i.belt.buckle)) {
+                            Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                            return this.set(errors.TYPE_ERROR);
+                        }
+                        for (const buckle of i.belt.buckle) {
+                            if (buckle in this.#varage) {
+                                this.#listen2[buckle] = [fatherData, fatherElement];
+                            }
+                        }
+                    }
+                    if (first === 0 && i.varAs) {
+                        this.asVar(card, i.varAs, traceback);
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
+                    }
+                    if (i.text) {
+                        card.title = this.preCompileStr(i.text, traceback, replacement);
+                    }
+                    if (i._type) {
+                        card.type = i._type;
+                    }
                 }
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
                 if (this.statusCode !== 0) {
                     return;
                 }
-                utils.applyStyles(card, i.style);
-                for (const j in (i.events || {})) {
-                    this.addListener(j, i, card, traceback);
+                if (!frag) {
+                    utils.applyStyles(card, i.style);
+                    for (const j in (i.events || {})) {
+                        this.addListener(j, i, card, traceback);
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
+                    }
+                    let r = this.preCompileStr(
+                        (i.content || ""),
+                        traceback, replacement
+                    );
                     if (this.statusCode !== 0) {
                         return;
                     }
-                }
-                let r = this.preCompileStr(
-                    (i.content || ""),
-                    traceback, replacement
-                );
-                if (this.config.escapeHTML || config.escapeHTML || i.config?.escapeHTML) {
-                    r = utils.htmlEscape(r);
-                }
-                card.innerHTML += r;
-                if (this.statusCode !== 0) {
-                    return;
-                }
-                for (const j in i) {
-                    if (keyword.has(j)) {
-                        continue;
+                    if (this.config.escapeHTML || config.escapeHTML || i.config?.escapeHTML) {
+                        r = utils.htmlEscape(r);
                     }
-                    card.setAttribute(j, this.preCompileStr(i[j], traceback, replacement));
-                    temp[j] = card[j];
+                    card.innerHTML += r;
+                    for (const j in i) {
+                        if (keyword.has(j)) {
+                            continue;
+                        }
+                        card.setAttribute(j, this.preCompileStr(i[j], traceback, replacement));
+                        temp[j] = card[j];
+                    }
                 }
                 temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, replacement));
                 if (this.statusCode !== 0) {
@@ -932,108 +942,121 @@ export class render {
             }
         } else {
             for (let k = 0; k < (i.times || 1); k++) {
-                const card = $$(i.tag || config.tag || "div"),
+                const card = (frag ? document.createDocumentFragment() : $$(i.tag || config.tag || "div")),
                     temp = {
                         children: [],
                         dataset: {}
                     };
-                card.classList.add(...this.#extendType(...(i.type || []), ...(config.type || [])));
-                if (i.expire) {
-                    setTimeout((function () {
-                        card.innerHTML = "";
-                        card.remove();
-                        if (i.pipe) {
-                            delete this.pipes[i.pipe.name];
+                if (!frag) {
+                    card.classList.add(...this.#extendType(...(i.type || []), ...(config.type || [])));
+                    if (i.expire) {
+                        setTimeout((function () {
+                            card.innerHTML = "";
+                            card.remove();
+                            if (i.pipe) {
+                                delete this.pipes[i.pipe.name];
+                            }
+                            this.removeVdom(temp);
+                            setTimeout(() => {
+                                i.expire.expired?.();
+                            });
+                        }).bind(this), i.expire.date - this.historyRender);
+                    }
+                    Ezy.validateValidation(this, card, i.validate || "", traceback, fatherElement);
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
+                    if (i.main) {
+                        if (typeof i.main !== "function") {
+                            Ezy.formatError(`Error when rendering, expected component.main attribute as function, found ${typeof i.main}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
+                            return this.set(errors.RENDER_ERROR);
                         }
-                        this.removeVdom(temp);
-                        setTimeout(() => {
-                            i.expire.expired?.();
+                        this.mains.push({
+                            el: card,
+                            obj: i,
+                            func: i.main
                         });
-                    }).bind(this), i.expire.date - this.historyRender);
-                }
-                Ezy.validateValidation(this, card, i.validate || "", traceback, fatherElement);
-                if (this.statusCode !== 0) {
-                    return;
-                }
-                if (i.main) {
-                    if (typeof i.main !== "function") {
-                        Ezy.formatError(`Error when rendering, expected component.main attribute as function, found ${typeof i.main}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
-                        return this.set(errors.RENDER_ERROR);
                     }
-                    this.mains.push({
-                        el: card,
-                        obj: i,
-                        func: i.main
-                    });
-                }
-                if (i.pipe) {
-                    Ezy.validatePipe(this, i.pipe, traceback);
-                    if (this.statusCode !== 0) {
-                        return;
+                    if (i.pipe) {
+                        Ezy.validatePipe(this, i.pipe, traceback);
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
+                        this.pipes[i.pipe.name] = i.pipe;
                     }
-                    this.pipes[i.pipe.name] = i.pipe;
-                }
-                if (i.data) {
-                    for (const k in i.data) {
-                        card.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, i.inherit || {}));
-                    }
-                }
-                this.beforePlugComponent(card, traceback);
-                if (this.statusCode !== 0) {
-                    return;
-                }
-                if (i.belt) {
-                    if (!Array.isArray(i.belt.buckle)) {
-                        Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
-                        return this.set(errors.TYPE_ERROR);
-                    }
-                    for (const buckle of i.belt.buckle) {
-                        if (buckle in this.#varage) {
-                            this.#listen2[buckle] = [fatherData, fatherElement];
+                    if (i.data) {
+                        for (const k in i.data) {
+                            card.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, i.inherit || {}));
+                            if (this.statusCode !== 0) {
+                                return;
+                            }
                         }
                     }
-                }
-                if (k === 0 && i.varAs) {
-                    this.asVar(card, i.varAs, traceback);
+                    this.beforePlugComponent(card, traceback);
                     if (this.statusCode !== 0) {
                         return;
                     }
-                }
-                if (i.text) {
-                    card.title = this.preCompileStr(i.text, traceback, i.inherit || {});
-                }
-                if (i._type) {
-                    card.type = i._type;
+                    if (i.belt) {
+                        if (!Array.isArray(i.belt.buckle)) {
+                            Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                            return this.set(errors.TYPE_ERROR);
+                        }
+                        for (const buckle of i.belt.buckle) {
+                            if (buckle in this.#varage) {
+                                this.#listen2[buckle] = [fatherData, fatherElement];
+                            }
+                        }
+                    }
+                    if (k === 0 && i.varAs) {
+                        this.asVar(card, i.varAs, traceback);
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
+                    }
+                    if (i.text) {
+                        card.title = this.preCompileStr(i.text, traceback, i.inherit || {});
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
+                    }
+                    if (i._type) {
+                        card.type = i._type;
+                    }
                 }
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
                 if (this.statusCode !== 0) {
                     return;
                 }
-                utils.applyStyles(card, i.style);
-                for (const j in (i.events || {})) {
-                    this.addListener(j, i, card, traceback);
+                if (!frag) {
+                    utils.applyStyles(card, i.style);
+                    for (const j in (i.events || {})) {
+                        this.addListener(j, i, card, traceback);
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
+                    }
+                    let r = this.preCompileStr(
+                        (i.content || ""),
+                        traceback, i.inherit || {}
+                    );
                     if (this.statusCode !== 0) {
                         return;
                     }
-                }
-                let r = this.preCompileStr(
-                    (i.content || ""),
-                    traceback, i.inherit || {}
-                );
-                if (this.config.escapeHTML || config.escapeHTML || i.config?.escapeHTML) {
-                    r = utils.htmlEscape(r);
-                }
-                card.innerHTML += r;
-                if (this.statusCode !== 0) {
-                    return;
-                }
-                for (const j in i) {
-                    if (keyword.has(j)) {
-                        continue;
+                    if (this.config.escapeHTML || config.escapeHTML || i.config?.escapeHTML) {
+                        r = utils.htmlEscape(r);
                     }
-                    card.setAttribute(j, this.preCompileStr(i[j], traceback, i.inherit));
-                    temp[j] = card[j];
+                    card.innerHTML += r;
+                    for (const j in i) {
+                        if (keyword.has(j)) {
+                            continue;
+                        }
+                        card.setAttribute(j, this.preCompileStr(i[j], traceback, i.inherit));
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
+                        temp[j] = card[j];
+                    }
                 }
                 temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
                 if (this.statusCode !== 0) {
@@ -1386,8 +1409,9 @@ export class render {
         const own = {
             time: 0
         },
-            todo = document.createDocumentFragment();
-        const vdom = [];
+            todo = document.createDocumentFragment(),
+            vdom = [],
+            frag = i.isFragment || false;
         for (let j of (i.component || [])) {
             if (typeof j === "string") {
                 if (!this.classify) {
@@ -1419,103 +1443,112 @@ export class render {
                 let first = -1;
                 for (const k in obj) {
                     first++;
-                    const el = $$(j.tag || config.tag || "div"),
+                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || "div")),
                         temp = {
                             children: [],
                             dataset: {}
                         };
-                    el.classList.add(...this.#extendType(...(j.type || []), ...(config.type || [])));
-                    utils.applyStyles(el, j.style);
+                    if (!frag) {
+                        el.classList.add(...this.#extendType(...(j.type || []), ...(config.type || [])));
+                        utils.applyStyles(el, j.style);
+                    }
                     const myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
-                    for (const evt in j.events) {
-                        this.addListener(evt, j, el, myTraceback);
-                        if (this.statusCode !== 0) {
-                            return;
+                    if (!frag) {
+                        for (const evt in j.events) {
+                            this.addListener(evt, j, el, myTraceback);
+                            if (this.statusCode !== 0) {
+                                return;
+                            }
                         }
                     }
                     const replace = { ...replacement, ...j.inherit, key: k, item: obj[k], ...own };
-                    for (const parm in j) {
-                        if (keyword.has(parm)) {
-                            continue;
-                        }
-                        el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, replace));
-                        temp[parm] = el[parm];
-                    }
-                    let r = this.preCompileStr(
-                        (j.content || ""), myTraceback, replace
-                    );
-                    if (this.config.escapeHTML || config.escapeHTML || j.config?.escapeHTML) {
-                        r = utils.htmlEscape(r);
-                    }
-                    el.innerHTML += r;
-                    if (this.statusCode !== 0) {
-                        return;
-                    }
-                    if (j.expire) {
-                        setTimeout((function () {
-                            el.innerHTML = "";
-                            el.remove();
-                            if (j.pipe) {
-                                delete this.pipes[j.pipe.name];
+                    if (!frag) {
+                        for (const parm in j) {
+                            if (keyword.has(parm)) {
+                                continue;
                             }
-                            this.removeVdom(temp);
-                            setTimeout(() => {
-                                j.expire.expired?.();
+                            el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, replace));
+                            if (this.statusCode !== 0) {
+                                return;
+                            }
+                            temp[parm] = el[parm];
+                        }
+                        let r = this.preCompileStr(
+                            (j.content || ""), myTraceback, replace
+                        );
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
+                        if (this.config.escapeHTML || config.escapeHTML || j.config?.escapeHTML) {
+                            r = utils.htmlEscape(r);
+                        }
+                        el.innerHTML += r;
+                        if (j.expire) {
+                            setTimeout((function () {
+                                el.innerHTML = "";
+                                el.remove();
+                                if (j.pipe) {
+                                    delete this.pipes[j.pipe.name];
+                                }
+                                this.removeVdom(temp);
+                                setTimeout(() => {
+                                    j.expire.expired?.();
+                                });
+                            }).bind(this), j.expire.date - this.historyRender);
+                        }
+                        Ezy.validateValidation(this, el, j.validate || "", traceback, parentNode);
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
+                        if (j.main) {
+                            if (typeof j.main !== "function") {
+                                Ezy.formatError(`Error when rendering, expected component.main attribute as function, found ${typeof j.main}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
+                                return this.set(errors.RENDER_ERROR);
+                            }
+                            this.mains.push({
+                                el,
+                                obj: j,
+                                func: j.main
                             });
-                        }).bind(this), j.expire.date - this.historyRender);
-                    }
-                    Ezy.validateValidation(this, el, j.validate || "", traceback, parentNode);
-                    if (this.statusCode !== 0) {
-                        return;
-                    }
-                    if (j.main) {
-                        if (typeof j.main !== "function") {
-                            Ezy.formatError(`Error when rendering, expected component.main attribute as function, found ${typeof j.main}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
-                            return this.set(errors.RENDER_ERROR);
                         }
-                        this.mains.push({
-                            el,
-                            obj: j,
-                            func: j.main
-                        });
-                    }
-                    if (j.pipe) {
-                        Ezy.validatePipe(this, j.pipe, traceback);
-                        if (this.statusCode !== 0) {
-                            return;
+                        if (j.pipe) {
+                            Ezy.validatePipe(this, j.pipe, traceback);
+                            if (this.statusCode !== 0) {
+                                return;
+                            }
+                            this.pipes[j.pipe.name] = j.pipe;
                         }
-                        this.pipes[j.pipe.name] = j.pipe;
-                    }
-                    if (j.text) {
-                        el.title = this.preCompileStr(j.text, myTraceback, replace);
-                    }
-                    if (j._type) {
-                        el.type = j._type;
-                    }
-                    if (j.data) {
-                        for (const k in j.data) {
-                            el.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, replace));
+                        if (j.text) {
+                            el.title = this.preCompileStr(j.text, myTraceback, replace);
                         }
-                    }
-                    this.beforePlugComponent(el, myTraceback);
-                    if (this.statusCode !== 0) {
-                        return;
-                    }
-                    if (j.belt) {
-                        if (!Array.isArray(j.belt.buckle)) {
-                            Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
-                            return this.set(errors.TYPE_ERROR);
+                        if (j._type) {
+                            el.type = j._type;
                         }
-                        for (const buckle of j.belt.buckle) {
-                            if (buckle in this.#varage) {
-                                this.#listen2[buckle] = [i, parentNode];
+                        if (j.data) {
+                            for (const k in j.data) {
+                                el.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, replace));
                             }
                         }
-                    }
-                    if (first === 0) {
-                        this.asVar(el, j.varAs, myTraceback);
+                        this.beforePlugComponent(el, myTraceback);
                         if (this.statusCode !== 0) {
                             return;
+                        }
+                        if (j.belt) {
+                            if (!Array.isArray(j.belt.buckle)) {
+                                Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                                return this.set(errors.TYPE_ERROR);
+                            }
+                            for (const buckle of j.belt.buckle) {
+                                if (buckle in this.#varage) {
+                                    this.#listen2[buckle] = [i, parentNode];
+                                }
+                            }
+                        }
+                        if (first === 0 && j.varAs) {
+                            this.asVar(el, j.varAs, myTraceback);
+                            if (this.statusCode !== 0) {
+                                return;
+                            }
                         }
                     }
                     todo.appendChild(el);
@@ -1539,102 +1572,115 @@ export class render {
                 }
             } else {
                 for (let k = 0; k < (j.times || 1); k++) {
-                    const el = $$(j.tag || config.tag || "div"),
+                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || "div")),
                         temp = {
                             children: [],
                             dataset: {}
                         };
-                    el.classList.add(...this.#extendType(...(j.type || []), ...(config.type || [])));
-                    utils.applyStyles(el, j.style);
+                    if (!frag) {
+                        el.classList.add(...this.#extendType(...(j.type || []), ...(config.type || [])));
+                        utils.applyStyles(el, j.style);
+                    }
                     const myTraceback = traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`;
-                    for (const evt in j.events) {
-                        this.addListener(evt, j, el, myTraceback);
+                    if (!frag) {
+                        for (const evt in j.events) {
+                            this.addListener(evt, j, el, myTraceback);
+                            if (this.statusCode !== 0) {
+                                return;
+                            }
+                        }
+                        for (const parm in j) {
+                            if (keyword.has(parm)) {
+                                continue;
+                            }
+                            el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, { ...replacement, ...j.inherit, ...own }));
+                            temp[parm] = el[parm];
+                            if (this.statusCode !== 0) {
+                                return;
+                            }
+                        }
+                        let r = this.preCompileStr(
+                            (j.content || ""), myTraceback, { ...replacement, ...j.inherit, ...own }
+                        );
                         if (this.statusCode !== 0) {
                             return;
                         }
-                    }
-                    for (const parm in j) {
-                        if (keyword.has(parm)) {
-                            continue;
+                        if (this.config.escapeHTML || config.escapeHTML || j.config?.escapeHTML) {
+                            r = utils.htmlEscape(r);
                         }
-                        el.setAttribute(parm, this.preCompileStr(j[parm], myTraceback, { ...replacement, ...j.inherit, ...own }));
-                        temp[parm] = el[parm];
-                    }
-                    let r = this.preCompileStr(
-                        (j.content || ""), myTraceback, { ...replacement, ...j.inherit, ...own }
-                    );
-                    if (this.config.escapeHTML || config.escapeHTML || j.config?.escapeHTML) {
-                        r = utils.htmlEscape(r);
-                    }
-                    el.innerHTML += r;
-                    if (this.statusCode !== 0) {
-                        return;
-                    }
-                    if (j.expire) {
-                        setTimeout((function () {
-                            el.innerHTML = "";
-                            el.remove();
-                            if (j.pipe) {
-                                delete this.pipes[j.pipe.name];
+                        el.innerHTML += r;
+                        if (j.expire) {
+                            setTimeout((function () {
+                                el.innerHTML = "";
+                                el.remove();
+                                if (j.pipe) {
+                                    delete this.pipes[j.pipe.name];
+                                }
+                                this.removeVdom(temp);
+                                setTimeout(() => {
+                                    j.expire.expired?.();
+                                });
+                            }).bind(this), j.expire.date - this.historyRender);
+                        }
+                        Ezy.validateValidation(this, el, j.validate || "", traceback, parentNode);
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
+                        if (j.main) {
+                            if (typeof j.main !== "function") {
+                                Ezy.formatError(`Error when rendering, expected component.main attribute as function, found ${typeof j.main}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
+                                return this.set(errors.RENDER_ERROR);
                             }
-                            this.removeVdom(temp);
-                            setTimeout(() => {
-                                j.expire.expired?.();
+                            this.mains.push({
+                                el,
+                                obj: j,
+                                func: j.main
                             });
-                        }).bind(this), j.expire.date - this.historyRender);
-                    }
-                    Ezy.validateValidation(this, el, j.validate || "", traceback, parentNode);
-                    if (this.statusCode !== 0) {
-                        return;
-                    }
-                    if (j.main) {
-                        if (typeof j.main !== "function") {
-                            Ezy.formatError(`Error when rendering, expected component.main attribute as function, found ${typeof j.main}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
-                            return this.set(errors.RENDER_ERROR);
                         }
-                        this.mains.push({
-                            el,
-                            obj: j,
-                            func: j.main
-                        });
-                    }
-                    if (j.pipe) {
-                        Ezy.validatePipe(this, j.pipe, traceback);
-                        if (this.statusCode !== 0) {
-                            return;
+                        if (j.pipe) {
+                            Ezy.validatePipe(this, j.pipe, traceback);
+                            if (this.statusCode !== 0) {
+                                return;
+                            }
+                            this.pipes[j.pipe.name] = j.pipe;
                         }
-                        this.pipes[j.pipe.name] = j.pipe;
-                    }
-                    if (j.text) {
-                        el.title = this.preCompileStr(j.text, myTraceback, { ...replacement, ...j.inherit, ...own });
-                    }
-                    if (j._type) {
-                        el.type = j._type;
-                    }
-                    if (j.data) {
-                        for (const k in j.data) {
-                            el.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, { ...replacement, ...j.inherit, ...own }));
-                        }
-                    }
-                    this.beforePlugComponent(el, myTraceback);
-                    if (this.statusCode !== 0) {
-                        return;
-                    }
-                    if (j.belt) {
-                        if (Array.isArray(j.belt.buckle)) {
-                            Ezy.formatError(`Expected component.belt.buckle as string, found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
-                            return this.set(errors.TYPE_ERROR);
-                        }
-                        for (const buckle of j.belt.buckle) {
-                            if (buckle in this.#varage) {
-                                this.#listen2[buckle] = [i, parentNode];
+                        if (j.text) {
+                            el.title = this.preCompileStr(j.text, myTraceback, { ...replacement, ...j.inherit, ...own });
+                            if (this.statusCode !== 0) {
+                                return;
                             }
                         }
-                    }
-                    if (k === 0) {
-                        this.asVar(el, j.varAs, myTraceback);
+                        if (j._type) {
+                            el.type = j._type;
+                        }
+                        if (j.data) {
+                            for (const k in j.data) {
+                                el.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(j.data[k], myTraceback, { ...replacement, ...j.inherit, ...own }));
+                                if (this.statusCode !== 0) {
+                                    return;
+                                }
+                            }
+                        }
+                        this.beforePlugComponent(el, myTraceback);
                         if (this.statusCode !== 0) {
                             return;
+                        }
+                        if (j.belt) {
+                            if (Array.isArray(j.belt.buckle)) {
+                                Ezy.formatError(`Expected component.belt.buckle as string, found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                                return this.set(errors.TYPE_ERROR);
+                            }
+                            for (const buckle of j.belt.buckle) {
+                                if (buckle in this.#varage) {
+                                    this.#listen2[buckle] = [i, parentNode];
+                                }
+                            }
+                        }
+                        if (k === 0) {
+                            this.asVar(el, j.varAs, myTraceback);
+                            if (this.statusCode !== 0) {
+                                return;
+                            }
                         }
                     }
                     todo.appendChild(el);

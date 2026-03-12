@@ -6,6 +6,9 @@ const pageData = {
     onStart: {
         funcs: []
     },
+    config: {
+        debug: true
+    },
     data: {
         details: {
             "Introduce to Ezy": "{ezy} is a modern, clean, and efficient framework. Projects can be easily written in JSON. So the networking will be more efficent",
