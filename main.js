@@ -410,6 +410,7 @@ export class render {
     #typeExtend = {};
     #listen2 = {};
     #debug = false;
+    #pluginLeftovers = {};
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -469,6 +470,7 @@ export class render {
      * @returns null
      */
     reload() {
+        // clean-up section start
         if (!this.config?.keepConsole) {
             console.clear();
         }
@@ -486,6 +488,16 @@ export class render {
             }
             this.loadPage.length = 0;
         }
+        for (const i of this.#pluginLeftovers.timeouts) {
+            clearTimeout(i);
+        }
+        for (const i of this.#pluginLeftovers.events) {
+            document.removeEventListener(i);
+        }
+        for (const i of this.#pluginLeftovers.animationFrames) {
+            cancelAnimationFrame(i);
+        }
+        // clean-up section end
         this.historyRender = +new Date();
         if (!this.data) {
             this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
@@ -568,7 +580,10 @@ export class render {
             warn("[ezy.js] MAJOR SUGGESTION: : Suggest adding onStart function list to handle preprocess");
         }
         for (const i of Ezy.plugins) {
-            i.onStart?.(data);
+            const { timeouts, events, animationFrames } = i.onStart?.(data) || {};
+            this.#pluginLeftovers.timeouts.push(...timeouts);
+            this.#pluginLeftovers.events.push(...events);
+            this.#pluginLeftovers.animationFrames.push(...animationFrames);
         }
         const el = document.createDocumentFragment();
         this.vdom.children.push(...this.sectionRender(data, el, data.name || "", data.title || "", this.contentRender));
@@ -583,7 +598,10 @@ export class render {
             warn("[ezy.js] MINOR SUGGESTION: : Suggest adding onLoad function list to handle onLoad process");
         }
         for (const i of Ezy.plugins) {
-            i.onLoad?.(data);
+            const { timeouts, events, animationFrames } = i.onLoad?.(data) || {};
+            this.#pluginLeftovers.timeouts.push(...timeouts);
+            this.#pluginLeftovers.events.push(...events);
+            this.#pluginLeftovers.animationFrames.push(...animationFrames);
         }
         if (this.statusCode !== 0) {
             return;
@@ -1747,7 +1765,10 @@ export class render {
      */
     plugComponent(el, traceback) {
         for (const i of Ezy.plugins) {
-            i.onComponentLoad?.(this, el, traceback);
+            const { timeouts, events, animationFrames } = i.onComponentLoad?.(this, el, traceback) || {};
+            this.#pluginLeftovers.timeouts.push(...timeouts);
+            this.#pluginLeftovers.events.push(...events);
+            this.#pluginLeftovers.animationFrames.push(...animationFrames);
             if (this.statusCode !== 0) {
                 return;
             }
@@ -1761,7 +1782,10 @@ export class render {
      */
     beforePlugComponent(el, traceback) {
         for (const i of Ezy.plugins) {
-            i.beforeComponentLoad?.(this, el, traceback);
+            const { timeouts, events, animationFrames } = i.beforeComponentLoad?.(this, el, traceback) || {};
+            this.#pluginLeftovers.timeouts.push(...timeouts);
+            this.#pluginLeftovers.events.push(...events);
+            this.#pluginLeftovers.animationFrames.push(...animationFrames);
             if (this.statusCode !== 0) {
                 return;
             }

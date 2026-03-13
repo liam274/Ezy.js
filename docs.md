@@ -10,6 +10,7 @@ If you're curious about our doucment's specific terminologies, please take a loo
 - [CO Config](#general-config-attributes)
 - [CO Attributes](#introduce-to-attributes)
 - [Builtins](#builtin-functions)
+- [Plugins](#plugins)
 
 ## Data Structure
 
@@ -115,4 +116,24 @@ In the following sample, `#a` and `#b` is the first-level children of `#root`, w
     <div id="c">
     </div>
 </div>
+```
+
+## Plugins
+*Ezy.js* provided a wide range of life cycle hooks:
+- `onStart`, which is triggered at every `render.render` is called
+- `onLoad`, which is triggered when every render process is done
+- `onComponentLoad`, which is triggered after any component is load
+- `beforeComponentLoad`, which is triggered before any component is load
+### *Note that developers have the responsibility to return an Object which delicates what eventListeners is hooked, what timeout is set, etc. Unless you don't want to clean it before every reload.*
+This is the cleanup code:
+```JavaScript
+for (const i of this.#pluginLeftovers.timeouts) {
+    clearTimeout(i);
+}
+for (const i of this.#pluginLeftovers.events) {
+    document.removeEventListener(i);
+}
+for (const i of this.#pluginLeftovers.animationFrames) {
+    cancelAnimationFrame(i);
+}
 ```
