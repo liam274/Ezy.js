@@ -11,6 +11,8 @@ If you're curious about our doucment's specific terminologies, please take a loo
 - [CO Attributes](#introduce-to-attributes)
 - [Builtins](#builtin-functions)
 - [Plugins](#plugins)
+- [Belt Syntax](#belt-syntax)
+- [Template Syntax](#template-syntax)
 
 ## Data Structure
 
@@ -126,6 +128,11 @@ for (const i of this.#pluginLeftovers.animationFrames) {
 ## Belt Syntax
 Cautions:
 - Because belt syntax will update the entire element, please ensure that if you want to keep anything in status(for example input tags, etc.), please don't put it in the same or higher level.
+
+## Template Syntax
+In strings, we have:
+`{{systemVariable}} vs {customVariables}`
+while custom variables is the render.data, systemVariable provide ways to know about yourself(from the POV of component)
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.
