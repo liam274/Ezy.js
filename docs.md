@@ -13,6 +13,7 @@ If you're curious about our doucment's specific terminologies, please take a loo
 - [Plugins](#plugins)
 - [Belt Syntax](#belt-syntax)
 - [Template Syntax](#template-syntax)
+- [Render Methods](#render-methods)
 
 ## Data Structure
 
@@ -77,7 +78,7 @@ Except the specific root structure, *Ezy.js* is very dynamic and flexible, which
 | `main` | This is a function that will be executed in every milisecond, reciving the component object itself as the first argument while the component element as the second. |
 | `data` | will be stored as `data-*` attributes. |
 | `config` | Configuration to the element and its children(first-level children only). |
-| `belt` | ***BELT SYNTAX***. You can use `belt.buckle` to bind a varage variable, so when the variable is being changed, the CO will be re-rendered! |
+| `belt` | ***BELT SYNTAX***. You can use `belt.buckle` to bind a varage variable, so when the variable is being changed, the CO will be re-rendered! | [Example](#belt-syntax) |
 | `_type` | defines the type attribute in HTML tag |
 | `isFragment` | If it's set as truly values, the framework will use `document.createDocumentFragment()` to create the current element to pick up its components. Other Node-related attributes will be dismissed due to this attribute |
 
@@ -126,13 +127,25 @@ for (const i of this.#pluginLeftovers.animationFrames) {
 ```
 
 ## Belt Syntax
-Cautions:
+Since belt syntax tends to update its father component and its father component's childrens, we suggest that developers should put a CSS-less div to contain the component, to optimize the performance.
+
+| attribute name | expected type | usage |
+| -------------- | ------------- | ----- |
+| buckle | `string[]` | Tell the framework what varage variables should it watch at |
+| options | `Object` | Tell the framework when re-render, what options should it follow |
+
+#### Cautions:
 - Because belt syntax will update the entire element, please ensure that if you want to keep anything in status(for example input tags, etc.), please don't put it in the same or higher level.
 
 ## Template Syntax
 In strings, we have:
 `{{systemVariable}} vs {customVariables}`
 while custom variables is the render.data, systemVariable provide ways to know about yourself(from the POV of component)
+
+## Render Methods
+| method name | check statusCode | details |
+| ----------- | ---------------- | ------- |
+| reload | true | [document](render.reload.md) |
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.

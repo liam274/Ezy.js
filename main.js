@@ -515,14 +515,18 @@ export class render {
         this.#varage = Ezy.watchout({ ...varage, ...(this.data.data || {}) }, {
             late: (function (_, key) {
                 if (key in this.#listen2) {
-                    const [obj, el, cleanup] = this.#listen2[key];
+                    const [obj, el, cleanup, options] = this.#listen2[key];
                     this.#oldBoys = {};
                     if (cleanup) {
-                        cleanup.innerHTML = "";
-                        this.render(obj, cleanup);
+                        if (utils._default(options.deep, true)) {
+                            cleanup.innerHTML = "";
+                        }
+                        this.render(obj, cleanup, options);
                     } else {
-                        el.innerHTML = "";
-                        this.render(obj, el);
+                        if (utils._default(options.deep, true)) {
+                            el.innerHTML = "";
+                        }
+                        this.render(obj, el, options);
                     }
                 }
             }).bind(this)
@@ -576,9 +580,10 @@ export class render {
      * render at any node that you'd like to
      * @param {Object} data
      * @param {Node} root - Root element
+     * @param {Object} options
      * @returns null
      */
-    render(data, root) {
+    render(data, root, options = {}) {
         if (!data) {
             this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
                 this.maxWait, "Resource page.data not found", root));
@@ -597,7 +602,7 @@ export class render {
             this.#pluginLeftovers.animationFrames.push(...animationFrames);
         }
         const el = document.createDocumentFragment();
-        this.vdom.children.push(...this.sectionRender(data, el, data.name || "", data.title || "", this.contentRender, root));
+        this.vdom.children.push(...this.sectionRender(data, el, data.name || "", data.title || "", this.contentRender, root, options));
         log(`%c[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`,
             this.statusCode === 0 ? "font-size: 30px; font-weight: bold;color: #e0e0e0;" : "font-size: 30px; font-weight: bold;color: red;");
         if (data.onLoad) {
@@ -750,7 +755,7 @@ export class render {
      * @param {Node} root
      * @returns {Object|void}
      */
-    sectionRender = (sectionData, parentElement, sectionName, title, createElement, root) => {
+    sectionRender = (sectionData, parentElement, sectionName, title, createElement, root, options) => {
         const traceback = `${title} -> ${sectionName}`;
         if (!sectionData) {
             Ezy.formatError(`function found first parameter in ${sectionData}, expected object, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
@@ -766,7 +771,7 @@ export class render {
             if (this.statusCode !== 0) {
                 return;
             }
-            const temp = createElement(i, item, { ...(sectionData.config || {}), ...(i.config || {}) }, sectionData, parentElement, root);
+            const temp = createElement(i, item, { ...(sectionData.config || {}), ...(i.config || {}) }, sectionData, parentElement, root, options);
             if (this.statusCode !== 0) {
                 return;
             }
@@ -850,7 +855,7 @@ export class render {
             }
             for (const buckle of i.belt.buckle) {
                 if (buckle in this.#varage) {
-                    this.#listen2[buckle] = [fatherData, card, root];
+                    this.#listen2[buckle] = [fatherData, card, root, i.belt.options || {}];
                 }
             }
         }
@@ -902,9 +907,14 @@ export class render {
      * @param {string} _
      * @param {Object} i
      * @param {Object} config
+     * @param {Object} fatherData
+     * @param {Node} fatherElement
+     * @param {Node} root
+     * @param {Object} options
      * @returns {void|Object}
      */
-    contentRender = (_, i, config, fatherData, fatherElement, root) => {
+    contentRender = (_, i, config, fatherData, fatherElement, root, options) => {
+        options.deep = utils._default(options.deep, true);
         const title = fatherData.title || "",
             traceback = `${title}`,
             vdom = [];
@@ -959,7 +969,9 @@ export class render {
                         return;
                     }
                 }
-                temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, replacement));
+                if (options.deep) {
+                    temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, replacement));
+                }
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -999,7 +1011,9 @@ export class render {
                         return;
                     }
                 }
-                temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
+                if (options.deep) {
+                    temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
+                }
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -1420,7 +1434,7 @@ export class render {
             }
             for (const buckle of j.belt.buckle) {
                 if (buckle in this.#varage) {
-                    this.#listen2[buckle] = [i, parentNode, undefined];
+                    this.#listen2[buckle] = [i, parentNode, undefined, j.belt.options || {}];
                 }
             }
         }
