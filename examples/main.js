@@ -41,9 +41,6 @@ export const log = console.log,
     $$ = document.createElement.bind(document),
     error = console.error.bind(console),
     warn = console.warn.bind(console);
-function removePrefix(str, prefix) {
-    return str.startsWith(prefix) ? str.slice(prefix.length) : str;
-}
 
 export const keyword = new Set([
     "type", "component", "tag",
@@ -518,10 +515,15 @@ export class render {
         this.#varage = Ezy.watchout({ ...varage, ...(this.data.data || {}) }, {
             late: (function (_, key) {
                 if (key in this.#listen2) {
-                    const [obj, el] = this.#listen2[key];
-                    log(obj);
-                    el.innerHTML = "";
-                    this.render(obj, el);
+                    const [obj, el, cleanup] = this.#listen2[key];
+                    this.#oldBoys = {};
+                    if (cleanup) {
+                        cleanup.innerHTML = "";
+                        this.render(obj, cleanup);
+                    } else {
+                        el.innerHTML = "";
+                        this.render(obj, el);
+                    }
                 }
             }).bind(this)
         });
@@ -595,7 +597,7 @@ export class render {
             this.#pluginLeftovers.animationFrames.push(...animationFrames);
         }
         const el = document.createDocumentFragment();
-        this.vdom.children.push(...this.sectionRender(data, el, data.name || "", data.title || "", this.contentRender));
+        this.vdom.children.push(...this.sectionRender(data, el, data.name || "", data.title || "", this.contentRender, root));
         log(`%c[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`,
             this.statusCode === 0 ? "font-size: 30px; font-weight: bold;color: #e0e0e0;" : "font-size: 30px; font-weight: bold;color: red;");
         if (data.onLoad) {
@@ -745,9 +747,10 @@ export class render {
      * @param {string} sectionName
      * @param {string} title
      * @param {function(string, Object, Object, Object)} createElement
+     * @param {Node} root
      * @returns {Object|void}
      */
-    sectionRender = (sectionData, parentElement, sectionName, title, createElement) => {
+    sectionRender = (sectionData, parentElement, sectionName, title, createElement, root) => {
         const traceback = `${title} -> ${sectionName}`;
         if (!sectionData) {
             Ezy.formatError(`function found first parameter in ${sectionData}, expected object, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
@@ -763,7 +766,7 @@ export class render {
             if (this.statusCode !== 0) {
                 return;
             }
-            const temp = createElement(i, item, { ...(sectionData.config || {}), ...(i.config || {}) }, sectionData, parentElement);
+            const temp = createElement(i, item, { ...(sectionData.config || {}), ...(i.config || {}) }, sectionData, parentElement, root);
             if (this.statusCode !== 0) {
                 return;
             }
@@ -791,7 +794,7 @@ export class render {
         }
         return result;
     }
-    #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp) {
+    #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp, root) {
         card.classList.add(...this.#extendType(...(i.type || []), ...(config.type || [])));
         if (i.expire) {
             setTimeout((function () {
@@ -847,7 +850,7 @@ export class render {
             }
             for (const buckle of i.belt.buckle) {
                 if (buckle in this.#varage) {
-                    this.#listen2[buckle] = [fatherData, fatherElement];
+                    this.#listen2[buckle] = [fatherData, card, root];
                 }
             }
         }
@@ -901,20 +904,20 @@ export class render {
      * @param {Object} config
      * @returns {void|Object}
      */
-    contentRender = (_, i, config, fatherData, fatherElement) => {
+    contentRender = (_, i, config, fatherData, fatherElement, root) => {
         const title = fatherData.title || "",
             traceback = `${title}`,
             vdom = [];
         if (typeof i === "string") {
-            if (!this.classify) {
+            if (Object.keys(this.classify || Ezy.components).length === 0) {
                 Ezy.formatError(`Error when trying to use classify component without classify dictionary, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
                 return this.set(errors.CLASSIFY_ERROR);
             }
-            if (!(this.classify[i] || Ezy.components[i])) {
+            if (!(this.classify?.[i] || Ezy.components?.[i])) {
                 Ezy.formatError(`Error when trying to use classify component "${i}" without definition, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
                 return this.set(errors.CLASSIFY_ERROR);
             }
-            i = this.classify[i] || Ezy.components[i];
+            i = this.classify?.[i] || Ezy.components?.[i];
         }
         const todo = document.createDocumentFragment(),
             frag = i.isFragment || false;
@@ -940,7 +943,7 @@ export class render {
                         ...this.systemPlot, ...(i.inherit || {}), key: k, item: obj[k]
                     };
                 if (!frag) {
-                    this.#logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp);
+                    this.#logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp, root);
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -956,7 +959,7 @@ export class render {
                         return;
                     }
                 }
-                temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, replacement));
+                temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, replacement));
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -980,7 +983,7 @@ export class render {
                         dataset: {}
                     };
                 if (!frag) {
-                    this.#logic1(card, i, fatherData, fatherElement, k, i.inherit || {}, traceback, config, temp);
+                    this.#logic1(card, i, fatherData, fatherElement, k, i.inherit || {}, traceback, config, temp, root);
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -996,7 +999,7 @@ export class render {
                         return;
                     }
                 }
-                temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
+                temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -1159,6 +1162,10 @@ export class render {
      * @returns {string|void}
      */
     preCompileStr(data, traceback, replacement = {}, pipeData = {}) {
+        if (typeof data !== "string") {
+            Ezy.formatError(`Error when trying to parse string, expected string, found ${data}`, errorLevels.CRITICAL_ERROR, "Type Error");
+            return this.set(errors.TYPE_ERROR);
+        }
         const result = [];
         let skip = false,
             startVar = false,
@@ -1413,7 +1420,7 @@ export class render {
             }
             for (const buckle of j.belt.buckle) {
                 if (buckle in this.#varage) {
-                    this.#listen2[buckle] = [i, parentNode];
+                    this.#listen2[buckle] = [i, parentNode, undefined];
                 }
             }
         }
@@ -1492,7 +1499,7 @@ export class render {
                     if (this.statusCode !== 0) {
                         return;
                     }
-                    temp.children.push(...this.pushComponent(j, el, myTraceback, { ...config, ...(j.config || {}) }, replace));
+                    temp.children.push(...this.pushComponent(j, utils.isDocumentFragment(el) ? parentNode : el, myTraceback, { ...config, ...(j.config || {}) }, replace));
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1531,7 +1538,8 @@ export class render {
                     if (this.statusCode !== 0) {
                         return;
                     }
-                    temp.children.push(...this.pushComponent(j, el, myTraceback, { ...config, ...(j.config || {}) }, { ...replacement, ...j.inherit, ...own }));
+                    temp.children.push(...this.pushComponent(j, utils.isDocumentFragment(el) ? parentNode : j, myTraceback,
+                        { ...config, ...(j.config || {}) }, { ...replacement, ...j.inherit, ...own }));
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1641,7 +1649,7 @@ export class render {
             return this.set(errors.VALUE_ERROR);
         }
         if (obj.preventDefault) {
-            el.addEventListener(removePrefix(j, "on"), function (e) {
+            el.addEventListener(utils.removePrefix(j, "on").toLocaleLowerCase(), function (e) {
                 e.preventDefault();
                 for (const i of listener) {
                     i(e);
@@ -1649,7 +1657,7 @@ export class render {
             });
         }
         else {
-            el.addEventListener(removePrefix(j, "on"), function (e) {
+            el.addEventListener(utils.removePrefix(j, "on").toLocaleLowerCase(), function (e) {
                 for (const i of listener) {
                     i(e);
                 }
