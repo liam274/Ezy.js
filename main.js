@@ -10,7 +10,7 @@ import * as utils from "./utils.js";
     by Liam Lei
     Started from 2026.02.11
 
-    Release: 0.0.6 (Stable)
+    Release: 0.0.9 (Stable)
 
     Acknowledgments:
         - Nathan Wong. Thanks for :
