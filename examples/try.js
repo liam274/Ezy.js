@@ -116,9 +116,11 @@ const app = new render(
                     },
                     // Show the current email value (also updates via belt)
                     {
-                        tag: "p",
-                        content: "Current email: {email}",
-                        belt: { buckle: ["email"] }
+                        component: [{
+                            tag: "p",
+                            content: "Current email: {email}",
+                            belt: { buckle: ["email"] }
+                        }]
                     }
                 ]
             },
