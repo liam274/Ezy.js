@@ -786,7 +786,7 @@ export class render {
         }
         return result;
     }
-    #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config) {
+    #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp) {
         card.classList.add(...this.#extendType(...(i.type || []), ...(config.type || [])));
         if (i.expire) {
             setTimeout((function () {
@@ -935,7 +935,7 @@ export class render {
                         ...this.systemPlot, ...(i.inherit || {}), key: k, item: obj[k]
                     };
                 if (!frag) {
-                    this.#logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config);
+                    this.#logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp);
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -975,7 +975,10 @@ export class render {
                         dataset: {}
                     };
                 if (!frag) {
-                    this.#logic1(card, i, fatherData, fatherElement, k, i.inherit || {}, traceback, config);
+                    this.#logic1(card, i, fatherData, fatherElement, k, i.inherit || {}, traceback, config, temp);
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                 }
                 todo.appendChild(card);
                 this.plugComponent(card, traceback);
@@ -984,6 +987,9 @@ export class render {
                 }
                 if (!frag) {
                     this.#logic2(card, i, temp, config, i.inherit || {}, traceback);
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
                 }
                 temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
                 if (this.statusCode !== 0) {
@@ -1472,6 +1478,9 @@ export class render {
                         replace = { ...replacement, ...j.inherit, key: k, item: obj[k], ...own };
                     if (!frag) {
                         this.#pushLogic(j, el, replace, temp, config, traceback, myTraceback, first, parentNode, i);
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
                     }
                     todo.appendChild(el);
                     this.plugComponent(el, myTraceback);
@@ -1508,6 +1517,9 @@ export class render {
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
                     if (!frag) {
                         this.#pushLogic(j, el, { ...replacement, ...j.inherit, ...own }, temp, config, traceback, myTraceback, k, parentNode, i);
+                        if (this.statusCode !== 0) {
+                            return;
+                        }
                     }
                     todo.appendChild(el);
                     this.plugComponent(el, myTraceback);
