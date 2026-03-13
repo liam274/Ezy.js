@@ -17,10 +17,11 @@ import * as utils from "./utils.js";
             + him providing his seat, as it's close to the electricity socket
         - Deepseek. Thanks for it to:
             + debug js
-            + give out improving suggestions
+            + give out improvement suggestions
             + design btn css
             + give out css concepts and attribute usage
             + improve CLS
+            + teach me differrent JS syntax
         - Mr. Steven L. Thanks for him providing:
             + emotional value (Why I'm listing this out is because it's mostly why I decided to continue!)
             + React concept
@@ -29,6 +30,10 @@ import * as utils from "./utils.js";
             + their icons. I'm bad at art.
         - https://developer.mozilla.org/. Thanks for:
             + many web knowledges
+        - lumo. Thanks for it to:
+            + debug js
+            + give out improvement suggestions
+            + teach me differrent JS syntax
 */
 
 export const log = console.log,
