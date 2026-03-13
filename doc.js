@@ -157,7 +157,10 @@ const pageData = {
                                         },
                                         {
                                             tag: "span",
-                                            content: "someDate"
+                                            content: "someDate",
+                                            style: {
+                                                fontSize: "10px"
+                                            }
                                         }
                                     ]
                                 }

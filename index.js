@@ -7,8 +7,7 @@ const pageData = {
         funcs: []
     },
     config: {
-        debug: true,
-        keepConsole: true
+        debug: true
     },
     data: {
         details: {

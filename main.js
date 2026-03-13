@@ -475,17 +475,22 @@ export class render {
         if (this.#frameID) {
             cancelAnimationFrame(this.#frameID);
         }
-        if (this.config.debug) {
+        if (this.config?.debug) {
             this.#debug = true;
         } else {
             this.#debug = false;
         }
+        if (this.loadPage.length) {
+            for (const i of this.loadPage) {
+                this.clearLoading(i);
+            }
+            this.loadPage.length = 0;
+        }
         this.historyRender = +new Date();
         if (!this.data) {
-            this.set(errors.STRUCTURE_ERROR);
             this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
                 this.maxWait));
-            return;
+            return this.set(errors.STRUCTURE_ERROR);;
         }
         this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", HTTP_TIMEOUT, this.maxWait, "Page render timeout"));
         this.clear();
@@ -540,12 +545,6 @@ export class render {
             }
         }
         this.render(this.data, this.mainEl);
-        if (this.loadPage.length) {
-            for (const i of this.loadPage) {
-                this.clearLoading(i);
-            }
-            this.loadPage.length = 0;
-        }
         if (this.#debug) {
             log(`[ezy.js] Debug Message: : Render consumed ${new Date() - this.historyRender} ms`);
         }
@@ -558,26 +557,10 @@ export class render {
      */
     render(data, root) {
         if (!data) {
-            this.set(errors.STRUCTURE_ERROR);
             this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
                 this.maxWait, "Resource page.data not found", root));
-            return;
+            return this.set(errors.STRUCTURE_ERROR);;
         }
-        const el = this.#main(data);
-        if (this.statusCode !== 0) {
-            return;
-        }
-        if (el) {
-            root.appendChild(el);
-        }
-        if (this.loadPage.length) {
-            for (const i of this.loadPage) {
-                this.clearLoading(i);
-            }
-            this.loadPage.length = 0;
-        }
-    }
-    #main(data) {
         this.statusCode = 0;
         if (data.onStart) {
             this.preRender(data.onStart);
@@ -587,10 +570,8 @@ export class render {
         for (const i of Ezy.plugins) {
             i.onStart?.(data);
         }
-        const el = this.mainRender(data);
-        if (this.statusCode !== 0) {
-            return;
-        }
+        const el = document.createDocumentFragment();
+        this.vdom.children.push(...this.sectionRender(data, el, data.name || "", data.title || "", this.contentRender));
         log(`%c[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`,
             this.statusCode === 0 ? "font-size: 30px; font-weight: bold;color: #e0e0e0;" : "font-size: 30px; font-weight: bold;color: red;");
         if (data.onLoad) {
@@ -604,7 +585,18 @@ export class render {
         for (const i of Ezy.plugins) {
             i.onLoad?.(data);
         }
-        return el;
+        if (this.statusCode !== 0) {
+            return;
+        }
+        if (el) {
+            root.appendChild(el);
+        }
+        if (this.loadPage.length) {
+            for (const i of this.loadPage) {
+                this.clearLoading(i);
+            }
+            this.loadPage.length = 0;
+        }
     }
     /**
      * A loop that use requestAnimationFrame to implement. Calling it is not suggested
@@ -1086,17 +1078,6 @@ export class render {
             obj: vdom
         };
     };
-    /**
-     * main render proc, it's a historical problem. ***CALLING IT IS NOT SUGGESTED***
-     * @param {Object} pageData
-     * @returns null
-     */
-    mainRender(pageData) {
-        // Ezy.js is firstly a function, and this its body.
-        const el = document.createDocumentFragment();
-        this.vdom.children.push(...this.sectionRender(pageData, el, pageData.name || "", pageData.title || "", this.contentRender));
-        return el;
-    }
     /**
      * Set status code. ***CALLING IT IS NOT SUGGESTED***, unless you want to control the render flow.
      * @param {number} code
