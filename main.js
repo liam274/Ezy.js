@@ -496,7 +496,7 @@ export class render {
             clearTimeout(i);
         }
         for (const i of this.#pluginLeftovers.events) {
-            document.removeEventListener(i);
+            document.removeEventListener(...i);
         }
         for (const i of this.#pluginLeftovers.animationFrames) {
             cancelAnimationFrame(i);
