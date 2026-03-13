@@ -14,7 +14,7 @@ Here's a small "Hello world" example, for you to step forward:
 ```JavaScript
 import * as ezy from "./main.js";
 const proc=new ezy.render(// In case you want to reuse this object.
-    ezy.body,// This is the body element of the HTML page
+    ezy.body,// This is the body element of the HTML page. You may change it to other root element you'd like to.
     {
         component:[
             {
@@ -45,7 +45,7 @@ in the main directory.
 If you want to learn further about *Ezy.js*, please take a look at this [document](docs.md)
 
 ## Community
-Discord :discord: : https://discord.gg/QhaEZTTgru
+Discord : https://discord.gg/QhaEZTTgru
 
 ## Notice
-- The `setting.html` is DESIGNED to pop up error, in order to test whether the `render.loadingPage` is working or not.
+- The `setting.html` is **DESIGNED** to pop up error, in order to test whether the `render.loadingPage` is working or not.
