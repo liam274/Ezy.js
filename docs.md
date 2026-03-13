@@ -103,21 +103,6 @@ ezy.routeGuard.guards.push(
 ezy.Ezy.navigate("doesNotExists.html");// will be redirected to notFound.html
 ```
 
-## Specific Terminologies
-- LRP(Late Render Page) means the page that will be rendered on the main process of *render*.
-- CO(Component Object)
-- First-level children:
-In the following sample, `#a` and `#b` is the first-level children of `#root`, while `#b` is the first-level children of `#a`.
-```HTML
-<div id="root">
-    <div id="a">
-        <div id="b"></div>
-    </div>
-    <div id="c">
-    </div>
-</div>
-```
-
 ## Plugins
 *Ezy.js* provided a wide range of life cycle hooks:
 - `onStart`, which is triggered at every `render.render` is called
@@ -137,3 +122,26 @@ for (const i of this.#pluginLeftovers.animationFrames) {
     cancelAnimationFrame(i);
 }
 ```
+
+## Belt Syntax
+Cautions:
+- Because belt syntax will update the entire element, please ensure that if you want to keep anything in status(for example input tags, etc.), please don't put it in the same or higher level.
+
+## Specific Terminologies
+- LRP(Late Render Page) means the page that will be rendered on the main process of *render*.
+- CO(Component Object)
+- First-level children:
+In the following sample, `#a` and `#b` is the first-level children of `#root`, while `#b` is the first-level children of `#a`.
+```HTML
+<div id="root">
+    <div id="a">
+        <div id="b"></div>
+    </div>
+    <div id="c">
+    </div>
+</div>
+```
+- higher element:
+A higher element means it's more close to the root element(rooter, if you prefer)
+- lower elemetn:
+A lower element means it's less close to the root element(less rooter, if you prefer)
