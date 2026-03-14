@@ -7,7 +7,12 @@ const pageData = {
         funcs: []
     },
     config: {
-        debug: true
+        debug: true,
+        urlFilter: {
+            rules: [".*"],
+            confirmer: () => true,
+            reporter: () => undefined
+        }
     },
     data: {
         details: {

@@ -524,9 +524,9 @@ export class render {
                 return this.set(errors.SECURITY_ERROR);
             }
             if (!navigator.serviceWorker) {
-                Ezy.formatError("Error when trying to setup URL filter, since data.config.forceURLFilter option is on, we cannot provide any service.",
+                Ezy.formatError("Error when trying to setup URL filter, since your browser doesn't support serviceWorker, we cannot provide any service.",
                     errorLevels.CRITICAL_ERROR, "Security Error");
-                if (this.config.urlFilter.force === true) {
+                if (this.config.urlFilter?.force === true) {
                     return this.set(errors.SECURITY_ERROR);
                 }
                 this.config.urlFilter?.onError();

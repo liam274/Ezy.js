@@ -25,6 +25,11 @@ const pageData = {
         },
         typeExtend: {
             "oiie": ["font-black", "selectable"]
+        },
+        urlFilter: {
+            rules: [".*"],
+            confirmer: () => true,
+            reporter: () => undefined
         }
     },
     data: {
