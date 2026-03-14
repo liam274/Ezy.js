@@ -11,9 +11,12 @@ self.addEventListener("message", event => {
 });
 self.addEventListener("fetch", event => {
     const url = event.request.url;
+    if (!url.startsWith("http")) {
+        return;
+    }
     if (rules.some(rule => rule.test(url))) {
         event.respondWith(fetch(event.request));
         return;
     }
-    event.respondWith(new Response("Request blocked since the url is not unwhitelisted", { status: 403 }));
+    event.respondWith(new Response("Request blocked by Ezy.js firewall since the url is not unwhitelisted", { status: 403 }));
 });
