@@ -27,7 +27,7 @@ const proc=new ezy.render(// In case you want to reuse this object.
 ```
 
 ## Deployment
-If you want to try my framework, you may git clone the project:
+If you want to try the framework, you may git clone the project:
 ```sh
 git clone https://github.com/liam274/Ezy.js.git
 ```
@@ -39,7 +39,8 @@ or npx(Which is better for the router functions since python does not support th
 ```sh
 npx serve -s .
 ```
-in the main directory.
+in the main directory.<br />
+Please use `localhost:port` to visit it, since service worker is not aviliable in non-localhost or https:// urls
 
 ## Document
 If you want to learn further about *Ezy.js*, please take a look at this [document](docs.md)
