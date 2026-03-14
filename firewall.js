@@ -3,6 +3,7 @@
 const rules = [];
 self.addEventListener("message", event => {
     if (event.data.type === "UPDATE_RULES") {
+        rules.length = 0;
         for (const regex of event.data.rules) {
             rules.push(new RegExp(regex));
         }
