@@ -162,9 +162,8 @@ This should be definded as `data.config.urlFilters.*`
 | -------------- | ------------- | -------- | ----- |
 | confirmer | function | required | This function can only be set once in an render object. The function should expect reciving the url rules, and confirm if it's right via returning boolean |
 | reporter | function | required | If the confirmer returns false, the rendering process will be cut and this function will be triggered |
-| onError | function | not required | This function will be triggered if the browser doesn't support service worker |
+| onError | function | not required | This function will be triggered if the urlFilter fails no matter |
 | rules | string[] | required | This array should store the regex expressions. This is the whitelist |
-| force | boolean | not required | The framework will only set SECURITY_ERROR due to the browser is not supporting service worker if this attribute is `true` |
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.
