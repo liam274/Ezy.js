@@ -14,6 +14,7 @@ If you're curious about our doucment's specific terminologies, please take a loo
 - [Belt Syntax](#belt-syntax)
 - [Template Syntax](#template-syntax)
 - [Render Methods](#render-methods)
+- [URL Filter Syntax](#url-filter-syntax)
 
 ## Data Structure
 
@@ -31,16 +32,24 @@ In the root data, we have:
 
 - keepConsole<br />
 Expect type: boolean<br />
+Required: <span style="color: red">true</span><br />
 Function: To disable the `console.clear()` in every reload.
 - style<br />
 Expect type: Object<br />
+Required: <span style="color: red">true</span><br />
 Function: Define styles for the entire document, reducing the time consum of repeating inline style renders.<br />
 - typeExtend<br />
 Expect type: Object<br />
+Required: <span style="color: red">true</span><br />
 Function: pack up style classes, so developers can use one class references to mutliple number of classes.<br />
 - debug<br />
 Expect type: boolean<br />
+Required: <span style="color: red">true</span><br />
 Function: Decided rather showing warnings or not
+- urlFilter<br />
+Expect type: Object<br />
+Required: <span style="color: green">true</span><br />
+Function: define request-related URL whitelist. [Details](#url-filter-syntax)
 
 ### General Config Attributes
 
@@ -146,6 +155,16 @@ while custom variables is the render.data, systemVariable provide ways to know a
 | method name | check statusCode | details |
 | ----------- | ---------------- | ------- |
 | reload | true | [document](render.reload.md) |
+
+## URL Filter Syntax
+This should be definded as `data.config.urlFilters.*`
+| attribute name | expected type | required | usage |
+| -------------- | ------------- | -------- | ----- |
+| confirmer | function | required | This function can only be set once in an render object. The function should expect reciving the url rules, and confirm if it's right via returning boolean |
+| reporter | function | required | If the confirmer returns false, the rendering process will be cut and this function will be triggered |
+| onError | function | not required | This function will be triggered if the browser doesn't support service worker |
+| rules | string[] | required | This array should store the regex expressions. This is the whitelist |
+| force | boolean | not required | The framework will only set SECURITY_ERROR due to the browser is not supporting service worker if this attribute is `true` |
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.

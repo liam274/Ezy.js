@@ -51,6 +51,7 @@ export const keyword = new Set([
     "forEach", "innerHTML", "config",
     "data", "belt", "isFragment"
 ]), errors = {
+    SECURITY_ERROR: -1,
     STRUCTURE_ERROR: 1,
     ASVAR_REWRITE_ERROR: 2,
     FORMAT_ERROR: 3,
@@ -62,7 +63,7 @@ export const keyword = new Set([
     RENDER_ERROR: 9,
     PHARSING_ERROR: 10,
     ID_ERROR: 11,
-    TYPE_ERROR: 12
+    TYPE_ERROR: 12,
 };
 
 export const dictionary = {
@@ -417,6 +418,8 @@ export class render {
         events: [],
         animationFrames: []
     };
+    #confirmer = undefined;
+    #reporter = undefined;
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -502,6 +505,63 @@ export class render {
         }
         for (const i of this.#pluginLeftovers.animationFrames) {
             cancelAnimationFrame(i);
+        }
+        if (this.config.urlFilter) {
+            if (!this.#confirmer && typeof this.config.urlFilter.confirmer === "function") {// Prevent malicious replace
+                this.#confirmer = this.config.urlFilter.confirmer;
+            }
+            if (!this.#confirmer) {
+                Ezy.formatError("Error when trying to setup URL filter, since data.config.urlFilter.confirmer is not a function, due to security concerns, we disallowed the process.",
+                    errorLevels.CRITICAL_ERROR, "Security Error");
+                return this.set(errors.SECURITY_ERROR);
+            }
+            if (!this.#reporter && typeof this.config.urlFilter.reporter === "function") {// Prevent malicious replace
+                this.#reporter = this.config.urlFilter.reporter;
+            }
+            if (!this.#reporter) {
+                Ezy.formatError("Error when trying to setup URL filter, since data.config.urlFilter.reporter is not a function, due to security concerns, we disallowed the process.",
+                    errorLevels.CRITICAL_ERROR, "Security Error");
+                return this.set(errors.SECURITY_ERROR);
+            }
+            if (!navigator.serviceWorker) {
+                Ezy.formatError("Error when trying to setup URL filter, since data.config.forceURLFilter option is on, we cannot provide any service.",
+                    errorLevels.CRITICAL_ERROR, "Security Error");
+                if (this.config.urlFilter.force === true) {
+                    return this.set(errors.SECURITY_ERROR);
+                }
+                this.config.urlFilter?.onError();
+            }
+            if (Array.isArray(this.config.urlFilter.rules)) {
+                if (this.#confirmer(this.config.urlFilter.rules) !== true) {
+                    Ezy.formatError("Error when trying to setup URL filter, URL WHITELIST HAS BEEN TAMPERED.", errorLevels.CRITICAL_ERROR, "Security Error");
+                    this.#reporter();
+                    return this.set(errors.SECURITY_ERROR);
+                }
+                navigator.serviceWorker.register("./firewall.js").then(() => {
+                    if (this.#debug) {
+                        log("[ezy.js] URL filter Register successful.");
+                    }
+                    return navigator.serviceWorker.ready;
+                }).then(reg => {
+                    if (navigator.serviceWorker.controller) {
+                        navigator.serviceWorker.controller.postMessage({
+                            type: "UPDATE_RULES",
+                            rules: this.config.urlFilter.rules
+                        });
+                    } else if (reg.active) {
+                        reg.active.postMessage({
+                            type: "UPDATE_RULES",
+                            rules: this.config.urlFilter.rules
+                        });
+                    }
+                });
+            } else {
+                Ezy.formatError(`Expected data.config.urlFilter.urls as array, found ${typeof this.config.urlFilter.rules}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                return this.set(errors.TYPE_ERROR);
+            }
+        } else {
+            Ezy.formatError("Error when trying to setup page, config.urlFilter not found");
+            return this.set(errors.SECURITY_ERROR);
         }
         // clean-up section end
         this.historyRender = +new Date();
