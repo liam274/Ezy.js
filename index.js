@@ -213,7 +213,11 @@ const pageData = {
             component: [
                 {
                     text: "Normal Q&A",
-                    location: "q&a.html",
+                    events: {
+                        onclick: {
+                            listener: [() => ezy.Ezy.navigate("q&a.html")]
+                        }
+                    },
                     type: ["bg-light-white", "font-black"],
                     id: "clarify",
                     content: "Normal Q&A"
