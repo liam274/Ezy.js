@@ -43,7 +43,7 @@ in the main directory.<br />
 Please use `localhost:port` to visit it, since service worker is not aviliable in non-localhost or https:// urls
 
 ## Document
-If you want to learn further about *Ezy.js*, please take a look at this [document](docs.md)
+If you want to learn further about *Ezy.js*, please take a look at this [document](./docs/docs.md)
 
 ## Community
 Discord : https://discord.gg/QhaEZTTgru
