@@ -1,6 +1,7 @@
 # Ezy.js
 
-If you're curious about our doucment's specific terminologies, please take a look [here](#specific-terminologies)
+If you're curious about our doucment's specific terminologies, please take a look [here](#specific-terminologies)<br />
+Also, please read [this](special-syntax.md) since there might be special syntax in the document that isn't valid JS syntax.
 
 ## Table of Contents
 
@@ -149,12 +150,14 @@ Since belt syntax tends to update its father component and its father component'
 ## Template Syntax
 In strings, we have:
 `{{systemVariable}} vs {customVariables}`
-while custom variables is the render.data, systemVariable provide ways to know about yourself(from the POV of component)
+while custom variables is the render.data, systemVariable provide ways to know about yourself(from the POV of component)<br />
+Moreover, you may use `{data | func1:arg1:arg2 | ...}` to execute function on data. The functions in the filter syntax should expect reciving: `data,arg1,arg2,arg3,...`
 
 ## Render Methods
 | method name | check statusCode | details |
 | ----------- | ---------------- | ------- |
 | reload | true | [document](render.reload.md) |
+| render | true | [document](render.render.md) |
 
 ## URL Filter Syntax
 This should be definded as `data.config.urlFilters.*`
