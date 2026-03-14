@@ -14,9 +14,14 @@ self.addEventListener("fetch", event => {
     if (!url.startsWith("http")) {
         return;
     }
-    if (rules.some(rule => rule.test(url))) {
+    if (event.request.method === "OPTIONS" || rules.some(rule => rule.test(url))) {
         event.respondWith(fetch(event.request));
         return;
     }
-    event.respondWith(new Response("Request blocked by Ezy.js firewall since the url is not unwhitelisted", { status: 403 }));
+    event.respondWith(new Response(
+        JSON.stringify({ error: "Blocked by Ezy.js firewall", url }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+    ));
 });
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", event => event.waitUntil(clients.claim()));

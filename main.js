@@ -1687,6 +1687,7 @@ export class render {
             return false;
         });
         this.#oldBoys = {};
+        this.#listen2 = {};
         vars.clear();
     }
     /**
