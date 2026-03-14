@@ -560,7 +560,7 @@ export class render {
                 return this.set(errors.TYPE_ERROR);
             }
         } else {
-            Ezy.formatError("Error when trying to setup page, config.urlFilter not found");
+            Ezy.formatError("Error when trying to setup page, config.urlFilter not found", errorLevels.CRITICAL_ERROR, "Security Error");
             return this.set(errors.SECURITY_ERROR);
         }
         // clean-up section end
