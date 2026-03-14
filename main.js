@@ -514,7 +514,7 @@ export class render {
             if (!this.#confirmer) {
                 Ezy.formatError("Error when trying to setup URL filter, since data.config.urlFilter.confirmer is not a function, due to security concerns, we disallowed the process.",
                     errorLevels.CRITICAL_ERROR, "Security Error");
-                this.config.urlFilter?.onError();
+                this.config.urlFilter.onError?.();
                 return this.set(errors.SECURITY_ERROR);
             }
             if (!this.#reporter && typeof this.config.urlFilter.reporter === "function") {// Prevent malicious replace
@@ -523,13 +523,13 @@ export class render {
             if (!this.#reporter) {
                 Ezy.formatError("Error when trying to setup URL filter, since data.config.urlFilter.reporter is not a function, due to security concerns, we disallowed the process.",
                     errorLevels.CRITICAL_ERROR, "Security Error");
-                this.config.urlFilter?.onError();
+                this.config.urlFilter.onError?.();
                 return this.set(errors.SECURITY_ERROR);
             }
             if (!navigator.serviceWorker) {
                 Ezy.formatError("Error when trying to setup URL filter, since your browser doesn't support serviceWorker, we cannot provide any service.",
                     errorLevels.CRITICAL_ERROR, "Security Error");
-                this.config.urlFilter?.onError();
+                this.config.urlFilter.onError?.();
                 return this.set(errors.SECURITY_ERROR);
             }
             if (Array.isArray(this.config.urlFilter.rules)) {
@@ -560,12 +560,12 @@ export class render {
                 });
             } else {
                 Ezy.formatError(`Expected data.config.urlFilter.urls as array, found ${typeof this.config.urlFilter.rules}`, errorLevels.CRITICAL_ERROR, "Type Error");
-                this.config.urlFilter?.onError();
+                this.config.urlFilter.onError?.();
                 return this.set(errors.TYPE_ERROR);
             }
         } else {
             Ezy.formatError("Error when trying to setup page, config.urlFilter not found", errorLevels.CRITICAL_ERROR, "Security Error");
-            this.config.urlFilter?.onError();
+            this.config.urlFilter.onError?.();
             return this.set(errors.SECURITY_ERROR);
         }
         // clean-up section end
