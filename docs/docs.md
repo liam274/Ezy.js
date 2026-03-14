@@ -158,6 +158,7 @@ Moreover, you may use `{data | func1:arg1:arg2 | ...}` to execute function on da
 | ----------- | ---------------- | ------- |
 | reload | true | [document](render.reload.md) |
 | render | true | [document](render.render.md) |
+| pipe2 | true | [document](render.pipe2.md) |
 
 ## URL Filter Syntax
 This should be definded as `data.config.urlFilters.*`

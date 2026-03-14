@@ -741,7 +741,7 @@ export class render {
             return this.set(errors.PIPE_ERROR);
         }
         const obj = this.pipes[receiver].receive[sender];
-        obj.func(data, ...obj.data);
+        obj.func(data, ...(obj.data || []));
     }
     /**
      * edit variables
