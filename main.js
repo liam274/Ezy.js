@@ -506,6 +506,7 @@ export class render {
         for (const i of this.#pluginLeftovers.animationFrames) {
             cancelAnimationFrame(i);
         }
+        // Url filter section
         if (this.config.urlFilter) {
             if (!this.#confirmer && typeof this.config.urlFilter.confirmer === "function") {// Prevent malicious replace
                 this.#confirmer = this.config.urlFilter.confirmer;
@@ -537,7 +538,9 @@ export class render {
                     this.#reporter();
                     return this.set(errors.SECURITY_ERROR);
                 }
-                navigator.serviceWorker.register("./firewall.js").then(() => {
+                navigator.serviceWorker.register("./firewall.js", {
+                    scope: "/"
+                }).then(() => {
                     if (this.#debug) {
                         log("[ezy.js] URL filter Register successful.");
                     }
@@ -582,11 +585,23 @@ export class render {
                     if (cleanup) {
                         if (utils._default(options.deep, true)) {
                             cleanup.innerHTML = "";
+                        } else {
+                            for (const node of [...cleanup.childNodes]) {
+                                if (node.nodeType === Node.TEXT_NODE) {
+                                    node.remove();
+                                }
+                            }
                         }
                         this.render(obj, cleanup, options);
                     } else {
                         if (utils._default(options.deep, true)) {
                             el.innerHTML = "";
+                        } else {
+                            for (const node of [...el.childNodes]) {
+                                if (node.nodeType === Node.TEXT_NODE) {
+                                    node.remove();
+                                }
+                            }
                         }
                         this.render(obj, el, options);
                     }
