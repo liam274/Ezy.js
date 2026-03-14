@@ -162,7 +162,7 @@ This should be definded as `data.config.urlFilters.*`
 | -------------- | ------------- | -------- | ----- |
 | confirmer | function | required | This function can only be set once in an render object. The function should expect reciving the url rules, and confirm if it's right via returning boolean |
 | reporter | function | required | If the confirmer returns false, the rendering process will be cut and this function will be triggered |
-| onError | function | not required | This function will be triggered if the urlFilter fails no matter |
+| onError | function | not required | This function will be triggered if the urlFilter fails no matter what |
 | rules | string[] | required | This array should store the regex expressions. This is the whitelist |
 
 ## Specific Terminologies
