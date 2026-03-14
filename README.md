@@ -45,6 +45,9 @@ Please use `localhost:port` to visit it, since service worker is not aviliable i
 ## Document
 If you want to learn further about *Ezy.js*, please take a look at this [document](./docs/docs.md)
 
+## Issues
+If you got any issues, please check it [here](./docs/q&a.md) or contact me.
+
 ## Community
 Discord : https://discord.gg/QhaEZTTgru
 
