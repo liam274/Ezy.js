@@ -1862,6 +1862,13 @@ export class render {
         clearTimeout(loadPage.id);
         loadPage.obj.remove();
     }
+    /**
+     * Get the varage object's copy
+     * @returns {Object}
+     */
+    varage() {
+        return { ...this.#varage };
+    }
 };
 
 log("%c[ezy.js] Welcome to the world of Ezy.js framework!", "font-size: 60px; font-weight: bold;color: yellow;");

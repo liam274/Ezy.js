@@ -10,10 +10,13 @@ export class store {
             this.#varstore[key] = vars[key];
         }
     }
-    committ(name, ...args) {
+    commit(name, ...args) {
         this.#store[name](...args);
     }
     get(key) {
         return this.#store[key];
+    }
+    getState() {
+        return { ...this.#varstore };
     }
 }
