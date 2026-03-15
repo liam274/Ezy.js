@@ -1,8 +1,7 @@
 export class store {
     #store = {};
     #varstore = {};
-    add(data) {
-        const { vars, actions } = data;
+    add({ vars, actions }) {
         for (const name in actions) {
             this.#store[name] = actions[name].bind(this.#varstore);
         }
