@@ -50,11 +50,14 @@ const app = new render(
 
             // ----- Counter display (auto‑updates via belt) -----
             {
-                tag: "div",
-                content: "Count: <strong>{count}</strong>",
-                belt: {
-                    buckle: ["count"]     // re‑render when `count` changes
-                }
+                component: [
+                    {
+                        content: "Count: <strong>{count}</strong>",
+                        belt: {
+                            buckle: ["count"]     // re‑render when `count` changes
+                        }
+                    }
+                ]
             },
 
             // ----- Counter buttons -----

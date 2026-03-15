@@ -930,16 +930,18 @@ export class render {
             return;
         }
         if (i.belt) {
-            if (!Array.isArray(i.belt.buckle)) {
-                Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
-                return this.set(errors.TYPE_ERROR);
-            }
-            for (const buckle of i.belt.buckle) {
-                if (buckle in this.#varage) {
-                    this.#listen2[buckle] = [fatherData, card, root, i.belt.options || {}];
-                } else {
-                    Ezy.formatError(`varage variable ${i.belt.buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
-                    return this.set(errors.VARIABLE_ERROR);
+            if (i.belt.buckle) {
+                if (!Array.isArray(i.belt.buckle)) {
+                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                    return this.set(errors.TYPE_ERROR);
+                }
+                for (const buckle of i.belt.buckle) {
+                    if (buckle in this.#varage) {
+                        this.#listen2[buckle] = [fatherData, card, root, i.belt.options || {}];
+                    } else {
+                        Ezy.formatError(`varage variable ${i.belt.buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                        return this.set(errors.VARIABLE_ERROR);
+                    }
                 }
             }
             if (i.belt.reverseBuckle) {
@@ -951,7 +953,7 @@ export class render {
                     Ezy.formatError(`varage variable ${i.belt.reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                     return this.set(errors.VARIABLE_ERROR);
                 }
-                card.addEventListener(event => {
+                card.addEventListener("input", event => {
                     this.edit(i.belt.reverseBuckle, event.target.value);
                 });
             }
@@ -1525,16 +1527,18 @@ export class render {
             return;
         }
         if (j.belt) {
-            if (!Array.isArray(j.belt.buckle)) {
-                Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
-                return this.set(errors.TYPE_ERROR);
-            }
-            for (const buckle of j.belt.buckle) {
-                if (buckle in this.#varage) {
-                    this.#listen2[buckle] = [i, parentNode, undefined, j.belt.options || {}];
-                } else {
-                    Ezy.formatError(`varage variable ${j.belt.buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
-                    return this.set(errors.VARIABLE_ERROR);
+            if (j.belt.buckle) {
+                if (!Array.isArray(j.belt.buckle)) {
+                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                    return this.set(errors.TYPE_ERROR);
+                }
+                for (const buckle of j.belt.buckle) {
+                    if (buckle in this.#varage) {
+                        this.#listen2[buckle] = [i, parentNode, undefined, j.belt.options || {}];
+                    } else {
+                        Ezy.formatError(`varage variable ${j.belt.buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                        return this.set(errors.VARIABLE_ERROR);
+                    }
                 }
             }
             if (j.belt.reverseBuckle) {
@@ -1546,7 +1550,7 @@ export class render {
                     Ezy.formatError(`varage variable ${j.belt.reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                     return this.set(errors.VARIABLE_ERROR);
                 }
-                el.addEventListener(event => {
+                el.addEventListener("input", event => {
                     this.edit(j.belt.reverseBuckle, event.target.value);
                 });
             }

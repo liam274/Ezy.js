@@ -953,7 +953,7 @@ export class render {
                     Ezy.formatError(`varage variable ${i.belt.reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                     return this.set(errors.VARIABLE_ERROR);
                 }
-                card.addEventListener(event => {
+                card.addEventListener("input", event => {
                     this.edit(i.belt.reverseBuckle, event.target.value);
                 });
             }
@@ -1550,7 +1550,7 @@ export class render {
                     Ezy.formatError(`varage variable ${j.belt.reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                     return this.set(errors.VARIABLE_ERROR);
                 }
-                el.addEventListener(event => {
+                el.addEventListener("input", event => {
                     this.edit(j.belt.reverseBuckle, event.target.value);
                 });
             }
