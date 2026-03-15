@@ -88,3 +88,16 @@ export function removePrefix(str, prefix) {
 export function isDocumentFragment(node) {
     return node && node.nodeType === Node.DOCUMENT_FRAGMENT_NODE;
 }
+
+/**
+ * Simple pack
+ * @param {any} value
+ * @param {any} _default
+ * @returns {any}
+ */
+export function _default(value, _default) {
+    if (value === undefined) {
+        return _default;
+    }
+    return value;
+}

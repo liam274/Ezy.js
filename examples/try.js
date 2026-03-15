@@ -5,8 +5,7 @@
 // Your HTML should have a `<div id="app"></div>`.
 // ====================================================
 
-import { body } from "../main.js";
-import { render, Ezy } from "./main.js";
+import { render, Ezy, body } from "./main.js";
 
 // --- Register a simple global component (no parameters) ---
 Ezy.component("info-box", {
@@ -33,7 +32,12 @@ const app = new render(
         // Top‑level configuration
         config: {
             escapeHTML: false,            // enable XSS protection
-            debug: true                  // show render timings in console
+            debug: true,                  // show render timings in console
+            urlFilter: {
+                rules: [".*"],
+                confirmer: () => true,
+                reporter: () => undefined
+            }
         },
 
         // Array of components to render
@@ -106,12 +110,8 @@ const app = new render(
                             onValid: () => console.log("✅ Valid email"),
                             onInvalid: () => console.log("❌ Invalid email")
                         },
-                        events: {
-                            onInput: {
-                                listener: [
-                                    (e) => app.edit("email", e.target.value)
-                                ]
-                            }
+                        belt: {
+                            reverseBuckle: "email"
                         }
                     },
                     // Show the current email value (also updates via belt)
