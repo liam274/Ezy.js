@@ -1318,18 +1318,18 @@ export class render {
                     if ((typeof _var[varName]) === "function") {
                         const temp = String(_var[varName]());
                         result.push(temp);
-                        local[varName] = this.#setOldBoys(varName, temp, stop) || local[varName];
+                        local[varName] = this.#setOldBoys(varName, temp, stop) || temp;
                     }
                     else {
                         const temp = String(_var[varName]);
                         result.push(temp);
-                        local[varName] = this.#setOldBoys(varName, temp, stop) || local[varName];
+                        local[varName] = this.#setOldBoys(varName, temp, stop) || temp;
                     }
                 } else {
                     try {
                         const temp = String(this.evaluateExpression(varName, traceback, _var));
                         result.push(temp);
-                        local[varName] = this.#setOldBoys(varName, temp, stop) || local[varName];
+                        local[varName] = this.#setOldBoys(varName, temp, stop) || temp;
                     } catch (e) {
                         Ezy.formatError(`Error when trying to eval expression ${varName}, as below, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Eval Error");
                         error(e);
@@ -1424,12 +1424,12 @@ export class render {
                 if ((typeof _var[varName]) === "function") {
                     const temp = String(_var[varName]());
                     result.push(temp);
-                    local[varName] = this.#setOldBoys(varName, temp, stop) || local[varName];
+                    local[varName] = this.#setOldBoys(varName, temp, stop) || temp;
                 }
                 else {
                     const temp = String(_var[varName]);
                     result.push(temp);
-                    local[varName] = this.#setOldBoys(varName, temp, stop) || local[varName];
+                    local[varName] = this.#setOldBoys(varName, temp, stop) || temp;
                 }
             }
             else {
