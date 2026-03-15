@@ -65,6 +65,7 @@ export const keyword = new Set([
     PHARSING_ERROR: 10,
     ID_ERROR: 11,
     TYPE_ERROR: 12,
+    VARIABLE_ERROR: 13
 };
 
 export const dictionary = {
@@ -936,7 +937,23 @@ export class render {
             for (const buckle of i.belt.buckle) {
                 if (buckle in this.#varage) {
                     this.#listen2[buckle] = [fatherData, card, root, i.belt.options || {}];
+                } else {
+                    Ezy.formatError(`varage variable ${i.belt.buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                    return this.set(errors.VARIABLE_ERROR);
                 }
+            }
+            if (i.belt.reverseBuckle) {
+                if (typeof i.belt.reverseBuckle !== "string") {
+                    Ezy.formatError(`Expected component.belt.reverseBuckle as string, found ${typeof i.belt.reverseBuckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                    return this.set(errors.TYPE_ERROR);
+                }
+                if (!(i.belt.reverseBuckle in this.#varage)) {
+                    Ezy.formatError(`varage variable ${i.belt.reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                    return this.set(errors.VARIABLE_ERROR);
+                }
+                card.addEventListener(event => {
+                    this.edit(i.belt.reverseBuckle, event.target.value);
+                });
             }
         }
         if (first === 0 && i.varAs) {
@@ -1515,7 +1532,23 @@ export class render {
             for (const buckle of j.belt.buckle) {
                 if (buckle in this.#varage) {
                     this.#listen2[buckle] = [i, parentNode, undefined, j.belt.options || {}];
+                } else {
+                    Ezy.formatError(`varage variable ${j.belt.buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                    return this.set(errors.VARIABLE_ERROR);
                 }
+            }
+            if (j.belt.reverseBuckle) {
+                if (typeof j.belt.reverseBuckle !== "string") {
+                    Ezy.formatError(`Expected component.belt.reverseBuckle as string, found ${typeof j.belt.reverseBuckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                    return this.set(errors.TYPE_ERROR);
+                }
+                if (!(j.belt.reverseBuckle in this.#varage)) {
+                    Ezy.formatError(`varage variable ${j.belt.reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                    return this.set(errors.VARIABLE_ERROR);
+                }
+                el.addEventListener(event => {
+                    this.edit(j.belt.reverseBuckle, event.target.value);
+                });
             }
         }
         if (first === 0 && j.varAs) {
