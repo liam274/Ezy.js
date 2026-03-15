@@ -1,3 +1,9 @@
-import * as ezy from "./main.js";
-const proc = new ezy.render(undefined);
+import * as ezy from "./Ezy.js/main.js";
+const proc = new ezy.render(ezy.body, {
+    config: {
+        urlFilter: {
+            rules: [".*"]
+        }
+    }
+});
 proc.reload();

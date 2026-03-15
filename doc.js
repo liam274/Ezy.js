@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import * as ezy from "./main.js";
+import * as ezy from "./Ezy.js/main.js";
 // data
 const pageData = {
     onStart: {

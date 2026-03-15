@@ -1,4 +1,4 @@
-import * as ezy from "./main.js";
+import * as ezy from "./Ezy.js/main.js";
 new ezy.render("head", {
     component: [
         {
