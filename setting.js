@@ -2,7 +2,9 @@ import * as ezy from "./Ezy.js/main.js";
 const proc = new ezy.render(ezy.body, {
     config: {
         urlFilter: {
-            rules: [".*"]
+            rules: [".*"],
+            confirmer: () => true,
+            reporter: () => undefined
         }
     }
 });

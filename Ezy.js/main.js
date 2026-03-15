@@ -457,7 +457,6 @@ export class render {
                 this.maxWait, "Resource page.data.component not found"));
             return this;
         }
-        this.config = data.config || {};
         this.namespace = namespace;
         if (typeof el === "string") {
             this.mainEl = $(el);
@@ -484,6 +483,7 @@ export class render {
      * @returns null
      */
     reload() {
+        this.config = this.data.config || {};
         // clean-up section start
         if (!this.config?.keepConsole) {
             console.clear();
