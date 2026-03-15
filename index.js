@@ -131,7 +131,9 @@ const pageData = {
         {
             id: "content",
             component: [
-                "cardie",
+                {
+                    component: ["cardie"]
+                },
                 {
                     component: [
                         {
