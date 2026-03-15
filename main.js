@@ -4,6 +4,7 @@
 "use strict";
 
 import * as utils from "./utils.js";
+import * as storage from "./storage.js";
 
 /*
     @file ezy.js
@@ -405,6 +406,9 @@ export const MAXWAIT = 60000,
     HTTP_NOT_FOUND = 404,
     HTTP_TIMEOUT = 408,
     SECOND = 1000;
+
+export const store = new storage.store();
+
 export class render {
     #varage = {};
     #frameID = undefined;
