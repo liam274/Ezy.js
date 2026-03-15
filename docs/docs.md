@@ -143,6 +143,7 @@ Since belt syntax tends to update its father component and its father component'
 | -------------- | ------------- | ----- |
 | buckle | `string[]` | Tell the framework what varage variables should it watch at |
 | options | `Object` | Tell the framework when re-render, what options should it follow |
+| reverseBuckle | `string` | The value of the component affects the variable in varage provided |
 
 #### Cautions:
 - Because belt syntax will update the entire element, please ensure that if you want to keep anything in status(for example input tags, etc.), please don't put it in the same or higher level.
