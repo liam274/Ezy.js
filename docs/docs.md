@@ -16,6 +16,7 @@ Also, please read [this](special-syntax.md) since there might be special syntax 
 - [Template Syntax](#template-syntax)
 - [Render Methods](#render-methods)
 - [URL Filter Syntax](#url-filter-syntax)
+- [Cross Object Store](#)
 
 ## Data Structure
 
@@ -169,6 +170,14 @@ This should be definded as `data.config.urlFilters.*`
 | reporter | function | required | If the confirmer returns false, the rendering process will be cut and this function will be triggered |
 | onError | function | not required | This function will be triggered if the urlFilter fails no matter what |
 | rules | string[] | required | This array should store the regex expressions. This is the whitelist |
+
+## Cross Object Store
+| method | structure | details |
+| ------ | --------- | ------- |
+| `add` | `add({vars: Object[string,any], actions: Object[string,function]})` | Added datas and access functions to the global. The actions can use this.varName to get variables that has stated in the object. [Example](example.md#storeadd) |
+| `commit` | `commit(name: string,...args: any[])` | To call the functions stated perviously |
+| `get` | `get(key: string)` | To get the variable value perviously declared |
+
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.

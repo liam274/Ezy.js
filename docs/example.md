@@ -1,3 +1,5 @@
+# Ezy.js Examples
+
 ### event
 ``` JavaScript
 {
@@ -38,4 +40,23 @@
         }
     }
 }
+```
+### store.add
+```JavaScript
+import * as ezy from "./main.js";
+ezy.store.add({
+    vars:{
+        count: 0,
+        discount: 100,
+    },
+    actions:{
+        increase:()=>this.count++,
+        decrease:()=>this.discount++,
+        add:(count)=>this.count+=count
+    }
+});
+ezy.store.commit("increase");
+ezy.log(ezy.store.get("count"));// Output: 1
+ezy.store.commit("add",12,13);
+ezy.log(ezy.store.get("count"));// Output: 13
 ```

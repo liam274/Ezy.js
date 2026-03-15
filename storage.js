@@ -2,19 +2,16 @@ export class store {
     #store = {};
     #varstore = {};
     add(data) {
-        const { obj, actions } = data,
-            temp = {};
-        for (const key in obj) {
-            for (const name in actions) {
-                temp[name] = actions[name].bind(this.#varstore);
-            }
-            this.#store = { ...this.#store, ...temp };
-            this.#varstore[key] = obj[key];
-            break;
+        const { vars, actions } = data;
+        for (const name in actions) {
+            this.#store[name] = actions[name].bind(this.#varstore);
+        }
+        for (const key in vars) {
+            this.#varstore[key] = vars[key];
         }
     }
-    committ(name) {
-        this.#store[name]();
+    committ(name, ...args) {
+        this.#store[name](...args);
     }
     get(key) {
         return this.#store[key];
