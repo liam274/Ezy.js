@@ -7,4 +7,4 @@ eslint.config.js
 node_modules/*
 compiler/*
 *.zip
-.*/big-version/*
+.*/big-version/.*

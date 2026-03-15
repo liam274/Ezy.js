@@ -683,7 +683,7 @@ export class render {
             this.#pluginLeftovers.animationFrames.push(...animationFrames);
         }
         const el = document.createDocumentFragment();
-        this.vdom.children.push(...this.vsectionRender(data, el, data.name || "", data.title || "", this.contentRender, root, options));
+        this.vdom.children.push(...this.sectionRender(data, el, data.name || "", data.title || "", this.vcontentRender, root, options));
         log(`%c[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`,
             this.statusCode === 0 ? "font-size: 30px; font-weight: bold;color: #e0e0e0;" : "font-size: 30px; font-weight: bold;color: red;");
     }
@@ -1086,6 +1086,253 @@ export class render {
                 }
                 if (options.deep) {
                     temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, replacement));
+                }
+                if (this.statusCode !== 0) {
+                    return;
+                }
+                if (!frag) {
+                    for (const i in ARGS) {
+                        temp[i] = ARGS[i](card[i]);
+                    }
+                    temp.tag = card.tagName;
+                    temp.dataset = { ...temp.dataset, ...card.dataset };
+                    temp.config = { ...config };
+                    vdom.push(temp);
+                } else {
+                    vdom.push(...temp.children);
+                }
+            }
+        } else {
+            for (let k = 0; k < (i.times || 1); k++) {
+                const card = (frag ? document.createDocumentFragment() : $$(i.tag || config.tag || "div")),
+                    temp = {
+                        children: [],
+                        dataset: {}
+                    };
+                if (!frag) {
+                    this.#logic1(card, i, fatherData, fatherElement, k, i.inherit || {}, traceback, config, temp, root);
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
+                }
+                todo.appendChild(card);
+                this.plugComponent(card, traceback);
+                if (this.statusCode !== 0) {
+                    return;
+                }
+                if (!frag) {
+                    this.#logic2(card, i, temp, config, i.inherit || {}, traceback);
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
+                }
+                if (options.deep) {
+                    temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
+                }
+                if (this.statusCode !== 0) {
+                    return;
+                }
+                if (!frag) {
+                    for (const i in ARGS) {
+                        temp[i] = ARGS[i](card[i]);
+                    }
+                    temp.tag = card.tagName;
+                    temp.dataset = { ...temp.dataset, ...card.dataset };
+                    temp.config = { ...config };
+                    vdom.push(temp);
+                } else {
+                    vdom.push(...temp.children);
+                }
+            }
+        }
+        return {
+            el: todo,
+            obj: vdom
+        };
+    };
+    #vlogic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp, root) {
+        card.classList.add(...this.#extendType(...(i.type || []), ...(config.type || [])));
+        if (i.expire) {
+            setTimeout((function () {
+                card.innerHTML = "";
+                card.remove();
+                if (i.pipe) {
+                    delete this.pipes[i.pipe.name];
+                }
+                this.removeVdom(temp);
+                setTimeout(() => {
+                    i.expire.expired?.();
+                });
+            }).bind(this), i.expire.date - this.historyRender);
+        }
+        Ezy.validateValidation(this, card, i.validate || "", traceback, fatherElement);
+        if (this.statusCode !== 0) {
+            return;
+        }
+        if (i.main) {
+            if (typeof i.main !== "function") {
+                Ezy.formatError(`Error when rendering, expected component.main attribute as function, found ${typeof i.main}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
+                return this.set(errors.RENDER_ERROR);
+            }
+            this.mains.push({
+                el: card,
+                obj: i,
+                func: i.main
+            });
+        }
+        if (i.pipe) {
+            Ezy.validatePipe(this, i.pipe, traceback);
+            if (this.statusCode !== 0) {
+                return;
+            }
+            this.pipes[i.pipe.name] = i.pipe;
+        }
+        if (i.data) {
+            for (const k in i.data) {
+                card.setAttribute(`data-${utils.camel2array(k).join("-")}`, this.preCompileStr(i.data[k], traceback, replacement));
+                if (this.statusCode !== 0) {
+                    return;
+                }
+            }
+        }
+        this.beforePlugComponent(card, traceback);
+        if (this.statusCode !== 0) {
+            return;
+        }
+        if (i.belt) {
+            if (i.belt.buckle) {
+                if (!Array.isArray(i.belt.buckle)) {
+                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                    return this.set(errors.TYPE_ERROR);
+                }
+                for (const buckle of i.belt.buckle) {
+                    if (buckle in this.#varage) {
+                        this.#listen2[buckle] = [fatherData, card, root, i.belt.options || {}];
+                    } else {
+                        Ezy.formatError(`varage variable ${i.belt.buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                        return this.set(errors.VARIABLE_ERROR);
+                    }
+                }
+            }
+            if (i.belt.reverseBuckle) {
+                if (typeof i.belt.reverseBuckle !== "string") {
+                    Ezy.formatError(`Expected component.belt.reverseBuckle as string, found ${typeof i.belt.reverseBuckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                    return this.set(errors.TYPE_ERROR);
+                }
+                if (!(i.belt.reverseBuckle in this.#varage)) {
+                    Ezy.formatError(`varage variable ${i.belt.reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                    return this.set(errors.VARIABLE_ERROR);
+                }
+                card.addEventListener("input", event => {
+                    this.edit(i.belt.reverseBuckle, event.target.value);
+                });
+            }
+        }
+        if (first === 0 && i.varAs) {
+            this.asVar(card, i.varAs, traceback);
+            if (this.statusCode !== 0) {
+                return;
+            }
+        }
+        if (i.text) {
+            card.title = this.preCompileStr(i.text, traceback, replacement);
+        }
+        if (i._type) {
+            card.type = i._type;
+        }
+    }
+    #vlogic2(card, i, temp, config, replacement, traceback) {
+        utils.applyStyles(card, i.style);
+        for (const j in (i.events || {})) {
+            this.addListener(j, i, card, traceback);
+            if (this.statusCode !== 0) {
+                return;
+            }
+        }
+        let r = this.preCompileStr(
+            (i.content || ""),
+            traceback, replacement
+        );
+        if (this.statusCode !== 0) {
+            return;
+        }
+        if (this.config.escapeHTML || config.escapeHTML || i.config?.escapeHTML) {
+            r = utils.htmlEscape(r);
+        }
+        card.innerHTML += r;
+        for (const j in i) {
+            if (keyword.has(j)) {
+                continue;
+            }
+            card.setAttribute(j, this.preCompileStr(i[j], traceback, replacement));
+            if (this.statusCode !== 0) {
+                return;
+            }
+            temp[j] = card[j];
+        }
+    }
+    /**
+     * ***CALLING IT IS NOT SUGGESTED***
+     * @param {string} _
+     * @param {Object} i
+     * @param {Object} config
+     * @param {Object} fatherData
+     * @param {Node} fatherElement
+     * @param {Node} root
+     * @param {Object} options
+     * @returns {void|Object}
+     */
+    vcontentRender = (_, i, config, fatherData, fatherElement, root, options) => {
+        options.deep = utils._default(options.deep, true);
+        const title = fatherData.title || "",
+            traceback = `${title}`,
+            vdom = [];
+        if (typeof i === "string") {
+            if (Object.keys(this.classify || Ezy.components).length === 0) {
+                Ezy.formatError(`Error when trying to use classify component without classify dictionary, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
+                return this.set(errors.CLASSIFY_ERROR);
+            }
+            if (!(this.classify?.[i] || Ezy.components?.[i])) {
+                Ezy.formatError(`Error when trying to use classify component "${i}" without definition, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
+                return this.set(errors.CLASSIFY_ERROR);
+            }
+            i = this.classify?.[i] || Ezy.components?.[i];
+        }
+        const frag = i.isFragment || false;
+        if (i.forEach) {
+            if (this.#varage[i.forEach] === undefined) {
+                Ezy.formatError(`Error when rendering, expected forEach variable, not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
+                return this.set(errors.RENDER_ERROR);
+            }
+            const obj = this.#varage[i.forEach];
+            if (!(obj && typeof obj === "object")) {
+                Ezy.formatError(`Error when rendering, expected object as forEach variable value, found ${obj}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
+                return this.set(errors.RENDER_ERROR);
+            }
+            let first = -1;
+            for (const k in obj) {
+                first++;
+                const temp = {
+                    children: [],
+                    dataset: {}
+                },
+                    replacement = {
+                        ...this.systemPlot, ...(i.inherit || {}), key: k, item: obj[k]
+                    };
+                if (!frag) {
+                    this.#vlogic1(i, fatherData, fatherElement, first, replacement, traceback, config, temp, root);
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
+                }
+                if (!frag) {
+                    this.#vlogic2(first, i, temp, config, replacement, traceback);
+                    if (this.statusCode !== 0) {
+                        return;
+                    }
+                }
+                if (options.deep) {
+                    temp.children.push(...this.pushComponent(i, first, traceback, { ...config, ...(i.config || {}) }, replacement));
                 }
                 if (this.statusCode !== 0) {
                     return;
