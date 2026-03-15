@@ -4,7 +4,6 @@
 export default class History {
     #history = [];
     #data = undefined;
-    #listeners = new Set();
     constructor(data, methods) {
         this.#data = data;
         for (const name of methods) {
@@ -28,11 +27,6 @@ export default class History {
         };
         this.#history.push(snapshot);
         this.#data[key] = value;
-        this.#notify(snapshot);
-    }
-    subscribe(func) {
-        this.#listeners.add(func);
-        return () => this.#listeners.delete(func);
     }
     rollback(offset) {
         this.#history.length -= offset;
@@ -42,10 +36,5 @@ export default class History {
     peacefulRollback(offset) {
         const { key, old } = this.#history[this.#history.length - offset - 1];
         this.#data[key] = old;
-    }
-    #notify(snapshot) {
-        for (const i of this.#listeners) {
-            i(snapshot);
-        }
     }
 };
