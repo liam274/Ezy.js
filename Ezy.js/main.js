@@ -1030,6 +1030,12 @@ export class render {
         }
         const todo = document.createDocumentFragment(),
             frag = i.isFragment || false;
+        if (i.evaluate) {
+            const obj = JSON.parse(i.evaluate);
+            for (const key in obj) {
+                i[key] = obj[key];
+            }
+        }
         if (i.forEach) {
             if (this.#varage[i.forEach] === undefined) {
                 Ezy.formatError(`Error when rendering, expected forEach variable, not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
@@ -1594,6 +1600,12 @@ export class render {
             }
             if (this.statusCode !== 0) {
                 return;
+            }
+            if (j.evaluate) {
+                const obj = JSON.parse(j.evaluate);
+                for (const key in obj) {
+                    j[key] = obj[key];
+                }
             }
             if (j.forEach) {
                 if (this.#varage[j.forEach] === undefined) {
