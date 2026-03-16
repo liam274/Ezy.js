@@ -1069,7 +1069,7 @@ export class render {
                     }
                 }
                 if (options.deep) {
-                    temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, replacement));
+                    temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, replacement));
                 }
                 if (this.statusCode !== 0) {
                     return;
@@ -1111,7 +1111,7 @@ export class render {
                     }
                 }
                 if (options.deep) {
-                    temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
+                    temp.children.push(...this.pushComponent(i, card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
                 }
                 if (this.statusCode !== 0) {
                     return;
@@ -1630,7 +1630,7 @@ export class render {
                     if (this.statusCode !== 0) {
                         return;
                     }
-                    temp.children.push(...this.pushComponent(j, utils.isDocumentFragment(el) ? parentNode : el, myTraceback, { ...config, ...(j.config || {}) }, replace));
+                    temp.children.push(...this.pushComponent(j, el, myTraceback, { ...config, ...(j.config || {}) }, replace));
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1669,7 +1669,7 @@ export class render {
                     if (this.statusCode !== 0) {
                         return;
                     }
-                    temp.children.push(...this.pushComponent(j, utils.isDocumentFragment(el) ? parentNode : el, myTraceback,
+                    temp.children.push(...this.pushComponent(j, el, myTraceback,
                         { ...config, ...(j.config || {}) }, { ...replacement, ...j.inherit, ...own }));
                     if (this.statusCode !== 0) {
                         return;
