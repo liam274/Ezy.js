@@ -64,6 +64,13 @@ ezy.log(ezy.store.get("count"));// Output: 13
 ```JavaScript
 import * as ezy from "./main.js";
 const proc=new ezy.render(ezy.body,{
+    config:{
+        urlFilter:{
+            rules:[".*"],
+            confirmer:()=>true,
+            reporter:()=>undefined
+        }
+    },
     component:[
         {
             evaluate:"{component:[{tag:\"h1\",content:\"hi\"}]}"
