@@ -40,7 +40,7 @@ or npx(Which is better for the router functions since python does not support th
 npx serve -s .
 ```
 in the main directory.<br />
-Please use `localhost:port` to visit it, since service worker is not aviliable in non-localhost or https:// urls
+Please use `localhost:port` to visit it, since service worker is not aviliable in non-localhost or http:// urls
 
 ## Document
 If you want to learn further about *Ezy.js*, please take a look at this [document](./docs/docs.md)
