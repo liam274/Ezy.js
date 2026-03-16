@@ -60,3 +60,14 @@ ezy.log(ezy.store.get("count"));// Output: 1
 ezy.store.commit("add",12,13);
 ezy.log(ezy.store.get("count"));// Output: 13
 ```
+### evaluate
+```JavaScript
+import * as ezy from "./main.js";
+const proc=new ezy.render(ezy.body,{
+    component:[
+        {
+            evaluate:"{component:[{tag:\"h1\",content:\"hi\"}]}"
+        }
+    ]
+});
+```
