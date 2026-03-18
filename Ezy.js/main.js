@@ -571,7 +571,7 @@ export class render {
     reload() {
         this.config = this.data.config || {};
         // clean-up section start
-        if (this.config?.debug) {
+        if (this.config.debug) {
             this.#debug = true;
         } else {
             this.#debug = false;
