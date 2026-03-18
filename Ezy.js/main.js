@@ -12,7 +12,7 @@ import * as consts from "./consts.js";
     by Liam Lei
     Started from 2026.02.11
 
-    Release: 0.0.9 (Stable)
+    Release: 0.0.10 (Stable)
 
     Acknowledgments:
         - Nathan Wong. Thanks for :
