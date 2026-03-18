@@ -114,8 +114,13 @@ export function passworder({ placeholder, mask }) {
     mask = mask[0];
     const val = [],
         handler = (e) => {
-            const _ = e.target.value;
-            val.push(_[_.length - 1]);
+            const _ = e.target.value,
+                cursorPosition = event.target.selectionStart - 1;
+            if (_.length > val.length) {
+                val.splice(cursorPosition, 0, _[cursorPosition]);
+            } else {
+                val.splice(cursorPosition + 1, 1);
+            }
             e.target.value = mask.repeat(e.target.value.length);
         };
     input.addEventListener("input", handler);
