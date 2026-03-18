@@ -232,7 +232,7 @@ export function cssCompiler(classes) {
         if (value === null) {
             organic.push(_class);
         } else {
-            result[key] = value.join("");
+            result[key] = value.join(" ");
         }
     }
     return [result, organic];
