@@ -16,7 +16,8 @@ Also, please read [this](special-syntax.md) since there might be special syntax 
 - [Template Syntax](#template-syntax)
 - [Render Methods](#render-methods)
 - [URL Filter Syntax](#url-filter-syntax)
-- [Cross Object Store](#)
+- [Cross Object Store](#cross-object-store)
+- [Global Variables](global-variables.md)
 
 ## Data Structure
 
