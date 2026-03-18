@@ -612,39 +612,39 @@ export class render {
         }
         // Url filter section
         if (this.config.urlFilter) {
-            if (!this.#confirmer && typeof this.config.urlFilter.confirmer === "function") {// Prevent malicious replace
-                this.#confirmer = this.config.urlFilter.confirmer;
+            const { urlFilter } = this.config,
+                { confirmer, reporter, rules } = urlFilter;
+            if (!this.#confirmer && typeof confirmer === "function") {// Prevent malicious replace
+                this.#confirmer = confirmer;
             }
             if (!this.#confirmer) {
                 Ezy.formatError("Error when trying to setup URL filter, since data.config.urlFilter.confirmer is not a function, due to security concerns, we disallowed the process.",
                     errorLevels.CRITICAL_ERROR, "Security Error");
-                this.config.urlFilter.onError?.();
+                urlFilter.onError?.();
                 return this.set(errors.SECURITY_ERROR);
             }
-            if (!this.#reporter && typeof this.config.urlFilter.reporter === "function") {// Prevent malicious replace
-                this.#reporter = this.config.urlFilter.reporter;
+            if (!this.#reporter && typeof reporter === "function") {// Prevent malicious replace
+                this.#reporter = reporter;
             }
             if (!this.#reporter) {
                 Ezy.formatError("Error when trying to setup URL filter, since data.config.urlFilter.reporter is not a function, due to security concerns, we disallowed the process.",
                     errorLevels.CRITICAL_ERROR, "Security Error");
-                this.config.urlFilter.onError?.();
+                urlFilter.onError?.();
                 return this.set(errors.SECURITY_ERROR);
             }
             if (!navigator.serviceWorker) {
                 Ezy.formatError("Error when trying to setup URL filter, since your browser doesn't support serviceWorker, we cannot provide any service.",
                     errorLevels.CRITICAL_ERROR, "Security Error");
-                this.config.urlFilter.onError?.();
+                urlFilter.onError?.();
                 return this.set(errors.SECURITY_ERROR);
             }
-            if (Array.isArray(this.config.urlFilter.rules)) {
-                if (this.#confirmer(this.config.urlFilter.rules) !== true) {
+            if (Array.isArray(rules)) {
+                if (this.#confirmer(rules) !== true) {
                     Ezy.formatError("Error when trying to setup URL filter, URL WHITELIST HAS BEEN TAMPERED.", errorLevels.CRITICAL_ERROR, "Security Error");
                     this.#reporter();
                     return this.set(errors.SECURITY_ERROR);
                 }
-                navigator.serviceWorker.register("./firewall.js", {
-                    scope: "/"
-                }).then(() => {
+                navigator.serviceWorker.register(new URL("./firewall.js", import.meta.url)).then(() => {
                     if (this.#debug) {
                         log("[ezy.js] URL filter Register successful.");
                     }
@@ -653,18 +653,18 @@ export class render {
                     if (navigator.serviceWorker.controller) {
                         navigator.serviceWorker.controller.postMessage({
                             type: "UPDATE_RULES",
-                            rules: this.config.urlFilter.rules
+                            rules: rules
                         });
                     } else if (reg.active) {
                         reg.active.postMessage({
                             type: "UPDATE_RULES",
-                            rules: this.config.urlFilter.rules
+                            rules: rules
                         });
                     }
                 });
             } else {
-                Ezy.formatError(`Expected data.config.urlFilter.urls as array, found ${typeof this.config.urlFilter.rules}`, errorLevels.CRITICAL_ERROR, "Type Error");
-                this.config.urlFilter.onError?.();
+                Ezy.formatError(`Expected data.config.urlFilter.urls as array, found ${typeof rules}`, errorLevels.CRITICAL_ERROR, "Type Error");
+                urlFilter.onError?.();
                 return this.set(errors.TYPE_ERROR);
             }
         } else {
