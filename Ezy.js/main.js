@@ -537,7 +537,7 @@ export class render {
         if (data.classify) {
             this.classify = data.classify;
         }
-        if (!this.data.component) {
+        if (!data.component) {
             this.set(errors.STRUCTURE_ERROR);
             this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure attribute \"component\" missing.", HTTP_NOT_FOUND,
                 this.maxWait, "Resource page.data.component not found"));
