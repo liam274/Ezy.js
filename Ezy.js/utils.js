@@ -237,3 +237,11 @@ export function cssCompiler(classes) {
     }
     return [result, organic];
 }
+
+/**
+ * @param {Node} node
+ * @returns {boolean}
+ */
+export function isFragment(node) {
+    return node && node.nodeType === Node.DOCUMENT_FRAGMENT_NODE;
+}
