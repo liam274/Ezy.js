@@ -182,7 +182,22 @@ const pageData = {
                                     })]
                                 }
                             }
-                        }
+                        },
+                        {
+                            tag: "button",
+                            content: "Ezy.dialog.password",
+                            events: {
+                                onclick: {
+                                    preventDefault: false,
+                                    listener: [() => ezy.Ezy.dialog.password({
+                                        title: "Ezy.js",
+                                        content: "Hi, what's your name?(Secretly)",
+                                        func: (yes, name) => yes ? alert(`Hello, ${name}!`) : "",
+                                        placeholder: "place ender your name here"
+                                    })]
+                                }
+                            }
+                        },
                     ],
                     type: ["card", "metal"],
                     events: {
