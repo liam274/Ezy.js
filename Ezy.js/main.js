@@ -361,12 +361,13 @@ export const Ezy = {
             content.innerHTML = data.content;
             content.classList.add("password-content");
             back.appendChild(content);
-            const [input, bind] = utils.passworder(data);
+            const { input, bind, deletor } = utils.passworder(data);
             input.addEventListener("keydown", (e) => {
                 if (e.keyCode === KEYCODE.ENTER) {
                     utils.removeChild(barrier);
                     barrier.remove();
                     data.func(true, bind(), ...(data.props || []));
+                    deletor();
                 }
             });
             input.classList.add("alert-input");

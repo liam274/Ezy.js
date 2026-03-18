@@ -108,14 +108,19 @@ export function _default(value, _default) {
     return value;
 }
 
-export function passworder(data) {
+export function passworder({ placeholder, mask }) {
     const input = $$("input");
-    input.placeholder = data.placeholder;
-    const val = [];
-    input.addEventListener("input", (e) => {
-        const _ = e.target.value;
-        val.push(_[_.length - 1]);
-        e.target.value = data.mask.repeat(e.target.value.length);
-    });
-    return [input, () => val.join("")];
+    input.placeholder = placeholder;
+    const val = [],
+        handler = (e) => {
+            const _ = e.target.value;
+            val.push(_[_.length - 1]);
+            e.target.value = mask.repeat(e.target.value.length);
+        };
+    input.addEventListener("input", handler);
+    return {
+        input,
+        bind: () => val.join(""),
+        deletor: () => input.removeEventListener("input", handler)
+    };
 }
