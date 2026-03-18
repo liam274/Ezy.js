@@ -50,7 +50,7 @@ export const keyword = new Set([
     "if", "content", "inherit",
     "validate", "expire", "text",
     "forEach", "innerHTML", "config",
-    "data", "belt", "isFragment"
+    "data", "belt", "isFragment", "evaluate"
 ]), errors = {
     SECURITY_ERROR: -1,
     STRUCTURE_ERROR: 1,
