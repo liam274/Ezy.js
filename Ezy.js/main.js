@@ -646,7 +646,7 @@ export class render {
                 }
                 navigator.serviceWorker.register(new URL("./firewall.js", import.meta.url)).then(() => {
                     if (this.#debug) {
-                        log("[ezy.js] URL filter Register successful.");
+                        log("[ezy.js] URL filter Registered successful.");
                     }
                     return navigator.serviceWorker.ready;
                 }).then(reg => {
