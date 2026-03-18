@@ -167,6 +167,21 @@ const pageData = {
                                     })]
                                 }
                             }
+                        },
+                        {
+                            tag: "button",
+                            content: "Ezy.dialog.input",
+                            events: {
+                                onclick: {
+                                    preventDefault: false,
+                                    listener: [() => ezy.Ezy.dialog.input({
+                                        title: "Ezy.js",
+                                        content: "Hi, what's your name?",
+                                        func: (yes, name) => yes ? alert(`Hello, ${name}!`) : "",
+                                        placeholder: "place ender your name here"
+                                    })]
+                                }
+                            }
                         }
                     ],
                     type: ["card", "metal"],

@@ -89,6 +89,10 @@ class unknownVariableError extends Error {
 export const body = document.body,
     head = document.head;
 
+export const KEYCODE = {
+    ENTER: 13
+};
+
 export const Ezy = {
     plugins: [],
     /**
@@ -229,23 +233,23 @@ export const Ezy = {
          * Alert the data
          * @param {Object} data
          */
-        log(data) {
+        alert(data) {
             const barrier = $$("div");
-            barrier.classList.add("log-barrier");
+            barrier.classList.add("alert-barrier");
             const back = $$("div");
-            back.classList.add("log-back");
+            back.classList.add("alert-back");
             barrier.appendChild(back);
             const title = $$("div");
-            title.classList.add("log-title");
+            title.classList.add("alert-title");
             title.innerHTML = data.title;
             back.appendChild(title);
             const content = $$("div");
             content.innerHTML = data.content;
-            content.classList.add("log-content");
+            content.classList.add("alert-content");
             back.appendChild(content);
             const confirm = $$("button");
             confirm.innerHTML = "OK";
-            confirm.classList.add("log-button");
+            confirm.classList.add("alert-button");
             confirm.addEventListener("click", () => {
                 utils.removeChild(barrier);
                 barrier.remove();
@@ -259,24 +263,24 @@ export const Ezy = {
          */
         confirm(data) {
             const barrier = $$("div");
-            barrier.classList.add("log-barrier");
+            barrier.classList.add("alert-barrier");
             const back = $$("div");
-            back.classList.add("log-back");
+            back.classList.add("alert-back");
             barrier.appendChild(back);
             const title = $$("div");
-            title.classList.add("log-title");
+            title.classList.add("alert-title");
             title.innerHTML = data.title;
             back.appendChild(title);
             const content = $$("div");
             content.innerHTML = data.content;
-            content.classList.add("log-content");
+            content.classList.add("alert-content");
             back.appendChild(content);
             const backk = $$("div"),
                 confirm = $$("button"),
                 cancel = $$("button");
             backk.classList.add("confirm-btns-container");
             confirm.innerHTML = "OK";
-            confirm.classList.add("log-button");
+            confirm.classList.add("alert-button");
             confirm.addEventListener("click", () => {
                 utils.removeChild(barrier);
                 barrier.remove();
@@ -284,7 +288,7 @@ export const Ezy = {
             });
             backk.appendChild(confirm);
             cancel.innerHTML = "Cancel";
-            cancel.classList.add("log-button");
+            cancel.classList.add("alert-button");
             cancel.addEventListener("click", () => {
                 utils.removeChild(barrier);
                 barrier.remove();
@@ -293,7 +297,106 @@ export const Ezy = {
             backk.appendChild(cancel);
             back.appendChild(backk);
             body.appendChild(barrier);
-        }
+        },
+        input(data) {
+            const barrier = $$("div");
+            barrier.classList.add("alert-barrier");
+            const back = $$("div");
+            back.classList.add("alert-back");
+            barrier.appendChild(back);
+            const title = $$("div");
+            title.classList.add("alert-title");
+            title.innerHTML = data.title;
+            back.appendChild(title);
+            const content = $$("div");
+            content.innerHTML = data.content;
+            content.classList.add("password-content");
+            back.appendChild(content);
+            const input = $$("input");
+            input.placeholder = data.placeholder;
+            input.classList.add("alert-input");
+            input.addEventListener("keydown", (e) => {
+                if (e.keyCode === KEYCODE.ENTER) {
+                    utils.removeChild(barrier);
+                    barrier.remove();
+                    data.func(true, input.value, ...(data.props || []));
+                }
+            });
+            content.appendChild(input);
+            const backk = $$("div"),
+                confirm = $$("button"),
+                cancel = $$("button");
+            backk.classList.add("confirm-btns-container");
+            confirm.innerHTML = "OK";
+            confirm.classList.add("alert-button");
+            confirm.addEventListener("click", () => {
+                utils.removeChild(barrier);
+                barrier.remove();
+                data.func(true, input.value, ...(data.props || []));
+            });
+            backk.appendChild(confirm);
+            cancel.innerHTML = "Cancel";
+            cancel.classList.add("alert-button");
+            cancel.addEventListener("click", () => {
+                utils.removeChild(barrier);
+                barrier.remove();
+                data.func(false, input.value, ...(data.props || []));
+            });
+            backk.appendChild(cancel);
+            back.appendChild(backk);
+            body.appendChild(barrier);
+            input.focus();
+        },
+        password(data) {
+            const barrier = $$("div");
+            barrier.classList.add("alert-barrier");
+            const back = $$("div");
+            back.classList.add("alert-back");
+            barrier.appendChild(back);
+            const title = $$("div");
+            title.classList.add("alert-title");
+            title.innerHTML = data.title;
+            back.appendChild(title);
+            const content = $$("div");
+            content.innerHTML = data.content;
+            content.classList.add("password-content");
+            back.appendChild(content);
+            const input = $$("input");
+            input.placeholder = data.placeholder;
+            input.classList.add("alert-input");
+            input.type = "password";
+            input.addEventListener("keydown", (e) => {
+                if (e.keyCode === KEYCODE.ENTER) {
+                    utils.removeChild(barrier);
+                    barrier.remove();
+                    data.func(true, input.value, ...(data.props || []));
+                }
+            });
+            content.appendChild(input);
+            const backk = $$("div"),
+                confirm = $$("button"),
+                cancel = $$("button");
+            backk.classList.add("confirm-btns-container");
+            confirm.innerHTML = "OK";
+            confirm.classList.add("alert-button");
+            confirm.addEventListener("click", () => {
+                utils.removeChild(barrier);
+                barrier.remove();
+                data.func(true, input.value, ...(data.props || []));
+            });
+            backk.appendChild(confirm);
+            cancel.innerHTML = "Cancel";
+            cancel.classList.add("alert-button");
+            cancel.addEventListener("click", () => {
+                utils.removeChild(barrier);
+                barrier.remove();
+                data.func(false, input.value, ...(data.props || []));
+            });
+            backk.appendChild(cancel);
+            back.appendChild(backk);
+            body.appendChild(barrier);
+            input.focus();
+        },
     },
     /**
      * format error message. ***CALLING THIS FUNCTION IS NOT SUGGEGSTED***

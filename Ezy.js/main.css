@@ -111,6 +111,16 @@ span {
     margin: 12px;
 }
 
+.alert-input {
+    height: auto;
+    color: black;
+    width: 50%;
+    font-size: 20px;
+    font-family: monospace;
+    align-self: center;
+    padding: 10px;
+}
+
 .confirm-btns-container {
     display: flex;
     flex-direction: row-reverse;
@@ -130,16 +140,29 @@ span {
     transform: scale(0.98);
 }
 
-.alert-content::selection {
+.alert-content::selection,
+.alert-title::selection,
+.alert-input::selection,
+.password-content::selection {
     background-color: black;
     color: #e0e0e0;
 }
 
-.alert-title::selection {
-    background-color: black;
-    color: #e0e0e0;
+.password-content {
+    flex: 1;
+    overflow: auto;
+    font-size: 18px;
+    color: #E0E0E0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    line-height: 1.6;
+    text-align: center;
+    border-bottom: 1px solid #3a3a3a;
+    border-bottom-width: 0;
+    flex-direction: column;
 }
-
 
 /*custome class*/
 
