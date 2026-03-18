@@ -1,6 +1,12 @@
 /* eslint-disable no-undef */
 /* eslint-disable indent */
 
+export const log = console.log,
+    $ = document.querySelector.bind(document),
+    $$ = document.createElement.bind(document),
+    error = console.error.bind(console),
+    warn = console.warn.bind(console);
+
 
 export const UPPERCASE_REGEX = /[A-Z]/g,
     ALPHABET_REGEX = /^[a-zA-Z]+$/,
@@ -100,4 +106,16 @@ export function _default(value, _default) {
         return _default;
     }
     return value;
+}
+
+export function passworder(data) {
+    const input = $$("input");
+    input.placeholder = data.placeholder;
+    const val = [];
+    input.addEventListener("input", (e) => {
+        const _ = e.target.value;
+        val.push(_[_.length - 1]);
+        e.target.value = data.mask.repeat(e.target.value.length);
+    });
+    return [input, () => val.join("")];
 }
