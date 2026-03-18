@@ -671,7 +671,6 @@ export class render {
             late: (function (_, key) {
                 if (key in this.#listen2) {
                     const [obj, el, cleanup, options] = this.#listen2[key];
-                    log(obj, el, cleanup, options);
                     this.#oldBoys = {};
                     if (cleanup) {
                         if (utils._default(options.deep, true)) {
