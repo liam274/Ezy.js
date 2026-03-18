@@ -5,7 +5,8 @@ new ezy.render("head", {
             rules: [".*"],
             confirmer: () => true,
             reporter: () => undefined
-        }
+        },
+        debug: true
     },
     component: [
         {
@@ -19,5 +20,15 @@ new ezy.render("head", {
         }
     ]
 });
-const proc = new ezy.render(ezy.body, { component: [] });
+const proc = new ezy.render(ezy.body, {
+    config: {
+        debug: true,
+        urlFilter: {
+            rules: [".*"],
+            confirmer: () => true,
+            reporter: () => undefined
+        },
+    },
+    component: []
+});
 proc.errorPage("[ezy.js] CRITICAL ERROR: Page Error: Page not found.", ezy.HTTP_NOT_FOUND, "Page not found");

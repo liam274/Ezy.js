@@ -5,7 +5,8 @@ const proc = new ezy.render(ezy.body, {
             rules: [".*"],
             confirmer: () => true,
             reporter: () => undefined
-        }
+        },
+        debug: true
     }
 });
 proc.reload();

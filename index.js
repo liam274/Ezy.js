@@ -288,7 +288,8 @@ new ezy.render("head", {
             rules: [".*"],
             confirmer: () => true,
             reporter: () => undefined
-        }
+        },
+        debug: true
     }, component: [
         {
             tag: "title",
