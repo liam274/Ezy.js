@@ -1913,7 +1913,6 @@ export class render {
      * @returns {Object}
      */
     loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = body) {// dark joke
-        parentNode.style.display = "flex";
         const pot = $$("div");
         const [result, organic] = utils.cssCompiler(["display-flex", "horizontal-mid", "vertical-mid", "background-color-white"]);
         utils.applyStyles(pot, result);
@@ -1941,7 +1940,6 @@ export class render {
      */
     errorPage(msg, errorCode, reason, parentNode = body) {
         error(msg);
-        parentNode.style.display = "flex";
         const pot = $$("div");
         const [result, organic] = utils.cssCompiler(["display-flex", "background-color-white", "horizontal-mid", "vertical-mid"]);
         utils.applyStyles(pot, result);
