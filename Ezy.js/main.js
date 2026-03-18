@@ -1913,8 +1913,11 @@ export class render {
      * @returns {Object}
      */
     loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = body) {// dark joke
+        parentNode.style.display = "flex";
         const pot = $$("div");
-        pot.classList.add("flex", "horizontal-mid", "vertical-mid", "bg-white");
+        const [result, organic] = utils.cssCompiler(["display-flex", "horizontal-mid", "vertical-mid", "background-color-white"]);
+        utils.applyStyles(pot, result);
+        pot.classList.add(...organic);
         pot.style.width = "100%";
         pot.style.height = parentNode === body ? "100vh" : "100%";
         const temp = $$("img");
@@ -1938,8 +1941,11 @@ export class render {
      */
     errorPage(msg, errorCode, reason, parentNode = body) {
         error(msg);
+        parentNode.style.display = "flex";
         const pot = $$("div");
-        pot.classList.add("flex", "bg-white", "horizontal-mid", "vertical-mid");
+        const [result, organic] = utils.cssCompiler(["display-flex", "background-color-white", "horizontal-mid", "vertical-mid"]);
+        utils.applyStyles(pot, result);
+        pot.classList.add(...organic);
         pot.style.width = "100%";
         pot.style.height = parentNode === body ? "100vh" : "100%";
         const div = $$("div");
