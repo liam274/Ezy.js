@@ -571,16 +571,16 @@ export class render {
     reload() {
         this.config = this.data.config || {};
         // clean-up section start
-        if (!this.config?.keepConsole) {
-            console.clear();
-        }
-        if (this.#frameID) {
-            cancelAnimationFrame(this.#frameID);
-        }
         if (this.config?.debug) {
             this.#debug = true;
         } else {
             this.#debug = false;
+        }
+        if (!this.#debug) {
+            console.clear();
+        }
+        if (this.#frameID) {
+            cancelAnimationFrame(this.#frameID);
         }
         if (this.loadPage.length) {
             for (const i of this.loadPage) {
@@ -671,6 +671,7 @@ export class render {
             late: (function (_, key) {
                 if (key in this.#listen2) {
                     const [obj, el, cleanup, options] = this.#listen2[key];
+                    log(obj, el, cleanup, options);
                     this.#oldBoys = {};
                     if (cleanup) {
                         if (utils._default(options.deep, true)) {
@@ -1019,17 +1020,17 @@ export class render {
             return;
         }
         if (i.belt) {
-            const { bucklee, reverseBuckle } = i.belt;
-            if (bucklee) {
-                if (!Array.isArray(bucklee)) {
-                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof bucklee}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+            const { buckle, reverseBuckle } = i.belt;
+            if (buckle) {
+                if (!Array.isArray(buckle)) {
+                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                     return this.set(errors.TYPE_ERROR);
                 }
-                for (const buckle of bucklee) {
-                    if (buckle in this.#varage) {
-                        this.#listen2[buckle] = [fatherData, card, root, i.belt.options || {}];
+                for (const _buckle of buckle) {
+                    if (_buckle in this.#varage) {
+                        this.#listen2[_buckle] = [fatherData, card, root, i.belt.options || {}];
                     } else {
-                        Ezy.formatError(`varage variable ${buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                        Ezy.formatError(`varage variable ${_buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                         return this.set(errors.VARIABLE_ERROR);
                     }
                 }
@@ -1623,17 +1624,17 @@ export class render {
             return;
         }
         if (j.belt) {
-            const { bucklee, reverseBuckle } = j.belt;
-            if (bucklee) {
-                if (!Array.isArray(bucklee)) {
-                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof bucklee}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+            const { buckle, reverseBuckle } = j.belt;
+            if (buckle) {
+                if (!Array.isArray(buckle)) {
+                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                     return this.set(errors.TYPE_ERROR);
                 }
-                for (const buckle of bucklee) {
-                    if (buckle in this.#varage) {
-                        this.#listen2[buckle] = [i, parentNode, undefined, j.belt.options || {}];
+                for (const _buckle of buckle) {
+                    if (_buckle in this.#varage) {
+                        this.#listen2[_buckle] = [i, parentNode, undefined, j.belt.options || {}];
                     } else {
-                        Ezy.formatError(`varage variable ${buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                        Ezy.formatError(`varage variable ${_buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                         return this.set(errors.VARIABLE_ERROR);
                     }
                 }
