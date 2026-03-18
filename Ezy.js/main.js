@@ -128,24 +128,24 @@ export const Ezy = {
             return data >= limit;
         },
     },
-    validatePipe(obj, data, traceback) {
-        if (!data.pipe.receive || typeof data.pipe.receive !== "object") {
-            Ezy.formatError(`Error when rendering, expected object[string,function], found ${data.pipe.receive}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Pipe Error");
+    validatePipe(obj, { pipe }, traceback) {
+        if (!pipe.receive || typeof pipe.receive !== "object") {
+            Ezy.formatError(`Error when rendering, expected object[string,function], found ${pipe.receive}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Pipe Error");
             return obj.set(errors.PIPE_ERROR);
         }
-        for (const i in data.pipe.receive) {
-            const sobj = data.pipe.receive[i];
+        for (const i in pipe.receive) {
+            const sobj = pipe.receive[i];
             if (typeof sobj.func !== "function") {
-                Ezy.formatError(`Error when piping, expected data.pipe.receive.*.func as function, found ${typeof sobj.func}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Structure Error");
+                Ezy.formatError(`Error when piping, expected pipe.receive.*.func as function, found ${typeof sobj.func}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Structure Error");
                 return obj.set(errors.STRUCTURE_ERROR);
             }
             if (!Array.isArray(sobj.data)) {
-                Ezy.formatError(`Error when piping, expected data.pipe.receive.*.data as array, found ${typeof sobj.data}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Structure Error");
+                Ezy.formatError(`Error when piping, expected pipe.receive.*.data as array, found ${typeof sobj.data}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Structure Error");
                 return obj.set(errors.STRUCTURE_ERROR);
             }
         }
-        if (!data.pipe.name) {
-            Ezy.formatError(`Error when piping, expected data.pipe.name, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Structure Error");
+        if (!pipe.name) {
+            Ezy.formatError(`Error when piping, expected pipe.name, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Structure Error");
             return obj.set(errors.STRUCTURE_ERROR);
         }
     },
@@ -252,7 +252,7 @@ export const Ezy = {
                 barrier.remove();
             });
             back.appendChild(confirm);
-            consts.body.appendChild(barrier);
+            body.appendChild(barrier);
         },
         /**
          * Ask for confirm
@@ -293,7 +293,7 @@ export const Ezy = {
             });
             backk.appendChild(cancel);
             back.appendChild(backk);
-            consts.body.appendChild(barrier);
+            body.appendChild(barrier);
         },
         input(data) {
             const barrier = $$("div");
@@ -341,7 +341,7 @@ export const Ezy = {
             });
             backk.appendChild(cancel);
             back.appendChild(backk);
-            consts.body.appendChild(barrier);
+            body.appendChild(barrier);
             input.focus();
         },
         password(data) {
@@ -390,7 +390,7 @@ export const Ezy = {
             });
             backk.appendChild(cancel);
             back.appendChild(backk);
-            consts.body.appendChild(barrier);
+            body.appendChild(barrier);
             input.focus();
         },
     },
@@ -739,7 +739,7 @@ export class render {
             }
             s.innerHTML = c.join("");
             this.#builds.push(s);
-            consts.head.appendChild(s);
+            head.appendChild(s);
         }
         if (this.config.typeExtend) {
             for (const i in this.config.typeExtend) {
@@ -1029,31 +1029,32 @@ export class render {
             return;
         }
         if (i.belt) {
-            if (i.belt.buckle) {
-                if (!Array.isArray(i.belt.buckle)) {
-                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof i.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+            const { buckle, reverseBuckle } = i.belt;
+            if (buckle) {
+                if (!Array.isArray(buckle)) {
+                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                     return this.set(errors.TYPE_ERROR);
                 }
-                for (const buckle of i.belt.buckle) {
+                for (const buckle of buckle) {
                     if (buckle in this.#varage) {
                         this.#listen2[buckle] = [fatherData, card, root, i.belt.options || {}];
                     } else {
-                        Ezy.formatError(`varage variable ${i.belt.buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                        Ezy.formatError(`varage variable ${buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                         return this.set(errors.VARIABLE_ERROR);
                     }
                 }
             }
-            if (i.belt.reverseBuckle) {
-                if (typeof i.belt.reverseBuckle !== "string") {
-                    Ezy.formatError(`Expected component.belt.reverseBuckle as string, found ${typeof i.belt.reverseBuckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+            if (reverseBuckle) {
+                if (typeof reverseBuckle !== "string") {
+                    Ezy.formatError(`Expected component.belt.reverseBuckle as string, found ${typeof reverseBuckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                     return this.set(errors.TYPE_ERROR);
                 }
-                if (!(i.belt.reverseBuckle in this.#varage)) {
-                    Ezy.formatError(`varage variable ${i.belt.reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                if (!(reverseBuckle in this.#varage)) {
+                    Ezy.formatError(`varage variable ${reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                     return this.set(errors.VARIABLE_ERROR);
                 }
                 card.addEventListener("input", event => {
-                    this.edit(i.belt.reverseBuckle, event.target.value);
+                    this.edit(reverseBuckle, event.target.value);
                 });
             }
         }
@@ -1632,31 +1633,32 @@ export class render {
             return;
         }
         if (j.belt) {
-            if (j.belt.buckle) {
-                if (!Array.isArray(j.belt.buckle)) {
-                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof j.belt.buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+            const { buckle, reverseBuckle } = j.belt;
+            if (buckle) {
+                if (!Array.isArray(buckle)) {
+                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                     return this.set(errors.TYPE_ERROR);
                 }
-                for (const buckle of j.belt.buckle) {
+                for (const buckle of buckle) {
                     if (buckle in this.#varage) {
                         this.#listen2[buckle] = [i, parentNode, undefined, j.belt.options || {}];
                     } else {
-                        Ezy.formatError(`varage variable ${j.belt.buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                        Ezy.formatError(`varage variable ${buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                         return this.set(errors.VARIABLE_ERROR);
                     }
                 }
             }
-            if (j.belt.reverseBuckle) {
-                if (typeof j.belt.reverseBuckle !== "string") {
-                    Ezy.formatError(`Expected component.belt.reverseBuckle as string, found ${typeof j.belt.reverseBuckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+            if (reverseBuckle) {
+                if (typeof reverseBuckle !== "string") {
+                    Ezy.formatError(`Expected component.belt.reverseBuckle as string, found ${typeof reverseBuckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                     return this.set(errors.TYPE_ERROR);
                 }
-                if (!(j.belt.reverseBuckle in this.#varage)) {
-                    Ezy.formatError(`varage variable ${j.belt.reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+                if (!(reverseBuckle in this.#varage)) {
+                    Ezy.formatError(`varage variable ${reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                     return this.set(errors.VARIABLE_ERROR);
                 }
                 el.addEventListener("input", event => {
-                    this.edit(j.belt.reverseBuckle, event.target.value);
+                    this.edit(reverseBuckle, event.target.value);
                 });
             }
         }
@@ -1916,11 +1918,11 @@ export class render {
      * @param {Node} parentNode
      * @returns {Object}
      */
-    loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = consts.body) {// dark joke
+    loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = body) {// dark joke
         const pot = $$("div");
         pot.classList.add("flex", "horizontal-mid", "vertical-mid", "bg-white");
         pot.style.width = "100%";
-        pot.style.height = parentNode === consts.body ? "100vh" : "100%";
+        pot.style.height = parentNode === body ? "100vh" : "100%";
         const temp = $$("img");
         temp.src = "./assets/loading.svg";
         pot.appendChild(temp);
@@ -1929,7 +1931,7 @@ export class render {
             obj: pot,
             id: setTimeout(() => {
                 pot.remove();
-                this.errorPage(msg, errorCode, reason, parentNode);
+                this.errorPage(msg, errorCode, reason, parentNode).remove();
             }, guillotine)
         };
     }
@@ -1940,12 +1942,12 @@ export class render {
      * @param {string} reason
      * @param {Node} parentNode
      */
-    errorPage(msg, errorCode, reason, parentNode = consts.body) {
+    errorPage(msg, errorCode, reason, parentNode = body) {
         error(msg);
         const pot = $$("div");
         pot.classList.add("flex", "bg-white", "horizontal-mid", "vertical-mid");
         pot.style.width = "100%";
-        pot.style.height = parentNode === consts.body ? "100vh" : "100%";
+        pot.style.height = parentNode === body ? "100vh" : "100%";
         const div = $$("div");
         div.innerHTML = errorCode || "404";
         div.style.fontSize = "20px";
@@ -1965,17 +1967,22 @@ export class render {
         pot.appendChild(div);
         pot.appendChild(another);
         parentNode.appendChild(pot);
+        return {
+            remove() {
+                pot.remove();
+            }
+        };
     }
     /**
      * Clear the loading page. Please call it if you don't need the loading page any longer.
      * @returns null
      */
-    clearLoading(loadPage) {
-        if (!loadPage) {
+    clearLoading({ id, obj }) {
+        if (!(id && obj)) {
             return;
         }
-        clearTimeout(loadPage.id);
-        loadPage.obj.remove();
+        clearTimeout(id);
+        obj.remove();
     }
     /**
      * Get the varage object's copy
