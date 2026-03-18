@@ -113,31 +113,80 @@ export function _default(value, _default) {
 export function passworder({ placeholder, mask }) {
     const input = $$("input");
     input.placeholder = placeholder;
-    mask = mask[0];
-    let keyCode = 0;
-    const val = [],
-        inputHandler = (e) => {
-            const _ = e.target.value,
-                cursorPosition = e.target.selectionStart - 1;
-            if (_.length > val.length) {
-                val.splice(cursorPosition, 0, _[cursorPosition]);
+    mask = (mask && mask[0]) || "*";
+
+    const val = [];
+
+    function updateDisplayAndCursor(newCursorPos) {
+        input.value = mask.repeat(val.length);
+        input.setSelectionRange(newCursorPos, newCursorPos);
+    }
+
+    function handler(e) {
+        const start = e.target.selectionStart,
+            end = e.target.selectionEnd,
+            data = e.data,
+            inputType = e.inputType;
+
+        e.preventDefault();
+        if (start !== end) {
+            val.splice(start, end - start);
+        }
+        if (inputType.startsWith("insert")) {
+            if (data) {
+                val.splice(start, 0, ...data.split(""));
+                const newCursor = start + data.length;
+                updateDisplayAndCursor(newCursor);
             } else {
-                val.splice(cursorPosition + 1, 1);
+                updateDisplayAndCursor(start);
             }
-            e.target.value = mask.repeat(e.target.value.length);
-            e.target.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
-        },
-        keydownHandler = (e) => {
-            keyCode = e.keyCode;
-        };
-    input.addEventListener("input", inputHandler);
-    input.addEventListener("keydown", keydownHandler);
+        } else if (inputType.startsWith("delete")) {
+            if (start === end) {
+                if (inputType === "deleteContentBackward" && start > 0) {
+                    val.splice(start - 1, 1);
+                    updateDisplayAndCursor(start - 1);
+                } else if (inputType === "deleteContentForward" && start < val.length) {
+                    val.splice(start, 1);
+                    updateDisplayAndCursor(start);
+                } else {
+                    updateDisplayAndCursor(start);
+                }
+            } else {
+                updateDisplayAndCursor(start);
+            }
+        } else {
+            updateDisplayAndCursor(start);
+        }
+    }
+    function copyHandler(e) {
+        e.preventDefault();
+        const start = e.target.selectionStart,
+            end = e.target.selectionEnd;
+        if (start !== null && end !== null && start !== end) {
+            e.clipboardData.setData("text/plain", val.slice(start, end).join(""));
+        }
+    }
+    function cutHandler(e) {
+        e.preventDefault();
+        const start = e.target.selectionStart,
+            end = e.target.selectionEnd;
+        if (start !== null && end !== null && start !== end) {
+            e.clipboardData.setData("text/plain", val.splice(start, end - start).join(""));
+            updateDisplayAndCursor(start);
+        }
+    }
+
+    input.addEventListener("beforeinput", handler);
+    input.addEventListener("copy", copyHandler);
+    input.addEventListener("cut", cutHandler);
+
     return {
         input,
         bind: () => val.join(""),
         deletor: () => {
-            input.removeEventListener("input", inputHandler);
-            input.removeEventListener("keydown", keydownHandler);
+            input.removeEventListener("beforeinput", handler);
+            input.removeEventListener("copy", copyHandler);
+            input.removeEventListener("cut", cutHandler);
         }
     };
 }
