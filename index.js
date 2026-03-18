@@ -194,7 +194,7 @@ const pageData = {
                                         content: "Hi, what's your name?(Secretly)",
                                         func: (yes, name) => yes ? alert(`Hello, ${name}!`) : "",
                                         placeholder: "place ender your name here",
-                                        mask: "*"
+                                        mask: "．"
                                     })]
                                 }
                             }

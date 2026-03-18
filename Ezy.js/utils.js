@@ -111,6 +111,7 @@ export function _default(value, _default) {
 export function passworder({ placeholder, mask }) {
     const input = $$("input");
     input.placeholder = placeholder;
+    mask = mask[0];
     const val = [],
         handler = (e) => {
             const _ = e.target.value;
