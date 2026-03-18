@@ -5,7 +5,8 @@
 
 ## Components Async
 ```JavaScript
-// belting async componeny...
+// belting async component... Give the variable an inital value, it'll behaves like the placeholder.
+// or you can use evaluate, this is its designing purpose
 // codes...
 somePromiseFunction2Fetch().
 then(someDataCompilingFunction).
