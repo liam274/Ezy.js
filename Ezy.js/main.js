@@ -5,7 +5,6 @@
 
 import * as utils from "./utils.js";
 import * as storage from "./storage.js";
-import * as consts from "./consts.js";
 
 /*
     @file ezy.js
@@ -74,17 +73,6 @@ export const dictionary = {
     key: ["key"],
     item: ["item", "value"]
 };
-// class
-
-class unknownVariableError extends Error {
-    constructor(...data) {
-        super(...data);
-        this.name = "unknownVariableError";
-    }
-    getName() {
-        return "unknownVariableError";
-    }
-};
 
 // Ezy
 export const body = document.body,
@@ -98,9 +86,6 @@ export const Ezy = {
      */
     add(plugin) {
         this.plugins.push(plugin);
-    },
-    render() {
-        // implementation here
     },
     validates: {
         isInt(data) {
@@ -313,7 +298,7 @@ export const Ezy = {
             input.placeholder = data.placeholder;
             input.classList.add("alert-input");
             input.addEventListener("keydown", (e) => {
-                if (e.keyCode === consts.KEYCODE.ENTER) {
+                if (e.key === "Enter") {
                     utils.removeChild(barrier);
                     barrier.remove();
                     data.func(true, input.value, ...(data.props || []));
@@ -360,7 +345,7 @@ export const Ezy = {
             back.appendChild(content);
             const { input, bind, deletor } = utils.passworder(data);
             input.addEventListener("keydown", (e) => {
-                if (e.keyCode === consts.KEYCODE.ENTER) {
+                if (e.key === "Enter") {
                     utils.removeChild(barrier);
                     barrier.remove();
                     data.func(true, bind(), ...(data.props || []));
@@ -378,7 +363,8 @@ export const Ezy = {
             confirm.addEventListener("click", () => {
                 utils.removeChild(barrier);
                 barrier.remove();
-                data.func(true, input.value, ...(data.props || []));
+                data.func(true, bind(), ...(data.props || []));
+                barrier.remove();
             });
             backk.appendChild(confirm);
             cancel.innerHTML = "Cancel";
@@ -386,7 +372,8 @@ export const Ezy = {
             cancel.addEventListener("click", () => {
                 utils.removeChild(barrier);
                 barrier.remove();
-                data.func(false, input.value, ...(data.props || []));
+                data.func(false, bind(), ...(data.props || []));
+                barrier.remove();
             });
             backk.appendChild(cancel);
             back.appendChild(backk);
@@ -401,7 +388,7 @@ export const Ezy = {
      * @param {string} error
      */
     formatError(message, level, _error) {
-        error(`[ezy.js] ${Ezy.errors[level]}: ${_error.toLocaleUpperCase()}: ${message}`);
+        error(`[ezy.js] ${Ezy.errors[level]}: ${_error.toUpperCase()}: ${message}`);
     },
     /**
      * Public Classify
@@ -871,7 +858,8 @@ export class render {
             return this.#varage[key];
         }
         else {
-            throw new unknownVariableError(`[ezy.js] Critical Error: Variable Error: Variable "${key}" not found`);
+            Ezy.formatError(`Variable Error: Variable "${key}" not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
+            return this.set(errors.VARIABLE_ERROR);
         }
     }
     /**
@@ -980,7 +968,9 @@ export class render {
         return result;
     }
     #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp, root) {
-        card.classList.add(...this.#extendType(...(i.type || []), ...(config.type || [])));
+        const [result, organic] = utils.cssCompiler(this.#extendType(...(i.type || []), ...(config.type || [])));
+        card.classList.add(...organic);
+        utils.applyStyles(card, result);
         if (i.expire) {
             setTimeout((function () {
                 card.innerHTML = "";
@@ -1029,13 +1019,13 @@ export class render {
             return;
         }
         if (i.belt) {
-            const { buckle, reverseBuckle } = i.belt;
-            if (buckle) {
-                if (!Array.isArray(buckle)) {
-                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+            const { bucklee, reverseBuckle } = i.belt;
+            if (bucklee) {
+                if (!Array.isArray(bucklee)) {
+                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof bucklee}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                     return this.set(errors.TYPE_ERROR);
                 }
-                for (const buckle of buckle) {
+                for (const buckle of bucklee) {
                     if (buckle in this.#varage) {
                         this.#listen2[buckle] = [fatherData, card, root, i.belt.options || {}];
                     } else {
@@ -1633,13 +1623,13 @@ export class render {
             return;
         }
         if (j.belt) {
-            const { buckle, reverseBuckle } = j.belt;
-            if (buckle) {
-                if (!Array.isArray(buckle)) {
-                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
+            const { bucklee, reverseBuckle } = j.belt;
+            if (bucklee) {
+                if (!Array.isArray(bucklee)) {
+                    Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof bucklee}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                     return this.set(errors.TYPE_ERROR);
                 }
-                for (const buckle of buckle) {
+                for (const buckle of bucklee) {
                     if (buckle in this.#varage) {
                         this.#listen2[buckle] = [i, parentNode, undefined, j.belt.options || {}];
                     } else {
@@ -1727,7 +1717,9 @@ export class render {
                             dataset: {}
                         };
                     if (!frag) {
-                        el.classList.add(...this.#extendType(...(j.type || []), ...(config.type || [])));
+                        const [result, organic] = utils.cssCompiler(this.#extendType(...(j.type || []), ...(config.type || [])));
+                        el.classList.add(...organic);
+                        utils.applyStyles(el, result);
                         utils.applyStyles(el, j.style);
                     }
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`),
@@ -1767,7 +1759,9 @@ export class render {
                             dataset: {}
                         };
                     if (!frag) {
-                        el.classList.add(...this.#extendType(...(j.type || []), ...(config.type || [])));
+                        const [result, organic] = utils.cssCompiler(this.#extendType(...(j.type || []), ...(config.type || [])));
+                        el.classList.add(...organic);
+                        utils.applyStyles(el, result);
                         utils.applyStyles(el, j.style);
                     }
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
@@ -1894,7 +1888,7 @@ export class render {
             return this.set(errors.VALUE_ERROR);
         }
         if (obj.preventDefault) {
-            el.addEventListener(utils.removePrefix(j, "on").toLocaleLowerCase(), function (e) {
+            el.addEventListener(utils.removePrefix(j, "on").toLowerCase(), function (e) {
                 e.preventDefault();
                 for (const i of listener) {
                     i(e);
@@ -1902,7 +1896,7 @@ export class render {
             });
         }
         else {
-            el.addEventListener(utils.removePrefix(j, "on").toLocaleLowerCase(), function (e) {
+            el.addEventListener(utils.removePrefix(j, "on").toLowerCase(), function (e) {
                 for (const i of listener) {
                     i(e);
                 }

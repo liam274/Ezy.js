@@ -53,3 +53,6 @@ Discord : https://discord.gg/QhaEZTTgru
 
 ## Notice
 - The `setting.html` is **DESIGNED** to pop up error, in order to test whether the `render.loadingPage` is working or not.
+
+## **DISCLAIMER**
+Please note that you should ***NEVER*** fully rely on the builtin firewall, since the developer is not a professional security expert. The firewall is only for providing small client-side protection, reducing server load.

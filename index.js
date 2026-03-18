@@ -251,7 +251,7 @@ const pageData = {
                             listener: [() => ezy.Ezy.navigate("q&a.html")]
                         }
                     },
-                    type: ["bg-light-white", "font-black"],
+                    type: ["background-color-#e0e0e0", "color-black"],
                     id: "clarify",
                     content: "Normal Q&A"
                 }

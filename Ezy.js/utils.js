@@ -1,8 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable indent */
 
-import * as consts from "./consts.js";
-
 export const log = console.log,
     $ = document.querySelector.bind(document),
     $$ = document.createElement.bind(document),
@@ -12,7 +10,7 @@ export const log = console.log,
 
 export const UPPERCASE_REGEX = /[A-Z]/g,
     ALPHABET_REGEX = /^[a-zA-Z]+$/,
-    EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    EMAIL_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*[a-zA-Z0-9]@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/,
     DATE_REGEX = /^(3[01]|[12][0-9]|0?[1-9])(\/|-)(1[0-2]|0?[1-9])\2([0-9]{2})?[0-9]{2}$/;
 /**
  * Change camelcase to array
@@ -28,10 +26,10 @@ export const camel2array = (data) => data.replace(UPPERCASE_REGEX, "-$&").toLowe
  * @returns null
  */
 export function applyStyles(el, styles) {
-    if (!styles) {
+    if (!(styles && typeof styles === "object")) {
         return;
     }
-    for (const prop in styles) {
+    for (const prop of Object.keys(styles)) {
         el.style.setProperty(camel2array(prop).join("-"), styles[prop]);
     }
 }
@@ -41,7 +39,9 @@ export function applyStyles(el, styles) {
  * @param {Node} el - Element
  */
 export function removeChild(el) {
-    el.innerHTML = "";
+    while (el.firstChild) {
+        el.firstChild.remove();
+    }
 }
 /**
  * Join array to camelcase
@@ -55,7 +55,7 @@ export function array2camel(data) {
     for (const i of data) {
         sec = true;
         for (const char of i) {
-            result.push(sec && first ? char.toLocaleUpperCase() : char);
+            result.push(sec && first ? char.toUpperCase() : char);
             sec = false;
         }
         first = true;
@@ -189,4 +189,51 @@ export function passworder({ placeholder, mask }) {
             input.removeEventListener("cut", cutHandler);
         }
     };
+}
+
+function cssFix(data) {
+    const n3w = [data[0]];
+    data = data.slice(1);
+    let support = false;
+    while (data.length > 0) {
+        if (CSS.supports(n3w.join("-"), data.join(" "))) {
+            support = true;
+        } else if (support) {
+            data.push(n3w[n3w.length - 1]);
+            return [array2camel(n3w.slice(0, n3w.length - 1)), data];
+        }
+        n3w.push(data[0]);
+        data = data.slice(1);
+    }
+    if (support) {
+        data.push(n3w[n3w.length - 1]);
+        return [array2camel(n3w.slice(0, n3w.length - 1)), data];
+    }
+    return [null, null];
+}
+
+/**
+ * style-class self implement. Note that the implement is different from Tailwind!
+ * @param {string[]} classes
+ * @returns {[Object<string,any>,string[]]}
+ */
+export function cssCompiler(classes) {
+    if (!Array.isArray(classes)) {
+        throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected classes as string[], found ${typeof classes}`);
+    }
+    const result = {},
+        organic = [];
+    for (const _class of classes) {
+        if (typeof _class !== "string") {
+            throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected classes as string[], found ${typeof _class} as element`);
+        }
+        const lis = _class.split("-");
+        const [key, value] = cssFix(lis);
+        if (value === null) {
+            organic.push(_class);
+        } else {
+            result[key] = value.join("");
+        }
+    }
+    return [result, organic];
 }
