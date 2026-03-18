@@ -1,5 +1,12 @@
 import * as ezy from "./Ezy.js/main.js";
 new ezy.render("head", {
+    config: {
+        urlFilter: {
+            rules: [".*"],
+            confirmer: () => true,
+            reporter: () => undefined
+        }
+    },
     component: [
         {
             tag: "title",
