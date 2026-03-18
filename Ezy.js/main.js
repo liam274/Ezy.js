@@ -5,6 +5,7 @@
 
 import * as utils from "./utils.js";
 import * as storage from "./storage.js";
+import * as consts from "./consts.js";
 
 /*
     @file ezy.js
@@ -88,10 +89,6 @@ class unknownVariableError extends Error {
 // Ezy
 export const body = document.body,
     head = document.head;
-
-export const KEYCODE = {
-    ENTER: 13
-};
 
 export const Ezy = {
     plugins: [],
@@ -255,7 +252,7 @@ export const Ezy = {
                 barrier.remove();
             });
             back.appendChild(confirm);
-            body.appendChild(barrier);
+            consts.body.appendChild(barrier);
         },
         /**
          * Ask for confirm
@@ -296,7 +293,7 @@ export const Ezy = {
             });
             backk.appendChild(cancel);
             back.appendChild(backk);
-            body.appendChild(barrier);
+            consts.body.appendChild(barrier);
         },
         input(data) {
             const barrier = $$("div");
@@ -316,7 +313,7 @@ export const Ezy = {
             input.placeholder = data.placeholder;
             input.classList.add("alert-input");
             input.addEventListener("keydown", (e) => {
-                if (e.keyCode === KEYCODE.ENTER) {
+                if (e.keyCode === consts.KEYCODE.ENTER) {
                     utils.removeChild(barrier);
                     barrier.remove();
                     data.func(true, input.value, ...(data.props || []));
@@ -344,7 +341,7 @@ export const Ezy = {
             });
             backk.appendChild(cancel);
             back.appendChild(backk);
-            body.appendChild(barrier);
+            consts.body.appendChild(barrier);
             input.focus();
         },
         password(data) {
@@ -363,7 +360,7 @@ export const Ezy = {
             back.appendChild(content);
             const { input, bind, deletor } = utils.passworder(data);
             input.addEventListener("keydown", (e) => {
-                if (e.keyCode === KEYCODE.ENTER) {
+                if (e.keyCode === consts.KEYCODE.ENTER) {
                     utils.removeChild(barrier);
                     barrier.remove();
                     data.func(true, bind(), ...(data.props || []));
@@ -393,7 +390,7 @@ export const Ezy = {
             });
             backk.appendChild(cancel);
             back.appendChild(backk);
-            body.appendChild(barrier);
+            consts.body.appendChild(barrier);
             input.focus();
         },
     },
@@ -742,7 +739,7 @@ export class render {
             }
             s.innerHTML = c.join("");
             this.#builds.push(s);
-            head.appendChild(s);
+            consts.head.appendChild(s);
         }
         if (this.config.typeExtend) {
             for (const i in this.config.typeExtend) {
@@ -1919,11 +1916,11 @@ export class render {
      * @param {Node} parentNode
      * @returns {Object}
      */
-    loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = body) {// dark joke
+    loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = consts.body) {// dark joke
         const pot = $$("div");
         pot.classList.add("flex", "horizontal-mid", "vertical-mid", "bg-white");
         pot.style.width = "100%";
-        pot.style.height = parentNode === body ? "100vh" : "100%";
+        pot.style.height = parentNode === consts.body ? "100vh" : "100%";
         const temp = $$("img");
         temp.src = "./assets/loading.svg";
         pot.appendChild(temp);
@@ -1943,12 +1940,12 @@ export class render {
      * @param {string} reason
      * @param {Node} parentNode
      */
-    errorPage(msg, errorCode, reason, parentNode = body) {
+    errorPage(msg, errorCode, reason, parentNode = consts.body) {
         error(msg);
         const pot = $$("div");
         pot.classList.add("flex", "bg-white", "horizontal-mid", "vertical-mid");
         pot.style.width = "100%";
-        pot.style.height = parentNode === body ? "100vh" : "100%";
+        pot.style.height = parentNode === consts.body ? "100vh" : "100%";
         const div = $$("div");
         div.innerHTML = errorCode || "404";
         div.style.fontSize = "20px";

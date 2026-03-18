@@ -1,6 +1,8 @@
 /* eslint-disable no-undef */
 /* eslint-disable indent */
 
+import * as consts from "./consts.js";
+
 export const log = console.log,
     $ = document.querySelector.bind(document),
     $$ = document.createElement.bind(document),
@@ -112,8 +114,9 @@ export function passworder({ placeholder, mask }) {
     const input = $$("input");
     input.placeholder = placeholder;
     mask = mask[0];
+    let keyCode = 0;
     const val = [],
-        handler = (e) => {
+        inputHandler = (e) => {
             const _ = e.target.value,
                 cursorPosition = e.target.selectionStart - 1;
             if (_.length > val.length) {
@@ -122,11 +125,19 @@ export function passworder({ placeholder, mask }) {
                 val.splice(cursorPosition + 1, 1);
             }
             e.target.value = mask.repeat(e.target.value.length);
+            e.target.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+        },
+        keydownHandler = (e) => {
+            keyCode = e.keyCode;
         };
-    input.addEventListener("input", handler);
+    input.addEventListener("input", inputHandler);
+    input.addEventListener("keydown", keydownHandler);
     return {
         input,
         bind: () => val.join(""),
-        deletor: () => input.removeEventListener("input", handler)
+        deletor: () => {
+            input.removeEventListener("input", inputHandler);
+            input.removeEventListener("keydown", keydownHandler);
+        }
     };
 }
