@@ -11,7 +11,7 @@ import * as storage from "./storage.js";
     by Liam Lei
     Started from 2026.02.11
 
-    Release: 0.0.10 (Stable)
+    Release: 0.1.0 (Stable)
 
     Acknowledgments:
         - Nathan Wong. Thanks for :
