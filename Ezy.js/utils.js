@@ -206,7 +206,6 @@ function manageCSSAlias(data) {
 }
 
 function cssFix(data) {
-    data = manageCSSAlias(data);
     const n3w = [data[0]];
     data = data.slice(1);
     let support = false;
@@ -243,7 +242,7 @@ export function cssCompiler(classes) {
             throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected classes as string[], found ${typeof _class} as element`);
         }
         const lis = _class.split("-");
-        const [key, value] = cssFix(lis);
+        const [key, value] = cssFix(manageCSSAlias(lis));
         if (value === null) {
             organic.push(_class);
         } else {
