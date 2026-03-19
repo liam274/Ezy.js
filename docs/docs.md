@@ -164,6 +164,9 @@ Moreover, you may use `{data | func1:arg1:arg2 | ...}` to execute function on da
 | reload | true | [document](render.reload.md) |
 | render | true | [document](render.render.md) |
 | pipe2 | true | [document](render.pipe2.md) |
+| edit | false | [document](render.edit.md) |
+| read | true | `renderObj.read(key)` |
+| varage | false | You'll get a copy of `renderObj.#varage` |
 
 ## URL Filter Syntax
 This should be definded as `data.config.urlFilters.*`
