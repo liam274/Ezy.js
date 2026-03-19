@@ -16,6 +16,14 @@ import * as ezy from "./main.js";
 const proc=new ezy.render(// In case you want to reuse this object.
     ezy.body,// This is the body element of the HTML page. You may change it to other root element you'd like to.
     {
+        config:{
+            urlFilter:{
+                rules:[".*"],
+                confirmer:()=>true,
+                reporter:()=>undefined
+            },
+            escapeHTML:true
+        },
         component:[
             {
                 tag:"h1",
@@ -44,6 +52,9 @@ Please use `localhost:port` to visit it, since service worker is not aviliable i
 
 ## Document
 If you want to learn further about *Ezy.js*, please take a look at this [document](./docs/docs.md)
+
+## Tutorial
+Please look at this [tutorial](./docs/tutorial.md) to get started.
 
 ## Issues
 If you got any issues, please check it [here](./docs/q&a.md) or contact me.
