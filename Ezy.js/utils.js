@@ -214,14 +214,14 @@ function cssFix(data) {
             support = true;
         } else if (support) {
             data.push(n3w[n3w.length - 1]);
-            return [array2camel(n3w.slice(0, n3w.length - 1)), data];
+            return [array2camel(manageCSSAlias(n3w.slice(0, n3w.length - 1))), manageCSSAlias(data)];
         }
         n3w.push(data[0]);
         data = data.slice(1);
     }
     if (support) {
         data.push(n3w[n3w.length - 1]);
-        return [array2camel(n3w.slice(0, n3w.length - 1)), data];
+        return [array2camel(manageCSSAlias(n3w.slice(0, n3w.length - 1))), manageCSSAlias(data)];
     }
     return [null, null];
 }
