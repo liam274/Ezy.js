@@ -39,3 +39,78 @@ new ezy.render(
     }
 );
 ```
+
+## Varage(Variables)
+For setting variables, we have a [private attribute](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_elements) named as `#varage` to maintaince variable use in Ezy.js. Should you never use `#varage` to store sensitive informations.
+
+Initally, if you want to define inital variables in a render object:
+```JavaScript
+new ezy.render(
+    "#app",
+    {
+        ...,
+        data:{
+            pager:"I'm a place holder"
+        },
+        component:[
+            {
+                tag:"h1",
+                content:"Who are you?"
+            },
+            {
+                tag:"h1",
+                content:"{pager}"// -> I'm a place holder
+            }
+        ]
+    }
+);
+```
+You can use the `read` method to get the current variable value in `#varage`:
+```JavaScript
+// Let's assume that you use renderObj to store the render instance:
+renderObj.read("pager");// returns "I'm a place holder"
+```
+You can use the `edit` method to edit variables in `#varage`:
+```JavaScript
+renderObj.edit("pager","I'm a Ezy.js developer!");// But wait... why the content is still "I'm a place holder"?
+```
+It's because *Ezy.js* is a passive framework, so it will not react unless you explicitly command it.
+So we're here to introduce...
+
+## Belt Syntax!
+For reacting variable changes, we're here to introduce the following syntax in great honour:
+```JavaScript
+component:[
+    ...,
+    {
+        tag:"h1",
+        content:"{pager}",
+        belt:{
+            buckle:["pager"]
+        }
+    },
+    ...
+]
+```
+So from now on, if the pager is edited, *Ezy.js* will automatically update the buckled CO's **PARENT CO**. Note that the CO that's changed is its **PARENT CO**. So:
+```JavaScript
+renderObj.edit("pager","I'm a Ezy.js developer!");// The content is now "I'm a Ezy.js developer"!
+```
+But will cause problem if you want to keep the same-level elements of the buckled CO... So we suggested putting the CO into a style-less div to avoid resource-eating and accidental re-render:
+```JavaScript
+component:[
+    ...,
+    {
+        component:[
+            {
+                tag:"h1",
+                content:"{pager}",
+                belt:{
+                    buckle:["pager"]
+                }
+            }
+        ]
+    },
+    ...
+]
+```
