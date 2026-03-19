@@ -1920,7 +1920,7 @@ export class render {
         pot.style.width = "100%";
         pot.style.height = parentNode === body ? "100vh" : "100%";
         const temp = $$("img");
-        temp.src = "./assets/loading.svg";
+        temp.src = "/assets/loading.svg";
         pot.appendChild(temp);
         parentNode.appendChild(pot);
         return {
