@@ -8,3 +8,4 @@ node_modules/*
 compiler/*
 *.zip
 */big-version/*
+ignore.*
