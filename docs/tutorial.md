@@ -42,9 +42,9 @@ new ezy.render(
 Note that many of the render methods sets statusCode, please check the `renderObj.statusCode` to confirm that the method exists without errors.
 
 ## Varage(Variables)
-For setting variables, we have a [private attribute](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_elements) named as `#varage` to maintaince variable use in Ezy.js. Should you never use `#varage` to store sensitive informations.
+For setting variables, we have a [private attribute](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_elements) named as `#varage` to maintain variable use in Ezy.js. Should you never use `#varage` to store sensitive informations.
 
-Initally, if you want to define inital variables in a render object:
+Initally, if you want to define initial variables in a render object:
 ```JavaScript
 new ezy.render(
     "#app",
