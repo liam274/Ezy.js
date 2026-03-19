@@ -7,7 +7,6 @@ export const log = console.log,
     error = console.error.bind(console),
     warn = console.warn.bind(console);
 
-
 export const UPPERCASE_REGEX = /[A-Z]/g,
     ALPHABET_REGEX = /^[a-zA-Z]+$/,
     EMAIL_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*[a-zA-Z0-9]@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/,
@@ -109,7 +108,11 @@ export function _default(value, _default) {
     }
     return value;
 }
-
+/**
+ * Generate a input that mask with custom masking char
+ * @param {Object<string,string>} param0
+ * @returns {Object<string,Node|function>}
+ */
 export function passworder({ placeholder, mask }) {
     const input = $$("input");
     input.placeholder = placeholder;
@@ -229,7 +232,7 @@ function cssFix(data) {
 /**
  * style-class self implement. Note that the implement is different from Tailwind!
  * @param {string[]} classes
- * @returns {[Object<string,any>,string[]]}
+ * @returns {[Object<string,string>,string[]] | void}
  */
 export function cssCompiler(classes) {
     if (!Array.isArray(classes)) {

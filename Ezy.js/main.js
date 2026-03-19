@@ -1242,7 +1242,7 @@ export class render {
      * @param {string} expr
      * @param {string} traceback
      * @param {Object} extraScope
-     * @returns Any
+     * @returns {Any}
      */
     evaluateExpression(expr, traceback, extraScope) {
         expr = expr.trim();
@@ -1910,7 +1910,7 @@ export class render {
      * @param {number} guillotine - Timeout time limit
      * @param {string} reason - Timeout for what
      * @param {Node} parentNode
-     * @returns {Object}
+     * @returns {Object<string,Node|number>}
      */
     loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = body) {// dark joke
         const pot = $$("div");
@@ -1937,6 +1937,7 @@ export class render {
      * @param {number} errorCode
      * @param {string} reason
      * @param {Node} parentNode
+     * @returns {Object<string,function>}
      */
     errorPage(msg, errorCode, reason, parentNode = body) {
         error(msg);
