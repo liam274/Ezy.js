@@ -13,3 +13,4 @@ then(someDataCompilingFunction).
 then((data)=>renderObject.edit(varName,data));
 /// codes...
 ```
+[Example](../examples/spa/spa.html)
