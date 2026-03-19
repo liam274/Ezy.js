@@ -206,22 +206,23 @@ function manageCSSAlias(data) {
 }
 
 function cssFix(data) {
+    data = manageCSSAlias(data);
     const n3w = [data[0]];
     data = data.slice(1);
     let support = false;
     while (data.length > 0) {
-        if (CSS.supports(manageCSSAlias(n3w).join("-"), manageCSSAlias(data).join(" "))) {
+        if (CSS.supports(n3w.join("-"), data.join(" "))) {
             support = true;
         } else if (support) {
             data.push(n3w[n3w.length - 1]);
-            return [array2camel(manageCSSAlias(n3w.slice(0, n3w.length - 1))), manageCSSAlias(data)];
+            return [array2camel(n3w.slice(0, n3w.length - 1)), data];
         }
         n3w.push(data[0]);
         data = data.slice(1);
     }
     if (support) {
         data.push(n3w[n3w.length - 1]);
-        return [array2camel(manageCSSAlias(n3w.slice(0, n3w.length - 1))), manageCSSAlias(data)];
+        return [array2camel(n3w.slice(0, n3w.length - 1)), data];
     }
     return [null, null];
 }
