@@ -183,6 +183,8 @@ This should be definded as `data.config.urlFilters.*`
 | `add` | `add({vars: Object[string,any], actions: Object[string,function]})` | Added datas and access functions to the global. The actions can use this.varName to get variables that has stated in the object. [Example](example.md#storeadd) |
 | `commit` | `commit(name: string,...args: any[])` | To call the functions stated perviously |
 | `get` | `get(key: string)` | To get the variable value perviously declared |
+| `getState` | `getState()` | Get the variable store copy |
+| `subscribe` | `subscribe(func:function)` | Subscribe, every commit the subscribor function will be called. Returning a function, if you execute it, the subscribor will be deleted |
 
 
 ## Specific Terminologies
