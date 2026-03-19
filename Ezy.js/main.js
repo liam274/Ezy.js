@@ -1120,8 +1120,8 @@ export class render {
         }
         const todo = document.createDocumentFragment(),
             frag = i.isFragment || false;
-        if (i.evaluate) {
-            const obj = JSON.parse(i.evaluate);
+        if (i.evaluate && this.#varage[i.evaluate]) {
+            const obj = JSON.parse(this.#varage[i.evaluate]);
             for (const key in obj) {
                 i[key] = obj[key];
             }
@@ -1692,8 +1692,8 @@ export class render {
             if (this.statusCode !== 0) {
                 return;
             }
-            if (j.evaluate) {
-                const obj = JSON.parse(j.evaluate);
+            if (j.evaluate && this.#varage[j.evaluate]) {
+                const obj = JSON.parse(this.#varage[j.evaluate]);
                 for (const key in obj) {
                     j[key] = obj[key];
                 }
