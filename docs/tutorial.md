@@ -22,7 +22,7 @@ new ezy.render(
     "#app",
     {
         config:{
-            urlFilter:{
+            urlFilter:{// Note that urlFilter is a **MUST** in render objects.
                 rules:[".*"],// This is not suggested, as this may allows malicious redirection
                 confirmer:()=>true,// This function can only be set once in the render object.
                 // The object will rely on this to confirm if the rules is malicious or not, preventing XSS reset rules
