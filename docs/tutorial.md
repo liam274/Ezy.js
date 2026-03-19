@@ -12,6 +12,7 @@ https://cdn.jsdelivr.net/gh/liam274/Ezy.js@0.1.0-stable/Ezy.js/main.js
 Then you can import the framework
 ```JavaScript
 import * as ezy from "./main.js";
+import * as ezy from "https://cdn.jsdelivr.net/gh/liam274/Ezy.js@0.1.0-stable/Ezy.js/main.js";
 ```
 
 ## Hello, world!
