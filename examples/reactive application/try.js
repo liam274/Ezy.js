@@ -5,7 +5,7 @@
 // Your HTML should have a `<div id="app"></div>`.
 // ====================================================
 
-import { render, Ezy, body } from "./main.js";
+import { render, Ezy, body } from "../../Ezy.js/main.js";
 
 // --- Register a simple global component (no parameters) ---
 Ezy.component("info-box", {
