@@ -71,9 +71,12 @@ const proc=new ezy.render(ezy.body,{
             reporter:()=>undefined
         }
     },
+    data:{
+        superise:"{component:[{tag:\"h1\",content:\"hi\"}]}"
+    },
     component:[
         {
-            evaluate:"{component:[{tag:\"h1\",content:\"hi\"}]}"
+            evaluate:"superise"
         }
     ]
 });
