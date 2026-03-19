@@ -92,11 +92,11 @@ component:[
     ...
 ]
 ```
-So from now on, if the pager is edited, *Ezy.js* will automatically update the buckled CO's **PARENT CO**. Note that the CO that's changed is its **PARENT CO**. So:
+So from now on, if the pager is edited, *Ezy.js* will automatically update the buckled CO's **PARENT CO**. Yet, again, note that the CO that's changed is its **PARENT CO**. So:
 ```JavaScript
 renderObj.edit("pager","I'm a Ezy.js developer!");// The content is now "I'm a Ezy.js developer"!
 ```
-But will cause problem if you want to keep the same-level elements of the buckled CO... So we suggested putting the CO into a style-less div to avoid resource-eating and accidental re-render:
+But this will cause problem if you want to keep the same-level elements of the buckled CO... So we suggested putting the CO into a style-less div to avoid resource-eating and accidental re-render:
 ```JavaScript
 component:[
     ...,
