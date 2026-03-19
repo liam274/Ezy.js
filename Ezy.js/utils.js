@@ -191,12 +191,26 @@ export function passworder({ placeholder, mask }) {
     };
 }
 
+const alias = {
+    bg: "background",
+    mid: "middle",
+    img: "image"
+};
+
+function manageCSSAlias(data) {
+    const result = [];
+    for (const part of data) {
+        result.push(alias[part] || part);
+    }
+    return result;
+}
+
 function cssFix(data) {
     const n3w = [data[0]];
     data = data.slice(1);
     let support = false;
     while (data.length > 0) {
-        if (CSS.supports(n3w.join("-"), data.join(" "))) {
+        if (CSS.supports(manageCSSAlias(n3w).join("-"), manageCSSAlias(data).join(" "))) {
             support = true;
         } else if (support) {
             data.push(n3w[n3w.length - 1]);
