@@ -531,6 +531,7 @@ export class render {
      * @returns {render}
      */
     constructor(el, data, maxWait = MAXWAIT, namespace = {}) {
+        body.appendChild(this.#style);
         this.maxWait = maxWait;
         this.data = data;
         this.mains = [];
