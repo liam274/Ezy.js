@@ -232,23 +232,29 @@ function cssFix(data) {
 /**
  * style-class self implement. Note that the implement is different from Tailwind!
  * @param {string[]} classes
+ * @param {string[]} condition
  * @returns {Object<string,Object<string,string>> | void}
  */
-export function cssCompiler(classes) {
+export function cssCompiler(classes, condition = []) {
     if (!Array.isArray(classes)) {
         throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected classes as string[], found ${typeof classes}`);
+    }
+    if (!Array.isArray(condition)) {
+        throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected condition as string[], found ${typeof condition}`);
     }
     const result = {};
     for (const _class of classes) {
         if (typeof _class !== "string") {
             throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected classes as string[], found ${typeof _class} as element`);
         }
-        const lis = _class.split("-");
-        const [key, value] = cssFix(manageCSSAlias(lis));
-        if (value !== null) {
+        const conditions = _class.split(":"),
+            lis = conditions[0].split("-"),
+            [key, value] = cssFix(manageCSSAlias(lis));
+        if (value !== null && conditions.toSorted() === condition.sort()) {
             result[key.join("-")] = {
                 value: value.join(" "),
-                name: _class
+                name: _class,
+                theme: conditions
             };
         }
     }
@@ -261,4 +267,23 @@ export function cssCompiler(classes) {
  */
 export function isFragment(node) {
     return node && node.nodeType === Node.DOCUMENT_FRAGMENT_NODE;
+}
+/**
+ * Check if A is subset of B
+ * @param {Array} A
+ * @param {Array} B
+ * @returns {boolean}
+ */
+export function isSubset(A, B) {
+    B = new Set(B);
+    return A.every(i => B.has(i));
+}
+
+export function searchValue(obj, val) {
+    for (const k in obj) {
+        if (obj[k] === val) {
+            return true;
+        }
+    }
+    return false;
 }

@@ -522,6 +522,7 @@ export class render {
     #cssAfter = new Set();
     #style = $$("style");
     #remarkableStyle = $$("style");
+    #themes = {};
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -2045,8 +2046,9 @@ export class render {
     }
     putCSS(result) {
         for (const key in result) {
-            const { name, value } = result[key];
+            const { name, value, theme } = result[key];
             this.#cssBefore[key] = { name, value };
+            this.#themes[key] = theme;
         }
     }
     /**
@@ -2056,6 +2058,30 @@ export class render {
         utils.removeChild(this.mainEl);
         this.#remarkableStyle.remove();
         this.#style.remove();
+    }
+    /**
+     * set the themes
+     * @param {string[]} themes
+     */
+    setTheme(themes) {
+        const result = [],
+            temp = [];
+        for (const char in this.#style.innerHTML) {
+            if (char === ".") {
+                result.push(temp.join(""));
+                temp.length = 0;
+            } else if (char === "{") {
+                const frags = temp.join("").split(":");
+                if (utils.searchValue(this.#themes, frags.at(-1))) {
+                    temp.length = 0;
+                    temp.push(`.${swapped[frags.at(-1)].join(":")}${frags.at(-1)}`);
+                } else if (!utils.isSubset(frags, themes)) {
+                    temp.length = 0;
+                    temp.push(`.${frags.at(-1)}`);
+                }
+            }
+            temp.push(char);
+        }
     }
 };
 
