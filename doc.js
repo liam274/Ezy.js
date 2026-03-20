@@ -135,7 +135,7 @@ const pageData = {
                         },
                         {
                             type: [
-                                "list-item"
+                                "list-item", "display-flex"
                             ],
                             component: [
                                 {
@@ -173,9 +173,6 @@ const pageData = {
                             ],
                             times: 12,
                             content: "{{index}}{{key}}",
-                            style: {
-                                display: "flex"
-                            },
                             if: "abc",
                             forEach: "ary",
                             inherit: {

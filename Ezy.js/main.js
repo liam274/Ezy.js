@@ -519,6 +519,9 @@ export class render {
     };
     #confirmer = undefined;
     #reporter = undefined;
+    #cssBefore = {};
+    #cssAfter = new Set();
+    #style = $$("style");
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -778,6 +781,7 @@ export class render {
         }
         const el = document.createDocumentFragment();
         this.vdom.children.push(...this.sectionRender(data, el, data.name || "", data.title || "", this.contentRender, root, options));
+        this.cssPutter();
         log(`%c[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`,
             this.statusCode === 0 ? "font-size: 30px; font-weight: bold;color: #e0e0e0;" : "font-size: 30px; font-weight: bold;color: red;");
         if (data.onLoad) {
@@ -929,6 +933,7 @@ export class render {
      * @param {string} title
      * @param {function(string, Object, Object, Object)} createElement
      * @param {Node} root
+     * @param {Object} options
      * @returns {Object|void}
      */
     sectionRender = (sectionData, parentElement, sectionName, title, createElement, root, options) => {
@@ -976,9 +981,9 @@ export class render {
         return result;
     }
     #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp, root) {
-        const [result, organic] = utils.cssCompiler(this.#extendType(...(i.type || []), ...(config.type || [])));
-        card.classList.add(...organic);
-        utils.applyStyles(card, result);
+        const classes = [...(i.type || []), ...(config.type || [])];
+        card.classList.add(...classes);
+        this.putCSS(utils.cssCompiler(this.#extendType(...classes)));
         if (i.expire) {
             setTimeout((function () {
                 card.innerHTML = "";
@@ -1755,9 +1760,9 @@ export class render {
                             dataset: {}
                         };
                     if (!frag) {
-                        const [result, organic] = utils.cssCompiler(this.#extendType(...(j.type || []), ...(config.type || [])));
-                        el.classList.add(...organic);
-                        utils.applyStyles(el, result);
+                        const classes = [...(j.type || []), ...(config.type || [])];
+                        el.classList.add(...classes);
+                        this.putCSS(utils.cssCompiler(this.#extendType(...classes)));
                         utils.applyStyles(el, j.style);
                     }
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`),
@@ -1797,9 +1802,9 @@ export class render {
                             dataset: {}
                         };
                     if (!frag) {
-                        const [result, organic] = utils.cssCompiler(this.#extendType(...(j.type || []), ...(config.type || [])));
-                        el.classList.add(...organic);
-                        utils.applyStyles(el, result);
+                        const classes = [...(j.type || []), ...(config.type || [])];
+                        el.classList.add(...classes);
+                        this.putCSS(utils.cssCompiler(this.#extendType(...classes)));
                         utils.applyStyles(el, j.style);
                     }
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
@@ -1952,9 +1957,9 @@ export class render {
      */
     loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = body) {// dark joke
         const pot = $$("div");
-        const [result, organic] = utils.cssCompiler(["display-flex", "horizontal-mid", "vertical-mid", "bg-color-white"]);
-        utils.applyStyles(pot, result);
-        pot.classList.add(...organic);
+        this.putCSS(utils.cssCompiler(["display-flex", "horizontal-mid", "vertical-mid", "bg-color-white"]));
+        this.cssPutter();
+        pot.classList.add("display-flex", "horizontal-mid", "vertical-mid", "bg-color-white");
         pot.style.width = "100%";
         pot.style.height = parentNode === body ? "100vh" : "100%";
         const temp = $$("img");
@@ -1980,9 +1985,9 @@ export class render {
     errorPage(msg, errorCode, reason, parentNode = body) {
         error(msg);
         const pot = $$("div");
-        const [result, organic] = utils.cssCompiler(["display-flex", "bg-color-white", "horizontal-mid", "vertical-mid"]);
-        utils.applyStyles(pot, result);
-        pot.classList.add(...organic);
+        this.putCSS(utils.cssCompiler(["display-flex", "bg-color-white", "horizontal-mid", "vertical-mid"]));
+        this.cssPutter();
+        pot.classList.add("display-flex", "bg-color-white", "horizontal-mid", "vertical-mid");
         pot.style.width = "100%";
         pot.style.height = parentNode === body ? "100vh" : "100%";
         const div = $$("div");
@@ -2027,6 +2032,25 @@ export class render {
      */
     varage() {
         return { ...this.#varage };
+    }
+    cssPutter() {
+        const result = [];
+        for (const key in this.#cssBefore) {
+            const { name, value } = this.#cssBefore[key];
+            result.push(`.${name}{${key}: ${value};}`);
+            this.#cssAfter.add(key);
+        }
+        this.#style.innerHTML += result.join("");
+        head.appendChild(style);
+    }
+    putCSS(result) {
+        for (const key in result) {
+            if (this.#cssAfter.has(key)) {
+                continue;
+            }
+            const { name, value } = result[key];
+            this.#cssBefore[key] = { name, value };
+        }
     }
 };
 

@@ -217,14 +217,14 @@ function cssFix(data) {
             support = true;
         } else if (support) {
             data.push(n3w[n3w.length - 1]);
-            return [array2camel(n3w.slice(0, n3w.length - 1)), data];
+            return [n3w.slice(0, n3w.length - 1), data];
         }
         n3w.push(data[0]);
         data = data.slice(1);
     }
     if (support) {
         data.push(n3w[n3w.length - 1]);
-        return [array2camel(n3w.slice(0, n3w.length - 1)), data];
+        return [n3w.slice(0, n3w.length - 1), data];
     }
     return [null, null];
 }
@@ -232,27 +232,27 @@ function cssFix(data) {
 /**
  * style-class self implement. Note that the implement is different from Tailwind!
  * @param {string[]} classes
- * @returns {[Object<string,string>,string[]] | void}
+ * @returns {Object<string,Object<string,string>> | void}
  */
 export function cssCompiler(classes) {
     if (!Array.isArray(classes)) {
         throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected classes as string[], found ${typeof classes}`);
     }
-    const result = {},
-        organic = [];
+    const result = {};
     for (const _class of classes) {
         if (typeof _class !== "string") {
             throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected classes as string[], found ${typeof _class} as element`);
         }
         const lis = _class.split("-");
         const [key, value] = cssFix(manageCSSAlias(lis));
-        if (value === null) {
-            organic.push(_class);
-        } else {
-            result[key] = value.join(" ");
+        if (value !== null) {
+            result[key.join("-")] = {
+                value: value.join(" "),
+                name: _class
+            };
         }
     }
-    return [result, organic];
+    return result;
 }
 
 /**
