@@ -1,5 +1,7 @@
 # Ezy.js - Tutorial
 
+If you meet any errors, please see if [this](q&a.md) can fix it, otherwise please [contact me](mailto:ezyjsdeveloper@gmail.com)
+
 ## Start
 To get started, please clone the project to local first:
 ```sh
