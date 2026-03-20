@@ -155,27 +155,34 @@ export const Ezy = {
                 return obj.set(errors.TYPE_ERROR);
             }
             if (required) {
-                parentNode.addEventListener("submit", function (e) {
+                parentNode.addEventListener("submit", async function (e) {
+                    e.preventDefault();
+                    let a = 0;
                     for (const val of rules) {
                         const [vali, ...parms] = val.split(":");
                         if (Ezy.validates[vali]) {
-                            if (!Ezy.validates[vali](el.value, ...parms)) {
-                                e.preventDefault();
+                            const state = await Ezy.validates[vali](el.value, ...parms);
+                            if (!state) {
                                 validate?.onCaught();
+                                a = 1;
                             }
                         } else {
                             Ezy.formatError(`Error when rendering, Ezy[component.validate] not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
                             return obj.set(errors.RENDER_ERROR);
                         }
                     }
+                    if (a === 0) {
+                        parentNode.submit();
+                    }
                 });
             }
-            el.addEventListener("input", function () {
+            el.addEventListener("input", async function () {
                 let r = true;
                 for (const val of rules) {
                     const [vali, ...parms] = val.split(":");
                     if (Ezy.validates[vali]) {
-                        r = r && Ezy.validates[vali](el.value, ...parms);
+                        const state = await Ezy.validates[vali](el.value, ...parms);
+                        r = r && state;
                     } else {
                         Ezy.formatError(`Error when rendering, Ezy[component.validate] not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
                         return obj.set(errors.RENDER_ERROR);
