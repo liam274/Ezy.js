@@ -149,7 +149,7 @@ const pageData = {
                                             tag: "span",
                                             content: "Author: {author.toLocaleUpperCase()}.{{key}} says {{attr}}",
                                             type: [
-                                                "big-2"
+                                                "font-size-12px"
                                             ]
                                         }
                                     ]
