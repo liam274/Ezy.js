@@ -2046,9 +2046,6 @@ export class render {
     putCSS(result) {
         for (const key in result) {
             const { name, value } = result[key];
-            if (this.#cssAfter.has(name)) {
-                continue;
-            }
             this.#cssBefore[key] = { name, value };
         }
     }

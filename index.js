@@ -282,7 +282,7 @@ ezy.routeGuard.guards.push(function (data) {
 for (const i of ["index.html", "doc.html", "setting.html", "experiment.html"]) {
     ezy.routeGuard.builtin.add(i);
 }
-(new ezy.render("head", {
+new ezy.render("head", {
     config: {
         urlFilter: {
             rules: [".*"],
@@ -301,7 +301,7 @@ for (const i of ["index.html", "doc.html", "setting.html", "experiment.html"]) {
             href: "./assets/icon.svg"
         }
     ]
-}, 1000)).entireClean();
+}, 1000);
 ezy.Ezy.component("cardie",
     {
         component: [
