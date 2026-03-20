@@ -232,7 +232,6 @@ function cssFix(data) {
 /**
  * style-class self implement. Note that the implement is different from Tailwind!
  * @param {string[]} classes
- * @param {string[]} condition
  * @returns {Object<string,Object<string,string>> | void}
  */
 export function cssCompiler(classes, condition = []) {
@@ -250,7 +249,7 @@ export function cssCompiler(classes, condition = []) {
         const conditions = _class.split(":"),
             lis = conditions[0].split("-"),
             [key, value] = cssFix(manageCSSAlias(lis));
-        if (value !== null && conditions.toSorted() === condition.sort()) {
+        if (value !== null) {
             result[key.join("-")] = {
                 value: value.join(" "),
                 name: _class,
