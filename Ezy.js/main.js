@@ -507,7 +507,6 @@ export const store = new storage.store();
 export class render {
     #varage = {};
     #frameID = undefined;
-    #builds = [];
     #oldBoys = {};
     #typeExtend = {};
     #listen2 = {};
@@ -522,6 +521,7 @@ export class render {
     #cssBefore = {};
     #cssAfter = new Set();
     #style = $$("style");
+    #remarkableStyle = $$("style");
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -532,6 +532,7 @@ export class render {
      */
     constructor(el, data, maxWait = MAXWAIT, namespace = {}) {
         head.appendChild(this.#style);
+        head.appendChild(this.#remarkableStyle);
         this.maxWait = maxWait;
         this.data = data;
         this.mains = [];
@@ -726,8 +727,7 @@ export class render {
             this.interval = true; this.loop();
         }, SECOND - ((this.historyRender) % SECOND));
         if (this.config.style) {
-            const s = $$("style"),
-                c = [];
+            const c = [];
             for (const j in this.config.style) {
                 const val = this.config.style[j],
                     d = [];
@@ -736,9 +736,7 @@ export class render {
                 }
                 c.push(`${j}{${d.join("")}}`);
             }
-            s.innerHTML = c.join("");
-            this.#builds.push(s);
-            head.appendChild(s);
+            this.#remarkableStyle.innerHTML = c.join("");
         }
         if (this.config.typeExtend) {
             for (const i in this.config.typeExtend) {
@@ -1874,10 +1872,9 @@ export class render {
             children: [],
             dataset: {}
         };
-        this.#builds = this.#builds.filter((val) => {
-            val.remove();
-            return false;
-        });
+        this.#remarkableStyle.remove();
+        this.#remarkableStyle = $$("style");
+        head.appendChild(this.#remarkableStyle);
         this.#oldBoys = {};
         this.#listen2 = {};
         vars.clear();
