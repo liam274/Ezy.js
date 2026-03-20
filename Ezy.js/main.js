@@ -1120,6 +1120,24 @@ export class render {
         }
         const todo = document.createDocumentFragment(),
             frag = i.isFragment || false;
+        if (i.async) {
+            const { loader, setter, placeholder, error } = i.async;
+            loader().then((data) => {
+                setter();
+                for (const key of data) {
+                    i[key] = data[key];
+                }
+                this.render(fatherData, fatherElement);
+            }).error(() => {
+                for (const key of error) {
+                    i[key] = error[key];
+                }
+                this.render(fatherData, fatherElement);
+            });
+            for (const key of placeholder) {
+                i[key] = placeholder[key];
+            }
+        }
         if (i.evaluate && this.#varage[i.evaluate]) {
             const obj = JSON.parse(this.#varage[i.evaluate]);
             for (const key in obj) {
@@ -1691,6 +1709,24 @@ export class render {
             }
             if (this.statusCode !== 0) {
                 return;
+            }
+            if (j.async) {
+                const { loader, setter, placeholder, error } = j.async;
+                loader().then((data) => {
+                    setter();
+                    for (const key of data) {
+                        j[key] = data[key];
+                    }
+                    this.render(fatherData, fatherElement);
+                }).error(() => {
+                    for (const key of error) {
+                        j[key] = error[key];
+                    }
+                    this.render(fatherData, fatherElement);
+                });
+                for (const key of placeholder) {
+                    j[key] = placeholder[key];
+                }
             }
             if (j.evaluate && this.#varage[j.evaluate]) {
                 const obj = JSON.parse(this.#varage[j.evaluate]);

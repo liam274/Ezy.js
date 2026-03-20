@@ -95,6 +95,7 @@ Except the specific root structure, *Ezy.js* is very dynamic and flexible, which
 | `_type` | defines the type attribute in HTML tag |
 | `isFragment` | If it's set as truly values, the framework will use `document.createDocumentFragment()` to create the current element to pick up its components. Other Node-related attributes will be dismissed due to this attribute |
 | `evaluate` | This should be a variable name in varage. It will be pharsed as object and its attributes will be applied on the CO before rendering the CO | [Example](example.md#evaluate) |
+| `async` | This packs up the async behaviour to load the component | [Example](eample.md#asnyc-attribute) |
 
 ## Builtin functions
 

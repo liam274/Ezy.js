@@ -81,3 +81,21 @@ const proc=new ezy.render(ezy.body,{
     ]
 });
 ```
+### async attribute
+```JavaScript
+...,
+component:[
+    {
+        async:{
+            loader:()=>fetch("someURL"),// This should be any promise function
+            setter:()=>(data)=>this.edit("pager",data),
+            placeholder:{},// You may put any CO attributes into it, it will be rendered until the promise returns anything
+            error:{}// This will be rendered as CO if the setter or the loader returns error in the Promise chain
+        },
+        belt:{
+            buckle:["pager"]
+        }
+    }
+],
+...
+```
