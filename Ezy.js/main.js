@@ -2041,7 +2041,6 @@ export class render {
             this.#cssAfter.add(key);
         }
         this.#style.innerHTML += result.join("");
-        head.appendChild(style);
     }
     putCSS(result) {
         for (const key in result) {
