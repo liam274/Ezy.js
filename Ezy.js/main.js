@@ -2038,17 +2038,20 @@ export class render {
         const result = [];
         for (const key in this.#cssBefore) {
             const { name, value } = this.#cssBefore[key];
+            if (this.#cssAfter.has(name)) {
+                continue;
+            }
             result.push(`.${name}{${key}: ${value};}`);
-            this.#cssAfter.add(key);
+            this.#cssAfter.add(name);
         }
         this.#style.innerHTML += result.join("");
     }
     putCSS(result) {
         for (const key in result) {
-            if (this.#cssAfter.has(key)) {
+            const { name, value } = result[key];
+            if (this.#cssAfter.has(name)) {
                 continue;
             }
-            const { name, value } = result[key];
             this.#cssBefore[key] = { name, value };
         }
     }
