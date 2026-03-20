@@ -58,6 +58,7 @@ Please look at this [tutorial](./docs/tutorial.md) to get started.
 
 ## Issues
 If you got any issues, please check it [here](./docs/q&a.md) or [contact me](mailto:ezyjsdeveloper@gmail.com).
+The offical email is <ezyjsdeveloper@gmail.com>
 
 ## Community
 Discord : https://discord.gg/QhaEZTTgru
