@@ -1,5 +1,5 @@
 import * as ezy from "./Ezy.js/main.js";
-new ezy.render("head", {
+(new ezy.render("head", {
     config: {
         urlFilter: {
             rules: [".*"],
@@ -19,7 +19,7 @@ new ezy.render("head", {
             href: "./assets/icon.svg"
         }
     ]
-});
+})).entireClean();
 const proc = new ezy.render(ezy.body, {
     config: {
         debug: true,

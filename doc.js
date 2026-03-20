@@ -216,7 +216,7 @@ ezy.routeGuard.guards.push(function (data) {
 for (const i of ["index.html", "doc.html", "setting.html", "experiment.html"]) {
     ezy.routeGuard.builtin.add(i);
 }
-new ezy.render("head", {
+(new ezy.render("head", {
     config: {
         urlFilter: {
             rules: [".*"],
@@ -235,6 +235,6 @@ new ezy.render("head", {
             href: "./assets/icon.svg"
         }
     ]
-});
+})).entireClean();
 const proc = new ezy.render(ezy.body, pageData);
 proc.reload();

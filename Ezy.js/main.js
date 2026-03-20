@@ -2052,6 +2052,14 @@ export class render {
             this.#cssBefore[key] = { name, value };
         }
     }
+    /**
+     * **NOTE THAT THIS FUNCTION IS FOR CLEANING ALL THE NODES CREATED, PLEASE ENSURE THAT YOU KNOW WHAT YOU'RE DOING**
+     */
+    entireClean() {
+        utils.removeChild(this.mainEl);
+        this.#remarkableStyle.remove();
+        this.#style.remove();
+    }
 };
 
 log("%c[ezy.js] Welcome to the world of Ezy.js framework!", "font-size: 60px; font-weight: bold;color: yellow;");
