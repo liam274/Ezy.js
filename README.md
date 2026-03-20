@@ -57,7 +57,7 @@ If you want to learn further about *Ezy.js*, please take a look at this [documen
 Please look at this [tutorial](./docs/tutorial.md) to get started.
 
 ## Issues
-If you got any issues, please check it [here](./docs/q&a.md) or [contact me](mailto:ezyjsdeveloper@gmail.com).
+If you got any issues, please check it [here](./docs/q&a.md) or [contact me](mailto:ezyjsdeveloper@gmail.com).<br />
 The offical email is <ezyjsdeveloper@gmail.com>
 
 ## Community
