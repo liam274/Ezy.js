@@ -1122,19 +1122,16 @@ export class render {
             frag = i.isFragment || false;
         if (i.async) {
             const { loader, setter, placeholder, error } = i.async;
-            loader().then((data) => {
-                setter();
-                for (const key of data) {
-                    i[key] = data[key];
-                }
-                this.render(fatherData, fatherElement);
-            }).error(() => {
+            loader().then((data) => setter(data)).catch((err) => {
+                const temp = { ...fatherData };
                 for (const key of error) {
                     i[key] = error[key];
                 }
-                this.render(fatherData, fatherElement);
+                temp.inherit = temp.inherit || {};
+                temp.inherit.err = err;
+                this.render(temp, fatherElement);
             });
-            for (const key of placeholder) {
+            for (const key in placeholder) {
                 i[key] = placeholder[key];
             }
         }
@@ -1712,19 +1709,16 @@ export class render {
             }
             if (j.async) {
                 const { loader, setter, placeholder, error } = j.async;
-                loader().then((data) => {
-                    setter();
-                    for (const key of data) {
-                        j[key] = data[key];
-                    }
-                    this.render(fatherData, fatherElement);
-                }).error(() => {
+                loader().then((data) => setter(data)).catch((err) => {
+                    const temp = { ...fatherData };
                     for (const key of error) {
                         j[key] = error[key];
                     }
-                    this.render(fatherData, fatherElement);
+                    temp.inherit = temp.inherit || {};
+                    temp.inherit.err = err;
+                    this.render(temp, fatherElement);
                 });
-                for (const key of placeholder) {
+                for (const key in placeholder) {
                     j[key] = placeholder[key];
                 }
             }
