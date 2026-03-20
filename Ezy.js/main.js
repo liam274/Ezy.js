@@ -165,13 +165,14 @@ export const Ezy = {
                             if (!state) {
                                 validate?.onCaught();
                                 a = 1;
+                                break;
                             }
                         } else {
                             Ezy.formatError(`Error when rendering, Ezy[component.validate] not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
                             return obj.set(errors.RENDER_ERROR);
                         }
                     }
-                    if (a === 0) {
+                    if (a === 0 && parentNode.checkValidity()) {
                         parentNode.submit();
                     }
                 });
