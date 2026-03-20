@@ -201,7 +201,10 @@ const alias = {
     btn: "button",
     col: "column",
     h: "height",
-    clr: "color"
+    w: "width",
+    clr: "color",
+    p: "padding",
+    shadow: "box-shadow"
 };
 
 function manageCSSAlias(data) {
@@ -253,7 +256,6 @@ export function cssCompiler(classes, condition = []) {
         const conditions = _class.split(":"),
             lis = conditions.at(-1).split("-"),
             [key, value] = cssFix(manageCSSAlias(lis));
-        log(_class, conditions, lis, key, value);
         if (value !== null) {
             result[_class] = {
                 value: value.join(" "),
