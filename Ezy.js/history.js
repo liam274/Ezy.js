@@ -6,7 +6,7 @@ export default class History {
     #data = undefined;
     constructor(data, methods) {
         this.#data = data;
-        for (const name of methods) {
+        for (const name in methods) {
             if (typeof methods[name] !== "function") {
                 throw new Error(`[ezy.js] CRITICAL ERROR: Type Error: Expected methods as function[], found ${typeof methods[name]} as element.`);
             }
