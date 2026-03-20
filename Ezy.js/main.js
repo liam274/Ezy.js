@@ -2034,21 +2034,20 @@ export class render {
     }
     cssPutter() {
         const result = [];
-        for (const key in this.#cssBefore) {
-            const { name, value } = this.#cssBefore[key];
-            if (this.#cssAfter.has(name)) {
+        for (const name in this.#cssBefore) {
+            const { key, value, theme, originNam } = this.#cssBefore[name];
+            if (this.#cssAfter.has([name, value, theme])) {
                 continue;
             }
             result.push(`.${name}{${key}: ${value};}`);
-            this.#cssAfter.add(name);
+            this.#cssAfter.add([name, value, theme]);
+            this.#themes[originNam] = theme;
         }
         this.#style.innerHTML += result.join("");
     }
     putCSS(result) {
         for (const key in result) {
-            const { name, value, theme } = result[key];
-            this.#cssBefore[key] = { name, value };
-            this.#themes[key] = theme;
+            this.#cssBefore[key] = result[key];
         }
     }
     /**
@@ -2066,23 +2065,30 @@ export class render {
     setTheme(themes) {
         const result = [],
             temp = [];
-        for (const char in this.#style.innerHTML) {
+        for (const char of this.#style.innerHTML) {
             if (char === ".") {
                 result.push(temp.join(""));
                 temp.length = 0;
-            } else if (char === "{") {
-                const frags = temp.join("").split(":");
-                if (utils.searchValue(this.#themes, frags.at(-1))) {
-                    temp.length = 0;
-                    temp.push(`.${swapped[frags.at(-1)].join(":")}${frags.at(-1)}`);
-                } else if (!utils.isSubset(frags, themes)) {
-                    temp.length = 0;
+                continue;
+            }
+            if (char === "{") {
+                const frags = temp.join("").split(":"),
+                    _ = this.#themes[frags.at(-1)];
+                temp.length = 0;
+                if (_ && utils.isSubset(_, themes)) {
+                    temp.push(`.${_.join("\\:")}${_.length ? "\\:" : ""}${frags.at(-1)}`);
+                } else {
                     temp.push(`.${frags.at(-1)}`);
                 }
             }
             temp.push(char);
         }
+        if (temp.length > 0) {
+            result.push(temp.join(""));
+        }
+        this.#style.innerHTML = result.join("");
     }
 };
+
 
 log("%c[ezy.js] Welcome to the world of Ezy.js framework!", "font-size: 60px; font-weight: bold;color: yellow;");

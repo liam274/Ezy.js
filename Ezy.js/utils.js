@@ -197,7 +197,11 @@ export function passworder({ placeholder, mask }) {
 const alias = {
     bg: "background",
     mid: "middle",
-    img: "image"
+    img: "image",
+    btn: "button",
+    col: "column",
+    h: "height",
+    clr: "color"
 };
 
 function manageCSSAlias(data) {
@@ -247,13 +251,15 @@ export function cssCompiler(classes, condition = []) {
             throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected classes as string[], found ${typeof _class} as element`);
         }
         const conditions = _class.split(":"),
-            lis = conditions[0].split("-"),
+            lis = conditions.at(-1).split("-"),
             [key, value] = cssFix(manageCSSAlias(lis));
+        log(_class, conditions, lis, key, value);
         if (value !== null) {
-            result[key.join("-")] = {
+            result[_class] = {
                 value: value.join(" "),
-                name: _class,
-                theme: conditions
+                key: key.join("-"),
+                theme: conditions.slice(0, -1),
+                originNam: conditions.at(-1)
             };
         }
     }
@@ -281,7 +287,7 @@ export function isSubset(A, B) {
 export function searchValue(obj, val) {
     for (const k in obj) {
         if (obj[k] === val) {
-            return true;
+            return [k, val];
         }
     }
     return false;
