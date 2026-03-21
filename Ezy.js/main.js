@@ -113,27 +113,6 @@ export const Ezy = {
             return data >= limit;
         },
     },
-    validatePipe(obj, { pipe }, traceback) {
-        if (!pipe.receive || typeof pipe.receive !== "object") {
-            Ezy.formatError(`Error when rendering, expected object[string,function], found ${pipe.receive}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Pipe Error");
-            return obj.set(errors.PIPE_ERROR);
-        }
-        for (const i in pipe.receive) {
-            const sobj = pipe.receive[i];
-            if (typeof sobj.func !== "function") {
-                Ezy.formatError(`Error when piping, expected pipe.receive.*.func as function, found ${typeof sobj.func}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Structure Error");
-                return obj.set(errors.STRUCTURE_ERROR);
-            }
-            if (!Array.isArray(sobj.data)) {
-                Ezy.formatError(`Error when piping, expected pipe.receive.*.data as array, found ${typeof sobj.data}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Structure Error");
-                return obj.set(errors.STRUCTURE_ERROR);
-            }
-        }
-        if (!pipe.name) {
-            Ezy.formatError(`Error when piping, expected pipe.name, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Structure Error");
-            return obj.set(errors.STRUCTURE_ERROR);
-        }
-    },
     validateComponentIf(obj, varage, item, traceback) {
         if (item) {
             if (!varage[item]) {
@@ -506,7 +485,6 @@ export const store = new storage.store();
 
 export class render {
     #varage = {};
-    #frameID = undefined;
     #oldBoys = {};
     #typeExtend = {};
     #listen2 = {};
@@ -536,8 +514,6 @@ export class render {
         head.appendChild(this.#remarkableStyle);
         this.maxWait = maxWait;
         this.data = data;
-        this.mains = [];
-        this.pipes = {};
         this.vdom = {
             children: [],
             dataset: {}
@@ -592,9 +568,6 @@ export class render {
         }
         if (!this.#debug) {
             console.clear();
-        }
-        if (this.#frameID) {
-            cancelAnimationFrame(this.#frameID);
         }
         if (this.loadPage.length) {
             for (const i of this.loadPage) {
@@ -716,17 +689,6 @@ export class render {
         this.systemPlot = {
             time: 0
         };
-        this.mains.length = 0;
-        for (const key in this.pipes) {
-            delete this.pipes[key];
-        }
-        this.interval = false;
-        if (this.oldTimeout) {
-            clearTimeout(this.oldTimeout);
-        }
-        this.oldTimeout = setTimeout(() => {
-            this.interval = true; this.loop();
-        }, SECOND - ((this.historyRender) % SECOND));
         if (this.config.style) {
             const c = [];
             for (const j in this.config.style) {
@@ -810,41 +772,6 @@ export class render {
             }
             this.loadPage.length = 0;
         }
-    }
-    /**
-     * A loop that use requestAnimationFrame to implement. Calling it is not suggested
-     */
-    loop() {
-        for (const i of this.mains) {
-            i.func(i.obj, i.el);
-        }
-        cancelAnimationFrame(this.#frameID);
-        if (this.interval) {
-            this.#frameID = requestAnimationFrame(this.loop.bind(this));
-        }
-    }
-    /**
-     * pipe a message. ***PLEASE CHECK THE STATUS CODE***
-     * @param {string} sender - The one who sends
-     * @param {string} receiver - The one who recieves
-     * @param {Any} data - Data
-     * @returns {void}
-     */
-    pipe2(sender, receiver, data) {
-        if (!(sender in this.pipes)) {
-            Ezy.formatError(`Error when piping, trying to send message from ${sender}, not found in this.pipes`, errorLevels.CRITICAL_ERROR, "Pipe Error");
-            return this.set(errors.PIPE_ERROR);
-        }
-        if (!(receiver in this.pipes)) {
-            Ezy.formatError(`Error when piping, trying to send message to ${receiver}, not found in this.pipes`, errorLevels.CRITICAL_ERROR, "Pipe Error");
-            return this.set(errors.PIPE_ERROR);
-        }
-        if (!(sender in this.pipes[receiver].receive)) {
-            Ezy.formatError(`Error when piping, try to receive message from ${sender}, not found in this.pipes.${receiver}.receive`, errorLevels.CRITICAL_ERROR, "Pipe Error");
-            return this.set(errors.PIPE_ERROR);
-        }
-        const obj = this.pipes[receiver].receive[sender];
-        obj.func(data, ...(obj.data || []));
     }
     /**
      * edit variables
@@ -988,9 +915,6 @@ export class render {
             setTimeout((function () {
                 card.innerHTML = "";
                 card.remove();
-                if (i.pipe) {
-                    delete this.pipes[i.pipe.name];
-                }
                 this.removeVdom(temp);
                 setTimeout(() => {
                     i.expire.expired?.();
@@ -1000,24 +924,6 @@ export class render {
         Ezy.validateValidation(this, card, i.validate || "", traceback, fatherElement);
         if (this.statusCode !== 0) {
             return;
-        }
-        if (i.main) {
-            if (typeof i.main !== "function") {
-                Ezy.formatError(`Error when rendering, expected component.main attribute as function, found ${typeof i.main}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
-                return this.set(errors.RENDER_ERROR);
-            }
-            this.mains.push({
-                el: card,
-                obj: i,
-                func: i.main
-            });
-        }
-        if (i.pipe) {
-            Ezy.validatePipe(this, i.pipe, traceback);
-            if (this.statusCode !== 0) {
-                return;
-            }
-            this.pipes[i.pipe.name] = i.pipe;
         }
         if (i.data) {
             for (const k in i.data) {
@@ -1395,10 +1301,9 @@ export class render {
      * @param {string} data
      * @param {string} traceback
      * @param {Object} replacement
-     * @param {Object} pipeData
      * @returns {string|void}
      */
-    preCompileStr(data, traceback, replacement = {}, pipeData = {}) {
+    preCompileStr(data, traceback, replacement = {}) {
         if (typeof data !== "string") {
             Ezy.formatError(`Error when trying to parse string, expected string, found ${data}`, errorLevels.CRITICAL_ERROR, "Type Error");
             return this.set(errors.TYPE_ERROR);
@@ -1412,7 +1317,7 @@ export class render {
             varName = [];
         replacement = { ...this.systemPlot, ...replacement };
         const newReplacement = {},
-            _varage = { ...this.#varage, ...pipeData },
+            _varage = { ...this.#varage },
             local = {};
         for (const i in replacement) {
             for (const t of (dictionary[i] || [i])) {
@@ -1601,9 +1506,6 @@ export class render {
             setTimeout((function () {
                 el.innerHTML = "";
                 el.remove();
-                if (j.pipe) {
-                    delete this.pipes[j.pipe.name];
-                }
                 this.removeVdom(temp);
                 setTimeout(() => {
                     j.expire.expired?.();
@@ -1613,24 +1515,6 @@ export class render {
         Ezy.validateValidation(this, el, j.validate || "", traceback, parentNode);
         if (this.statusCode !== 0) {
             return;
-        }
-        if (j.main) {
-            if (typeof j.main !== "function") {
-                Ezy.formatError(`Error when rendering, expected component.main attribute as function, found ${typeof j.main}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
-                return this.set(errors.RENDER_ERROR);
-            }
-            this.mains.push({
-                el,
-                obj: j,
-                func: j.main
-            });
-        }
-        if (j.pipe) {
-            Ezy.validatePipe(this, j.pipe, traceback);
-            if (this.statusCode !== 0) {
-                return;
-            }
-            this.pipes[j.pipe.name] = j.pipe;
         }
         if (j.text) {
             el.title = this.preCompileStr(j.text, myTraceback, replace);

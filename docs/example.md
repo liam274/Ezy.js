@@ -30,17 +30,6 @@
     }
 }
 ```
-### pipes
-```JavaScript
-{
-    pipes: {
-        receive: {
-            receiveFrom: recieveFunc(messageFromReceiveFrom),
-            ...
-        }
-    }
-}
-```
 ### store.add
 ```JavaScript
 import * as ezy from "./main.js";

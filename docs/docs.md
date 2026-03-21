@@ -87,8 +87,6 @@ Except the specific root structure, *Ezy.js* is very dynamic and flexible, which
 | `validate` | Switch class via the given validation function name. | [Example](example.md#validate) |
 | `expire` | Type in object. It has subattributes like date, expired. The component will be removed on the nearest second in date(ceiling), and when expired, it will first let the UI update, then execute the expired function. | [Example](example.md#expire) |
 | `forEach` | It will loops through the given object to render components. |
-| `pipes` | You can use pipes to send messages. Reciver **MUST** have pipe definded. | [Example](example.md#pipes) |
-| `main` | This is a function that will be executed in every milisecond, reciving the component object itself as the first argument while the component element as the second. |
 | `data` | will be stored as `data-*` attributes. |
 | `config` | Configuration to the element and its children(first-level children only). |
 | `belt` | ***BELT SYNTAX***. You can use `belt.buckle` to bind a varage variable, so when the variable is being changed, the CO will be re-rendered! | [Example](#belt-syntax) |
