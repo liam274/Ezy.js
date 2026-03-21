@@ -268,19 +268,26 @@ export function cssCompiler(classes, condition = []) {
     return result;
 }
 
-export const specalizeTheme = new Set(["hover", "active"]);
+export const specializeTheme = new Set(["hover", "active", "focus", "defined", "heading", "open", "popover-open", "modal",
+    "fullscreen", "picture-in-picture", "enabled", "disabled", "read-only", "read-write", "placeholder-shown", "autofill",
+    "default", "checked", "indeterminate", "blank", "valid", "invalid", "in-range", "out-of-range", "required", "optional",
+    "user-valid", "any-link", "link", "visited", "local-link", "target", "scope", "playing", "paused", "seeking", "buffering",
+    "stalled", "muted", "volume-locked", "current", "past", "future", "root", "empty", "first-child", "last-child", "only-child",
+    "first-of-type", "last-of-type", "only-of-type", "host", "has-slotted", "focus-visible", "focus-within", "target-current",
+    "left", "right", "first", "blank", "active-view-transition"
+]);
 
-export function specalizeCSS(themes, key, value) {
+export function specializeCSS(themes, key, value) {
     for (const theme of themes) {
-        if (specalizeTheme.has(theme)) {
-            return `&:${theme}{${key}: ${specalizeCSSValue(key, value)};}`;
+        if (specializeTheme.has(theme)) {
+            return `&:${theme}{${key}: ${specializeCSSValue(key, value)};}`;
         }
     }
-    return `${key}: ${specalizeCSSValue(key, value)};`;
+    return `${key}: ${specializeCSSValue(key, value)};`;
 }
-export function specalizedCSS(themes, value) {
+export function specializedCSS(themes, value) {
     for (const theme of themes) {
-        if (specalizeTheme.has(theme)) {
+        if (specializeTheme.has(theme)) {
             return `&:${theme}${value}`;
         }
     }
@@ -300,7 +307,7 @@ const compileCSSValue = {
  * @param {string} key
  * @param {string} value
  */
-export function specalizeCSSValue(key, value) {
+export function specializeCSSValue(key, value) {
     if (compileCSSValue[key]) {
         return compileCSSValue[key](value);
     }

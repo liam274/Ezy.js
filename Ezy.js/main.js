@@ -478,8 +478,7 @@ const varage = {},// variable storage (?cold joke)
     };
 export const MAXWAIT = 60000,
     HTTP_NOT_FOUND = 404,
-    HTTP_TIMEOUT = 408,
-    SECOND = 1000;
+    HTTP_TIMEOUT = 408;
 
 export const store = new storage.store();
 
@@ -650,7 +649,7 @@ export class render {
         if (!this.data) {
             this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
                 this.maxWait));
-            return this.set(errors.STRUCTURE_ERROR);;
+            return this.set(errors.STRUCTURE_ERROR);
         }
         this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", HTTP_TIMEOUT, this.maxWait, "Page render timeout"));
         this.clear();
@@ -727,7 +726,7 @@ export class render {
         if (!data) {
             this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
                 this.maxWait, "Resource page.data not found", root));
-            return this.set(errors.STRUCTURE_ERROR);;
+            return this.set(errors.STRUCTURE_ERROR);
         }
         this.statusCode = 0;
         if (data.onStart) {
@@ -1607,13 +1606,13 @@ export class render {
             if (j.async) {
                 const { loader, setter, placeholder, error } = j.async;
                 loader().then((data) => setter(data)).catch((err) => {
-                    const temp = { ...fatherData };
+                    const temp = { ...i };
                     for (const key of error) {
                         j[key] = error[key];
                     }
                     temp.inherit = temp.inherit || {};
                     temp.inherit.err = err;
-                    this.render(temp, fatherElement);
+                    this.render(temp, parentNode);
                 });
                 for (const key in placeholder) {
                     j[key] = placeholder[key];
@@ -1923,7 +1922,7 @@ export class render {
             if (this.#cssAfter.has(originNam)) {
                 continue;
             }
-            result.push(`.${name.split(":").join("\\:")}{${utils.specalizeCSS(theme, key, value)}}`);
+            result.push(`.${name.split(":").join("\\:")}{${utils.specializeCSS(theme, key, value)}}`);
             this.#cssAfter.add(originNam);
             this.#themes[originNam] = theme;
         }
@@ -1947,7 +1946,7 @@ export class render {
  * @param {string[]} themes
  */
     setTheme(themes) {
-        const anotherThemes = [...themes, ...utils.specalizeTheme];
+        const anotherThemes = [...themes, ...utils.specializeTheme];
         const rules = this.#style.sheet.cssRules;
 
         for (const rule of rules) {
