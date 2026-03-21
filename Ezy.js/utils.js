@@ -268,6 +268,46 @@ export function cssCompiler(classes, condition = []) {
     return result;
 }
 
+export const specalizeTheme = new Set(["hover", "active"]);
+
+export function specalizeCSS(themes, key, value) {
+    for (const theme of themes) {
+        if (specalizeTheme.has(theme)) {
+            return `&:${theme}{${key}: ${specalizeCSSValue(key, value)};}`;
+        }
+    }
+    return `${key}: ${specalizeCSSValue(key, value)};`;
+}
+export function specalizedCSS(themes, value) {
+    for (const theme of themes) {
+        if (specalizeTheme.has(theme)) {
+            return `&:${theme}${value}`;
+        }
+    }
+    return value;
+}
+
+const compileCSSValue = {
+    scale(a) {
+        return a / 10;
+    },
+    opacity(a) {
+        return a / 100;
+    }
+};
+
+/**
+ * @param {string} key
+ * @param {string} value
+ */
+export function specalizeCSSValue(key, value) {
+    if (compileCSSValue[key]) {
+        return compileCSSValue[key](value);
+    }
+    return value;
+}
+
+
 /**
  * @param {Node} node
  * @returns {boolean}

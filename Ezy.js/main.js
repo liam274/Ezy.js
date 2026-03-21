@@ -2036,11 +2036,11 @@ export class render {
         const result = [];
         for (const name in this.#cssBefore) {
             const { key, value, theme, originNam } = this.#cssBefore[name];
-            if (this.#cssAfter.has([name, value, theme])) {
+            if (this.#cssAfter.has(originNam)) {
                 continue;
             }
-            result.push(`.${name}{${key}: ${value};}`);
-            this.#cssAfter.add([name, value, theme]);
+            result.push(`.${name.split(":").join("\\:")}{${utils.specalizeCSS(theme, key, value)}}`);
+            this.#cssAfter.add(originNam);
             this.#themes[originNam] = theme;
         }
         this.#style.innerHTML += result.join("");
@@ -2059,34 +2059,25 @@ export class render {
         this.#style.remove();
     }
     /**
-     * set the themes
-     * @param {string[]} themes
-     */
+ * set the themes
+ * @param {string[]} themes
+ */
     setTheme(themes) {
-        const result = [],
-            temp = [];
-        for (const char of this.#style.innerHTML) {
-            if (char === ".") {
-                result.push(temp.join(""));
-                temp.length = 0;
-                continue;
+        const anotherThemes = [...themes, ...utils.specalizeTheme];
+        const rules = this.#style.sheet.cssRules;
+
+        for (const rule of rules) {
+            const { selectorText } = rule;
+            const selector = selectorText.substring(1);
+            const frags = selector.split("\\:");
+            const originNam = frags.at(-1);
+            const _ = this.#themes[originNam];
+            if (_ && utils.isSubset(_, anotherThemes)) {
+                rule.selectorText = `.${_.join("\\:")}${_.length ? "\\:" : ""}${originNam}`;
+            } else {
+                rule.selectorText = `.${originNam}`;
             }
-            if (char === "{") {
-                const frags = temp.join("").split(":"),
-                    _ = this.#themes[frags.at(-1)];
-                temp.length = 0;
-                if (_ && utils.isSubset(_, themes)) {
-                    temp.push(`.${_.join("\\:")}${_.length ? "\\:" : ""}${frags.at(-1)}`);
-                } else {
-                    temp.push(`.${frags.at(-1)}`);
-                }
-            }
-            temp.push(char);
         }
-        if (temp.length > 0) {
-            result.push(temp.join(""));
-        }
-        this.#style.innerHTML = result.join("");
     }
 };
 

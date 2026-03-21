@@ -56,14 +56,15 @@
                         'light:clr-blue',
                         // 暗色主题样式
                         'dark:bg-clr-gray',
-                        'dark:clr-white'
+                        'dark:clr-white',
+                        "hover:scale-12"
                     ],
                     content: `
                         <h1 class="text-3xl font-bold mb-4">🌓 Ezy.js 主题切换</h1>
                         <p class="mb-6">当前主题由框架内置主题系统控制，点击下方按钮切换。</p>
                         <div class="flex gap-4">
-                            <button id="lightBtn" type="button" class="px-4 py-2 rounded light:bg-gray-200 light:text-black dark:bg-gray-700 dark:text-white transition">🌞 亮色模式</button>
-                            <button id="darkBtn" type="button" class="px-4 py-2 rounded light:bg-gray-200 light:text-black dark:bg-gray-700 dark:text-white transition">🌙 暗色模式</button>
+                            <button id="lightBtn" type="button" class="px-4 py-2 rounded light:bg-gray light:clr-black dark:bg-clr-black dark:clr-white transition">🌞 亮色模式</button>
+                            <button id="darkBtn" type="button" class="px-4 py-2 rounded light:bg-gray light:clr-black dark:bg-clr-black dark:clr-white transition">🌙 暗色模式</button>
                         </div>
                     `,
                     // 为按钮绑定事件（可选，也可用原生监听）
@@ -92,7 +93,7 @@
         window.app = app;
 
         // 可选：如果希望默认就加载暗色主题，可以在渲染完成后调用一次
-        // app.setTheme(['dark']);   // 取消注释则默认暗色
+        // app.setTheme(['light']);   // 取消注释则默认暗色
     </script>
 </body>
 
