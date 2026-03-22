@@ -5,6 +5,7 @@
 
 import * as utils from "./utils.js";
 import * as storage from "./storage.js";
+import * as cssComputer from "./cssComputer.js";
 
 /*
     @file ezy.js
@@ -909,7 +910,7 @@ export class render {
     #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp, root) {
         const classes = [...(i.type || []), ...(config.type || [])];
         card.classList.add(...classes);
-        this.putCSS(utils.cssCompiler(this.#extendType(...classes)));
+        this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
         if (i.expire) {
             setTimeout((function () {
                 card.innerHTML = "";
@@ -1645,7 +1646,7 @@ export class render {
                     if (!frag) {
                         const classes = [...(j.type || []), ...(config.type || [])];
                         el.classList.add(...classes);
-                        this.putCSS(utils.cssCompiler(this.#extendType(...classes)));
+                        this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
                         utils.applyStyles(el, j.style);
                     }
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`),
@@ -1687,7 +1688,7 @@ export class render {
                     if (!frag) {
                         const classes = [...(j.type || []), ...(config.type || [])];
                         el.classList.add(...classes);
-                        this.putCSS(utils.cssCompiler(this.#extendType(...classes)));
+                        this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
                         utils.applyStyles(el, j.style);
                     }
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
@@ -1839,7 +1840,7 @@ export class render {
      */
     loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = body) {// dark joke
         const pot = $$("div");
-        this.putCSS(utils.cssCompiler(["display-flex", "horizontal-mid", "vertical-mid", "bg-color-white"]));
+        this.putCSS(cssComputer.cssCompiler(["display-flex", "horizontal-mid", "vertical-mid", "bg-color-white"]));
         this.cssPutter();
         pot.classList.add("display-flex", "horizontal-mid", "vertical-mid", "bg-color-white");
         pot.style.width = "100%";
@@ -1867,7 +1868,7 @@ export class render {
     errorPage(msg, errorCode, reason, parentNode = body) {
         error(msg);
         const pot = $$("div");
-        this.putCSS(utils.cssCompiler(["display-flex", "bg-color-white", "horizontal-mid", "vertical-mid"]));
+        this.putCSS(cssComputer.cssCompiler(["display-flex", "bg-color-white", "horizontal-mid", "vertical-mid"]));
         this.cssPutter();
         pot.classList.add("display-flex", "bg-color-white", "horizontal-mid", "vertical-mid");
         pot.style.width = "100%";
