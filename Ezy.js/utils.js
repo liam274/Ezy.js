@@ -182,6 +182,10 @@ export function passworder({ placeholder, mask }) {
     input.addEventListener("beforeinput", handler);
     input.addEventListener("copy", copyHandler);
     input.addEventListener("cut", cutHandler);
+    input.addEventListener("dragstart", (e) => {
+        e.preventDefault();
+        return false;
+    });
 
     return {
         input,

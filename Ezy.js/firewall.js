@@ -16,7 +16,6 @@ self.addEventListener("install", event => {
                             rules.push(new RegExp(i));
                         }
                         ruled = true;
-                        console.log("rules loaded");
                     }
                     self.skipWaiting();
                 })
@@ -33,7 +32,6 @@ self.addEventListener("message", event => {
             rules.push(new RegExp(regex));
         }
         ruled = true;
-        console.log("rules loaded");
         caches.open(CACHE_NAME).then(cache => {
             cache.put("rules", new Response(JSON.stringify(event.data.rules)));
         });

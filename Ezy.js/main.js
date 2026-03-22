@@ -352,7 +352,6 @@ export const Ezy = {
                 utils.removeChild(barrier);
                 barrier.remove();
                 data.func(true, bind(), ...(data.props || []));
-                barrier.remove();
             });
             backk.appendChild(confirm);
             cancel.innerHTML = "Cancel";
@@ -361,7 +360,6 @@ export const Ezy = {
                 utils.removeChild(barrier);
                 barrier.remove();
                 data.func(false, bind(), ...(data.props || []));
-                barrier.remove();
             });
             backk.appendChild(cancel);
             back.appendChild(backk);
@@ -1821,7 +1819,7 @@ export class render {
             return this.set(errors.VALUE_ERROR);
         }
         if (obj.preventDefault) {
-            el.addEventListener(utils.removePrefix(j, "on").toLowerCase(), function (e) {
+            el.addEventListener(utils.removePrefix(j.toLowerCase(), "on"), function (e) {
                 e.preventDefault();
                 for (const i of listener) {
                     i(e);
@@ -1829,7 +1827,7 @@ export class render {
             });
         }
         else {
-            el.addEventListener(utils.removePrefix(j, "on").toLowerCase(), function (e) {
+            el.addEventListener(utils.removePrefix(j.toLowerCase(), "on"), function (e) {
                 for (const i of listener) {
                     i(e);
                 }

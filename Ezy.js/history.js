@@ -27,19 +27,30 @@ export default class History {
         this.#history.push(snapshot);
         this.#data[key] = value;
     }
+    /**
+     * @param {int} offset - the element that you'd like to rollback **TO**. Count from 1
+     * @returns {boolean} Show if success or not
+     */
     rollback(offset) {
         if (offset >= this.#history.length) {
             throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Offset(${offset}) out of range`);
         }
-        this.#history.length -= offset;
-        const { key, old } = this.#history[this.#history.length - 1];
+        if (offset === 0) {
+            return false;
+        }
+        this.#history.length -= offset - 1;
+        const { key, old } = this.#history.at(-1);
         this.#data[key] = old;
+        return true;
     }
+    /**
+     * @param {int} offset the element that you'd like peacefully rollback **TO**. Count from 1
+     */
     peacefulRollback(offset) {
         if (offset >= this.#history.length) {
             throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Offset(${offset}) out of range`);
         }
-        const { key, old } = this.#history[this.#history.length - offset - 1];
+        const { key, old } = this.#history.at(-offset);
         this.#data[key] = old;
     }
 };

@@ -11,6 +11,9 @@ export class store {
         }
     }
     commit(name, ...args) {
+        if (!this.#store[name]) {
+            throw new Error(`[ezy.js] CRITICAL ERROR: Variable Error: Try to access function-in-variable ${name}, not found.`);
+        }
         this.#store[name](...args);
         this.#notify(name, ...args);
     }
