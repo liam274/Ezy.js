@@ -54,6 +54,10 @@ Function: Decided rather showing warnings or not
 Expect type: Object<br />
 Required: <span style="color: green">true</span><br />
 Function: define request-related URL whitelist. [Details](#url-filter-syntax)
+- noComputeCSS<br />
+Expect type: boolean<br />
+Required: <span style="color: red">false</span><br />
+Function: disable builtin CSS compiling
 
 ### General Config Attributes
 

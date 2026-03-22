@@ -911,7 +911,9 @@ export class render {
     #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp, root) {
         const classes = [...(i.type || []), ...(config.type || [])];
         card.classList.add(...classes);
-        this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
+        if (!this.config.noComputeCSS) {
+            this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
+        }
         if (i.expire) {
             setTimeout((function () {
                 card.innerHTML = "";
@@ -1647,7 +1649,9 @@ export class render {
                     if (!frag) {
                         const classes = [...(j.type || []), ...(config.type || [])];
                         el.classList.add(...classes);
-                        this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
+                        if (!this.config.noComputeCSS) {
+                            this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
+                        }
                         utils.applyStyles(el, j.style);
                     }
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`),
@@ -1689,7 +1693,9 @@ export class render {
                     if (!frag) {
                         const classes = [...(j.type || []), ...(config.type || [])];
                         el.classList.add(...classes);
-                        this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
+                        if (!this.config.noComputeCSS) {
+                            this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
+                        }
                         utils.applyStyles(el, j.style);
                     }
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
