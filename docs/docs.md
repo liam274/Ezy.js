@@ -20,6 +20,7 @@ If you prefer to get start from small, please take a look at our [tutorial](tuto
 - [Cross Object Store](#cross-object-store)
 - [Global Variables](global-variables.md)
 - [Async skills](async-skills.md)
+- [Class-CSS](#class-css)
 
 ## Data Structure
 
@@ -189,6 +190,16 @@ This should be definded as `data.config.urlFilters.*`
 | `getState` | `getState()` | Get the variable store copy |
 | `subscribe` | `subscribe(func:function)` | Subscribe, every commit the subscribor function will be called. Returning a function, if you execute it, the subscribor will be deleted |
 
+## Class-CSS
+
+Remembered always put the `css-attribute-css-value` thing at last of the class name
+
+| syntax | meaning |
+| ------ | ------- |
+| `some-css-attribute-some-css-value` | This will be converted into `some-css-attribute: some css value` |
+| `...some-css-value!` | This will be converted into `... some css value !important` |
+| `theme1:theme2:...` | The remaining css will only apply on elements if the condition themes are the sub-array of the setted theme array |
+| `pseudo-class:theme1:pseudo-class2:theme2:` or whatever order you'd like | As above, just added pseudo conditions |
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.
