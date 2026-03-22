@@ -224,3 +224,24 @@ export function searchValue(obj, val) {
     }
     return false;
 }
+
+/**
+ * @param {string} string
+ * @param {string} trimmer
+ */
+export function trimEnd(string, trimmer) {
+    const result = [];
+    trimmer = new Set(trimmer);
+    let con = true;
+    for (const char of [...string].toReversed()) {
+        if (trimmer.has(char)) {
+            if (con) {
+                continue;
+            }
+        } else {
+            con = false;
+        }
+        result.push(char);
+    }
+    return result.toReversed().join("");
+}

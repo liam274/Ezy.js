@@ -1928,7 +1928,7 @@ export class render {
             if (this.#cssAfter.has(originNam)) {
                 continue;
             }
-            result.push(`.${name.split(":").join("\\:")}{${cssComputer.specializeCSS(theme, key, value)}}`);
+            result.push(`.${CSS.escape(name.split(":").join("\\:"))}{${cssComputer.specializeCSS(theme, key, value)}}`);
             this.#cssAfter.add(originNam);
             this.#themes[originNam] = theme;
         }
@@ -1962,7 +1962,7 @@ export class render {
             const originNam = frags.at(-1);
             const _ = this.#themes[originNam];
             if (_ && utils.isSubset(_, anotherThemes)) {
-                rule.selectorText = `.${_.join("\\:")}${_.length ? "\\:" : ""}${originNam}`;
+                rule.selectorText = `.${CSS.escape(_.join(":"))}${_.length ? "\\:" : ""}${originNam}`;
             } else {
                 rule.selectorText = `.${originNam}`;
             }

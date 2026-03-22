@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
 
+import * as utils from "./utils.js";
+
 const alias = {
     bg: "background",
     mid: "middle",
@@ -30,7 +32,7 @@ function cssFix(data) {
     data = data.slice(1);
     let support = false;
     while (data.length > 0) {
-        if (CSS.supports(n3w.join("-"), data.join(" "))) {
+        if (CSS.supports(n3w.join("-"), utils.trimEnd(data.join(" "), "!"))) {
             support = true;
         } else if (support) {
             data.push(n3w[n3w.length - 1]);

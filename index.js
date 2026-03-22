@@ -110,13 +110,7 @@ const pageData = {
                 {
                     type: ["left-right"],
                     component: [
-                        {
-                            style: {
-                                fontSize: "80px"
-                            },
-                            content: "Ezy.js",
-                            tag: "h1"
-                        },
+                        "tit",
                         {
                             tag: "span",
                             id: "slogon",
@@ -267,9 +261,7 @@ const pageData = {
         tit: {
             tag: "h1",
             content: "Ezy.js",
-            style: {
-                fontSize: "80px"
-            }
+            type: ["font-size-80px"]
         }
     }
 };
