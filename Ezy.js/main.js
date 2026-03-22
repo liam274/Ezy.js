@@ -1947,7 +1947,7 @@ export class render {
  * @param {string[]} themes
  */
     setTheme(themes) {
-        const anotherThemes = [...themes, ...utils.specializeTheme];
+        const anotherThemes = [...themes, ...cssComputer.specializeTheme];
         const rules = this.#style.sheet.cssRules;
 
         for (const rule of rules) {
