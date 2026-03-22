@@ -7,3 +7,4 @@
 | `validates` | `Object` | It has all the builtin validate functions for `form` element |
 | `flat` | `function` | This function will flats the given array |
 | `dialog` | `Object` | This stores the builtin dialog functions |
+| `component` | `function` | Registering cross-object components, allow using strings to behave as component |

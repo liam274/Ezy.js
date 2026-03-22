@@ -1,6 +1,6 @@
 # Ezy.js
 
-If you're curious about our doucment's specific terminologies, please take a look [here](#specific-terminologies)<br />
+If you're curious about our document's specific terminologies, please take a look [here](#specific-terminologies)<br />
 Also, please read [this](special-syntax.md) since there might be special syntax in the document that isn't valid JS syntax.
 If you prefer to get start from small, please take a look at our [tutorial](tutorial.md)
 
@@ -97,7 +97,7 @@ Except the specific root structure, *Ezy.js* is very dynamic and flexible, which
 | `belt` | ***BELT SYNTAX***. You can use `belt.buckle` to bind a varage variable, so when the variable is being changed, the CO will be re-rendered! | [Example](#belt-syntax) |
 | `_type` | defines the type attribute in HTML tag |
 | `isFragment` | If it's set as truly values, the framework will use `document.createDocumentFragment()` to create the current element to pick up its components. Other Node-related attributes will be dismissed due to this attribute |
-| `evaluate` | This should be a variable name in varage. It will be pharsed as object and its attributes will be applied on the CO before rendering the CO | [Example](example.md#evaluate) |
+| `evaluate` | This should be a variable name in varage. It will be phrased as object and its attributes will be applied on the CO before rendering the CO | [Example](example.md#evaluate) |
 | `async` | This packs up the async behaviour to load the component | [Example](example.md#asnyc-attribute) |
 
 ## Builtin functions
