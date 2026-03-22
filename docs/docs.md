@@ -2,6 +2,7 @@
 
 If you're curious about our doucment's specific terminologies, please take a look [here](#specific-terminologies)<br />
 Also, please read [this](special-syntax.md) since there might be special syntax in the document that isn't valid JS syntax.
+If you prefer to get start from small, please take a look at our [tutorial](tutorial.md)
 
 ## Table of Contents
 
