@@ -372,10 +372,13 @@ export const Ezy = {
      * @param {string} message
      * @param {number} level
      * @param {string} error
+     * @param {boolean} die
      */
-    formatError(message, level, _error) {
+    formatError(message, level, _error, die = true) {
         error(`[ezy.js] ${Ezy.errors[level]}: ${_error.toUpperCase()}: ${message}`);
-        throw new Error(`[ezy.js] ${Ezy.errors[level]}: ${_error.toUpperCase()}: ${message}`);
+        if (die) {
+            throw new Error(`[ezy.js] ${Ezy.errors[level]}: ${_error.toUpperCase()}: ${message}`);
+        }
     },
     /**
      * Public Classify
@@ -519,7 +522,11 @@ export class render {
         this.loadPage = [];
         if (!data) {
             this.set(errors.STRUCTURE_ERROR);
-            this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND, this.maxWait));
+            this.loadPage.push(this.loadingPage({
+                message: "Data structure missing.",
+                level: errorLevels.CRITICAL_ERROR,
+                _error: "Structure Error"
+            }, HTTP_NOT_FOUND, this.maxWait));
             return this;
         }
         if (data.classify) {
@@ -527,7 +534,11 @@ export class render {
         }
         if (!data.component) {
             this.set(errors.STRUCTURE_ERROR);
-            this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure attribute \"component\" missing.", HTTP_NOT_FOUND,
+            this.loadPage.push(this.loadingPage({
+                message: "Data structure attribute \"component\" missing.",
+                level: errorLevels.CRITICAL_ERROR,
+                _error: "Structure Error"
+            }, HTTP_NOT_FOUND,
                 this.maxWait, "Resource page.data.component not found"));
             return this;
         }
@@ -619,7 +630,7 @@ export class render {
                 }
                 navigator.serviceWorker.register(new URL("./firewall.js", import.meta.url)).then(() => {
                     if (this.#debug) {
-                        log("[ezy.js] URL filter Registered successful.");
+                        log("[ezy.js] URL filter registered successful.");
                     }
                     return navigator.serviceWorker.ready;
                 }).then(reg => {
@@ -647,11 +658,19 @@ export class render {
         // clean-up section end
         this.historyRender = +new Date();
         if (!this.data) {
-            this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
+            this.loadPage.push(this.loadingPage({
+                message: "Data structure missing.",
+                level: errorLevels.CRITICAL_ERROR,
+                _error: "Structure Error"
+            }, HTTP_NOT_FOUND,
                 this.maxWait));
             return this.set(errors.STRUCTURE_ERROR);
         }
-        this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Timeout Error: ", HTTP_TIMEOUT, this.maxWait, "Page render timeout"));
+        this.loadPage.push(this.loadingPage({
+            message: "",
+            level: errorLevels.CRITICAL_ERROR,
+            _error: "Timeout Error"
+        }, HTTP_TIMEOUT, this.maxWait, "Page render timeout"));
         this.clear();
         this.#varage = Ezy.watchout({ ...varage, ...(this.data.data || {}) }, {
             late: (function (_, key) {
@@ -724,7 +743,11 @@ export class render {
      */
     render(data, root, options = {}) {
         if (!data) {
-            this.loadPage.push(this.loadingPage("[ezy.js] CRITICAL ERROR: Structure Error: Data structure missing.", HTTP_NOT_FOUND,
+            this.loadPage.push(this.loadingPage({
+                message: "Data structure missing.",
+                level: errorLevels.CRITICAL_ERROR,
+                _error: "Structure Error"
+            }, HTTP_NOT_FOUND,
                 this.maxWait, "Resource page.data not found", root));
             return this.set(errors.STRUCTURE_ERROR);
         }
@@ -1848,14 +1871,14 @@ export class render {
     }
     /**
      * Add a loading page to the give node.
-     * @param {string} msg - Shown message on the error page, if timeout
+     * @param {Object} prop0 - Shown message on the error page, if timeout
      * @param {number} errorCode - The HTTP error code on the error page, if timeout
      * @param {number} guillotine - Timeout time limit
      * @param {string} reason - Timeout for what
      * @param {Node} parentNode
      * @returns {Object<string,Node|number>}
      */
-    loadingPage(msg, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = body) {// dark joke
+    loadingPage({ message, level, _error }, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = body) {// dark joke
         const pot = $$("div");
         this.putCSS(cssComputer.cssCompiler(["display-flex", "horizontal-mid", "vertical-mid", "bg-color-white"]));
         this.cssPutter();
@@ -1870,20 +1893,20 @@ export class render {
             obj: pot,
             id: setTimeout(() => {
                 pot.remove();
-                this.errorPage(msg, errorCode, reason, parentNode).remove();
+                this.errorPage({ message, level, _error }, errorCode, reason, parentNode).remove();
             }, guillotine)
         };
     }
     /**
      * ***CALLING IT IS NOT SUGGESTED***
-     * @param {string} msg
+     * @param {Object} prop0
      * @param {number} errorCode
      * @param {string} reason
      * @param {Node} parentNode
      * @returns {Object<string,function>}
      */
-    errorPage(msg, errorCode, reason, parentNode = body) {
-        error(msg);
+    errorPage({ message, level, _error }, errorCode, reason, parentNode = body) {
+        Ezy.formatError(message, level, _error, false);
         const pot = $$("div");
         this.putCSS(cssComputer.cssCompiler(["display-flex", "bg-color-white", "horizontal-mid", "vertical-mid"]));
         this.cssPutter();

@@ -31,4 +31,8 @@ const proc = new ezy.render(ezy.body, {
     },
     component: []
 });
-proc.errorPage("[ezy.js] CRITICAL ERROR: Page Error: Page not found.", ezy.HTTP_NOT_FOUND, "Page not found");
+proc.errorPage({
+    message: "Page not found.",
+    level: ezy.errorLevels.CRITICAL_ERROR,
+    _error: "Page Error"
+}, ezy.HTTP_NOT_FOUND, "Page not found");

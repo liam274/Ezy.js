@@ -36,11 +36,16 @@ export function applyStyles(el, styles) {
 /**
  * Remove every child of an element
  * @param {Node} el - Element
+ * @returns {boolean}
  */
 export function removeChild(el) {
+    if (!(el instanceof Node)) {
+        return false;
+    }
     while (el.firstChild) {
         el.firstChild.remove();
     }
+    return true;
 }
 /**
  * Join array to camelcase
