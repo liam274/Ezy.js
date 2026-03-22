@@ -375,6 +375,7 @@ export const Ezy = {
      */
     formatError(message, level, _error) {
         error(`[ezy.js] ${Ezy.errors[level]}: ${_error.toUpperCase()}: ${message}`);
+        throw new Error(`[ezy.js] ${Ezy.errors[level]}: ${_error.toUpperCase()}: ${message}`);
     },
     /**
      * Public Classify
