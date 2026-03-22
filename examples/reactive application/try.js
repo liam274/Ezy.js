@@ -32,7 +32,7 @@ const app = new render(
 
         // Top‑level configuration
         config: {
-            escapeHTML: false,            // enable XSS protection
+            escapeHTML: false,            // disable XSS protection
             debug: true,                  // show render timings in console
             urlFilter: {
                 rules: [".*"],

@@ -560,6 +560,7 @@ export class render {
      */
     reload() {
         this.config = this.data.config || {};
+        this.config.escapeHTML = utils._default(this.config.escapeHTML, true);
         // clean-up section start
         if (this.config.debug) {
             this.#debug = true;

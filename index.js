@@ -12,7 +12,8 @@ const pageData = {
             rules: [".*"],
             confirmer: () => true,
             reporter: () => undefined
-        }
+        },
+        escapeHTML: false
     },
     data: {
         details: {
