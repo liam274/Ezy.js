@@ -95,14 +95,6 @@ export const specializeTheme = new Set(["hover", "active", "focus", "defined", "
 ]);
 
 export function specializeCSS(themes, key, value) {
-    for (const theme of themes) {
-        if (specializeTheme.has(theme)) {
-            return `&:${theme}{${key}: ${specializeCSSValue(key, value)};}`;
-        }
-    }
-    return `${key}: ${specializeCSSValue(key, value)};`;
-}
-export function specializedCSS(themes, value) {
     const result = [];
     for (const theme of themes) {
         if (specializeTheme.has(theme)) {
@@ -110,9 +102,9 @@ export function specializedCSS(themes, value) {
         }
     }
     if (result.length) {
-        return `&:${result.join(":")}${value}`;
+        return `&:${result.join(":")}{${key}: ${specializeCSSValue(key, value)};}`;
     }
-    return value;
+    return `${key}: ${specializeCSSValue(key, value)};`;
 }
 
 const compileCSSValue = {
