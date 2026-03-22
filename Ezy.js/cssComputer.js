@@ -103,10 +103,14 @@ export function specializeCSS(themes, key, value) {
     return `${key}: ${specializeCSSValue(key, value)};`;
 }
 export function specializedCSS(themes, value) {
+    const result = [];
     for (const theme of themes) {
         if (specializeTheme.has(theme)) {
-            return `&:${theme}${value}`;
+            result.push(theme);
         }
+    }
+    if (result.length) {
+        return `&:${result.join(":")}${value}`;
     }
     return value;
 }
@@ -137,14 +141,17 @@ export function specializeCSSValue(key, value) {
  */
 export function themeSetter(themes, data) {
     const theme = [];
-    for (const t of themes) {
+    for (const t of utils.deDuplicate(themes)) {
         if (!specializeTheme.has(t)) {
             theme.push(t);
         }
     }
+    if (theme.length === 0) {
+        return data;
+    }
     const result = [];
     for (const t of theme) {
-        result.push(`[data-theme~="${t}"]`);
+        result.push(`[data-theme~="${CSS.escape(t)}"]`);
     }
     return result.join("") + " " + data;
 }

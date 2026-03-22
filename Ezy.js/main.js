@@ -1928,7 +1928,7 @@ export class render {
             if (this.#cssAfter.has(originNam)) {
                 continue;
             }
-            result.push(cssComputer.themeSetter(theme, `.${CSS.escape(name.split(":").join(":"))}{${cssComputer.specializeCSS(theme, key, value)}}`));
+            result.push(cssComputer.themeSetter(theme, `.${CSS.escape(name)}{${cssComputer.specializeCSS(theme, key, value)}}`));
             this.#cssAfter.add(originNam);
             this.#themes[originNam] = theme;
         }

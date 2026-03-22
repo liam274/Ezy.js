@@ -249,3 +249,11 @@ export function trimEnd(string, trimmer) {
     }
     return result.toReversed().join("");
 }
+
+/**
+ * @param {any[]} interable
+ * @returns {any[]}
+ */
+export function deDuplicate(iterable) {
+    return [...new Set(iterable)];
+}
