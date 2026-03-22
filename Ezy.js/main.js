@@ -498,7 +498,6 @@ export class render {
     #cssAfter = new Set();
     #style = $$("style");
     #remarkableStyle = $$("style");
-    #themes = {};
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -1924,13 +1923,12 @@ export class render {
     cssPutter() {
         const result = [];
         for (const name in this.#cssBefore) {
-            const { key, value, theme, originNam } = this.#cssBefore[name];
-            if (this.#cssAfter.has(originNam)) {
+            const { key, value, theme } = this.#cssBefore[name];
+            if (this.#cssAfter.has(name)) {
                 continue;
             }
             result.push(cssComputer.themeSetter(theme, `.${CSS.escape(name)}{${cssComputer.specializeCSS(theme, key, value)}}`));
-            this.#cssAfter.add(originNam);
-            this.#themes[originNam] = theme;
+            this.#cssAfter.add(name);
         }
         this.#style.innerHTML += result.join("");
     }

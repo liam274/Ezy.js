@@ -77,8 +77,7 @@ export function cssCompiler(classes, condition = []) {
             result[_class] = {
                 value: a.endsWith("!") ? a.slice(0, -1) + " !important" : a,
                 key: key.join("-"),
-                theme: conditions.slice(0, -1),
-                originNam: conditions.at(-1)
+                theme: conditions.slice(0, -1)
             };
         }
     }
@@ -102,7 +101,7 @@ export function specializeCSS(themes, key, value) {
         }
     }
     if (result.length) {
-        return `&:${result.join(":")}{${key}: ${specializeCSSValue(key, value)};}`;
+        return `&:${utils.deDuplicate(result).join(":")}{${key}: ${specializeCSSValue(key, value)};}`;
     }
     return `${key}: ${specializeCSSValue(key, value)};`;
 }
