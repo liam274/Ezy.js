@@ -21,6 +21,10 @@ function manageCSSAlias(data) {
     return result;
 }
 
+/**
+ * @param {string[]} data
+ * @returns {Array<string[],string[]>}
+ */
 function cssFix(data) {
     const n3w = [data[0]];
     data = data.slice(1);
@@ -63,8 +67,9 @@ export function cssCompiler(classes, condition = []) {
             lis = conditions.at(-1).split("-"),
             [key, value] = cssFix(manageCSSAlias(lis));
         if (value !== null) {
+            const a = value.join(" ");
             result[_class] = {
-                value: value.join(" "),
+                value: a.endsWith("!") ? a.slice(0, -1) + " !important" : a,
                 key: key.join("-"),
                 theme: conditions.slice(0, -1),
                 originNam: conditions.at(-1)
