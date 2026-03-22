@@ -907,6 +907,10 @@ export class render {
     }
     #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp, root) {
         const classes = [...(i.type || []), ...(config.type || [])];
+        if (classes.some((char) => char.includes(" "))) {
+            Ezy.formatError(`Error when computing classList, found " " char in className, ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
+            return this.set(errors.VALUE_ERROR);
+        }
         card.classList.add(...classes);
         if (!this.config.noComputeCSS) {
             this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
@@ -1645,6 +1649,10 @@ export class render {
                         };
                     if (!frag) {
                         const classes = [...(j.type || []), ...(config.type || [])];
+                        if (classes.some((char) => char.includes(" "))) {
+                            Ezy.formatError(`Error when computing classList, found " " char in className, ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
+                            return this.set(errors.VALUE_ERROR);
+                        }
                         el.classList.add(...classes);
                         if (!this.config.noComputeCSS) {
                             this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
@@ -1689,6 +1697,10 @@ export class render {
                         };
                     if (!frag) {
                         const classes = [...(j.type || []), ...(config.type || [])];
+                        if (classes.some((char) => char.includes(" "))) {
+                            Ezy.formatError(`Error when computing classList, found " " char in className, ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
+                            return this.set(errors.VALUE_ERROR);
+                        }
                         el.classList.add(...classes);
                         if (!this.config.noComputeCSS) {
                             this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
