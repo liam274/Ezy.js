@@ -215,7 +215,11 @@ export function isSubset(A, B) {
     B = new Set(B);
     return A.every(i => B.has(i));
 }
-
+/**
+ * @param {Array|Object} obj
+ * @param {*} val
+ * @returns {boolean|[any,string]}
+ */
 export function searchValue(obj, val) {
     for (const k in obj) {
         if (obj[k] === val) {

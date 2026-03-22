@@ -1928,7 +1928,7 @@ export class render {
             if (this.#cssAfter.has(originNam)) {
                 continue;
             }
-            result.push(`.${CSS.escape(name.split(":").join("\\:"))}{${cssComputer.specializeCSS(theme, key, value)}}`);
+            result.push(cssComputer.themeSetter(theme, `.${CSS.escape(name.split(":").join(":"))}{${cssComputer.specializeCSS(theme, key, value)}}`));
             this.#cssAfter.add(originNam);
             this.#themes[originNam] = theme;
         }
@@ -1948,25 +1948,11 @@ export class render {
         this.#style.remove();
     }
     /**
- * set the themes
- * @param {string[]} themes
- */
+     * set the themes
+     * @param {string[]} themes
+     */
     setTheme(themes) {
-        const anotherThemes = [...themes, ...cssComputer.specializeTheme];
-        const rules = this.#style.sheet.cssRules;
-
-        for (const rule of rules) {
-            const { selectorText } = rule;
-            const selector = selectorText.substring(1);
-            const frags = selector.split("\\:");
-            const originNam = frags.at(-1);
-            const _ = this.#themes[originNam];
-            if (_ && utils.isSubset(_, anotherThemes)) {
-                rule.selectorText = `.${CSS.escape(_.join(":"))}${_.length ? "\\:" : ""}${originNam}`;
-            } else {
-                rule.selectorText = `.${originNam}`;
-            }
-        }
+        this.mainEl.setAttribute("data-theme", themes.join(" "));
     }
 };
 

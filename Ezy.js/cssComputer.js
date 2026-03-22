@@ -12,7 +12,11 @@ const alias = {
     w: "width",
     clr: "color",
     p: "padding",
-    shadow: "box-shadow"
+    shadow: "box-shadow",
+    pt: "padding-top",
+    pb: "padding-bottom",
+    pl: "padding-left",
+    pr: "padding-right"
 };
 
 function manageCSSAlias(data) {
@@ -25,7 +29,7 @@ function manageCSSAlias(data) {
 
 /**
  * @param {string[]} data
- * @returns {Array<string[],string[]>}
+ * @returns {[string[],string[]]}
  */
 function cssFix(data) {
     const n3w = [data[0]];
@@ -125,4 +129,22 @@ export function specializeCSSValue(key, value) {
         return compileCSSValue[key](value);
     }
     return value;
+}
+
+/**
+ * @param {string[]} themes
+ * @param {string} data
+ */
+export function themeSetter(themes, data) {
+    const theme = [];
+    for (const t of themes) {
+        if (!specializeTheme.has(t)) {
+            theme.push(t);
+        }
+    }
+    const result = [];
+    for (const t of theme) {
+        result.push(`[data-theme~="${t}"]`);
+    }
+    return result.join("") + " " + data;
 }
