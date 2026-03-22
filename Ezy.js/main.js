@@ -1923,7 +1923,7 @@ export class render {
             if (this.#cssAfter.has(originNam)) {
                 continue;
             }
-            result.push(`.${name.split(":").join("\\:")}{${utils.specializeCSS(theme, key, value)}}`);
+            result.push(`.${name.split(":").join("\\:")}{${cssComputer.specializeCSS(theme, key, value)}}`);
             this.#cssAfter.add(originNam);
             this.#themes[originNam] = theme;
         }
