@@ -199,7 +199,8 @@ Remembered always put the `css-attribute-css-value` thing at last of the class n
 | `some-css-attribute-some-css-value` | This will be converted into `some-css-attribute: some css value` |
 | `...some-css-value!` | This will be converted into `... some css value !important` |
 | `theme1:theme2:...` | The remaining css will only apply on elements if the condition themes are the sub-array of the setted theme array |
-| `pseudo-class:theme1:pseudo-class2:theme2:` or whatever order you'd like | As above, just added pseudo conditions |
+| `pseudo-class:theme1:pseudo-element:theme2:...` or whatever order you'd like | As above, just added pseudo conditions |
+| `pseudo-class[someParmExpression]:...` | As above, but allow using parm-required pseudo classes or elements |
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.
