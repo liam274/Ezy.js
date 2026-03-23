@@ -84,20 +84,46 @@ export function cssCompiler(classes, condition = []) {
     return result;
 }
 
-export const specializeTheme = new Set(["hover", "active", "focus", "defined", "heading", "open", "popover-open", "modal",
-    "fullscreen", "picture-in-picture", "enabled", "disabled", "read-only", "read-write", "placeholder-shown", "autofill",
-    "default", "checked", "indeterminate", "blank", "valid", "invalid", "in-range", "out-of-range", "required", "optional",
-    "user-valid", "any-link", "link", "visited", "local-link", "target", "scope", "playing", "paused", "seeking", "buffering",
-    "stalled", "muted", "volume-locked", "current", "past", "future", "root", "empty", "first-child", "last-child", "only-child",
-    "first-of-type", "last-of-type", "only-of-type", "host", "has-slotted", "focus-visible", "focus-within", "target-current",
-    "left", "right", "first", "blank", "active-view-transition"
-]);
-
+const
+    specializeTheme = new Set(
+        [
+            "hover", "active", "focus", "defined", "heading", "open", "popover-open", "modal", "fullscreen", "picture-in-picture",
+            "enabled", "disabled", "read-only", "read-write", "placeholder-shown", "autofill", "default", "checked", "indeterminate",
+            "blank", "valid", "invalid", "in-range", "out-of-range", "required", "optional", "user-valid", "any-link", "link", "visited",
+            "local-link", "target", "scope", "playing", "paused", "seeking", "buffering", "stalled", "muted", "volume-locked", "current",
+            "past", "future", "root", "empty", "first-child", "last-child", "only-child", "first-of-type", "last-of-type", "only-of-type",
+            "host", "has-slotted", "focus-visible", "focus-within", "target-current", "left", "right", "first", "blank",
+            "active-view-transition", "dir", "active-view-transition-type", "has", "host-context", "host", "is", "lang", "not", "nth-child",
+            "nth-last-child", "nth-last-of-type", "nth-of-type", "state", "where"
+        ]
+    ),
+    pseudoElement = new Set([
+        "after", "backdrop", "before", "checkmark", "column", "cue", "details-content", "file-selector-button", "first-letter",
+        "first-line", "grammar-error", "highlight", "marker", "part", "picker-icon", "picker", "placholder", "scroll-button",
+        "scroll-marker", "scroll-marker-group", "search-text", "selection", "slotted", "spelling-error", "target-text",
+        "view-transition", "view-transition-group", "view-transition-image-pair", "view-transition-new", "view-transition-old"
+    ]);
+/**
+ * @param {string[]} themes
+ * @param {string} key
+ * @param {string} value
+ * @returns {string}
+ */
 export function specializeCSS(themes, key, value) {
     const result = [];
-    for (const theme of themes) {
-        if (specializeTheme.has(theme)) {
-            result.push(theme);
+    for (const th of themes) {
+        const theme = th.split("[");
+        if (pseudoElement.has(theme[0])) {
+            result.push(theme.at(-1).endsWith("]") ? `${theme[0]}(${theme.slice(1).join("[")})` : theme[0]);
+        }
+    }
+    if (result.length) {
+        return `&::${utils.deDuplicate(result).join("::")}{${key}: ${specializeCSSValue(key, value)};}`;
+    }
+    for (const th of themes) {
+        const theme = th.split("[");
+        if (specializeTheme.has(theme[0])) {
+            result.push(theme.at(-1).endsWith("]") ? `${theme[0]}(${theme.slice(1).join("[")})` : theme[0]);
         }
     }
     if (result.length) {
