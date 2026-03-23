@@ -155,6 +155,7 @@ export function specializeCSS(themes, key, value) {
     if (result.length) {
         r += `&::${utils.deDuplicate(result).join("::")}`;
     }
+    result.length = 0;
     for (const th of themes) {
         const theme = th.split("[");
         if (specializeTheme.has(theme[0])) {
