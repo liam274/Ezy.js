@@ -114,7 +114,7 @@ export function specializeCSS(themes, key, value) {
     for (const th of themes) {
         const theme = th.split("[");
         if (pseudoElement.has(theme[0])) {
-            result.push(theme.at(-1).endsWith("]") ? `${theme[0]}(${theme.slice(1).join("[")})` : theme[0]);
+            result.push(theme.at(-1).endsWith("]") ? `${theme[0]}(${theme.slice(1).join("[").slice(0, -1)})` : theme[0]);
         }
     }
     if (result.length) {
@@ -123,7 +123,7 @@ export function specializeCSS(themes, key, value) {
     for (const th of themes) {
         const theme = th.split("[");
         if (specializeTheme.has(theme[0])) {
-            result.push(theme.at(-1).endsWith("]") ? `${theme[0]}(${theme.slice(1).join("[")})` : theme[0]);
+            result.push(theme.at(-1).endsWith("]") ? `${theme[0]}(${theme.slice(1).join("[").slice(0, -1)})` : theme[0]);
         }
     }
     if (result.length) {
