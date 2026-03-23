@@ -16,7 +16,12 @@ const alias = {
     pt: "padding-top",
     pb: "padding-bottom",
     pl: "padding-left",
-    pr: "padding-right"
+    pr: "padding-right",
+    m: "margin",
+    mt: "margin-top",
+    mb: "margin-bottom",
+    ml: "margin-left",
+    mr: "margin-right"
 };
 
 function manageCSSAlias(data) {
@@ -52,6 +57,35 @@ function cssFix(data) {
     return [null, null];
 }
 
+const formatters = new Set([
+    "animation-iteration-count", "columns", "counter-increment", "counter-reset",
+    "flex", "flex-grow", "flex-shrink", "font-weight", "grid-column",
+    "grid-column-end", "grid-column-start", "grid-row", "grid-row-end", "grid-row-start",
+    "line-height", "opacity", "order", "orphans", "tab-size", "widows", "z-index",
+    "scale", "font-size-adjust", "counter-set", "zoom", "fill-opacity", "stroke-opacity",
+    "stroke-miterlimit", "shape-image-threshold", "column-count", "grid-auto-columns"
+]);
+
+/**
+ * @param {string} attribute
+ * @param {string} value
+ * @returns {string}
+ */
+function format(attribute, value) {
+    if (formatters.has(attribute)) {
+        return value;
+    }
+    const result = [];
+    for (const i of value.split(" ")) {
+        if (utils.endsWith(i, "0123456789")) {
+            result.push(i + "px");
+        } else {
+            result.push(i);
+        }
+    }
+    return result.join(" ");
+}
+
 /**
  * style-class self implement. Note that the implement is different from Tailwind!
  * @param {string[]} classes
@@ -75,7 +109,7 @@ export function cssCompiler(classes, condition = []) {
         if (value !== null) {
             const a = value.join(" ");
             result[_class] = {
-                value: a.endsWith("!") ? a.slice(0, -1) + " !important" : a,
+                value: format(key.join("-"), a.endsWith("!") ? a.slice(0, -1) + " !important" : a),
                 key: key.join("-"),
                 theme: conditions.slice(0, -1)
             };
@@ -111,6 +145,7 @@ const
  */
 export function specializeCSS(themes, key, value) {
     const result = [];
+    let r = "";
     for (const th of themes) {
         const theme = th.split("[");
         if (pseudoElement.has(theme[0])) {
@@ -118,7 +153,7 @@ export function specializeCSS(themes, key, value) {
         }
     }
     if (result.length) {
-        return `&::${utils.deDuplicate(result).join("::")}{${key}: ${specializeCSSValue(key, value)};}`;
+        r += `&::${utils.deDuplicate(result).join("::")}`;
     }
     for (const th of themes) {
         const theme = th.split("[");
@@ -127,7 +162,13 @@ export function specializeCSS(themes, key, value) {
         }
     }
     if (result.length) {
-        return `&:${utils.deDuplicate(result).join(":")}{${key}: ${specializeCSSValue(key, value)};}`;
+        if (r.length === 0) {
+            r = "&";
+        }
+        r += `:${utils.deDuplicate(result).join(":")}`;
+    }
+    if (r.length) {
+        return `${r}{${key}: ${specializeCSSValue(key, value)};}`;
     }
     return `${key}: ${specializeCSSValue(key, value)};`;
 }

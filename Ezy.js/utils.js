@@ -262,3 +262,17 @@ export function trimEnd(string, trimmer) {
 export function deDuplicate(iterable) {
     return [...new Set(iterable)];
 }
+
+/**
+ * @param {string} string
+ * @param {string[]} arr
+ * @returns {boolean}
+ */
+export function endsWith(string, arr) {
+    for (const i of arr) {
+        if (string.endsWith(i)) {
+            return true;
+        }
+    }
+    return false;
+}
