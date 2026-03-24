@@ -233,7 +233,7 @@ export function themeSetter(themes, data) {
         pre = ":where(:" + result2.join(") :where(:") + ") ";
     }
     for (const [cla, ...rest] of result3) {
-        pre += `:where(.${cla}):${rest.join("-")} `;
+        pre += `:where(.${CSS.escape(cla)}):${rest.join("-")} `;
     }
     if (result3.length > 1) {
         pre = pre.slice(0, -1);
