@@ -21,7 +21,13 @@ const alias = {
     mt: "margin-top",
     mb: "margin-bottom",
     ml: "margin-left",
-    mr: "margin-right"
+    mr: "margin-right",
+    uppercase: "text-transform-uppercase",
+    lowercase: "text-transform-lowercase",
+    ltr: "direction-ltr",
+    rtl: "direction-rtl",
+    shrink: "flex-shrink",
+    grow: "flex-grow"
 };
 
 function manageCSSAlias(data) {
@@ -29,7 +35,7 @@ function manageCSSAlias(data) {
     for (const part of data) {
         result.push(alias[part] || part);
     }
-    return result;
+    return result.join("-").split("-");
 }
 
 /**
@@ -41,7 +47,7 @@ function cssFix(data) {
     data = data.slice(1);
     let support = false;
     while (data.length > 0) {
-        if (CSS.supports(n3w.join("-"), utils.trimEnd(format(n3w.join("-"), data.join(" ")), "!"))) {
+        if (CSS.supports(n3w.join("-"), format(n3w.join("-"), utils.trimEnd(data.join(" "), "!")))) {
             support = true;
         } else if (support) {
             data.push(n3w[n3w.length - 1]);
@@ -149,17 +155,17 @@ export function specializeCSS(themes, key, value) {
     for (const th of themes) {
         const theme = th.split("[");
         if (pseudoElement.has(theme[0])) {
-            result.push(theme.at(-1).endsWith("]") ? `${theme[0]}(${theme.slice(1).join("[").slice(0, -1)})` : theme[0]);
+            result.push((theme.at(-1).endsWith("]") ? `${theme[0]}(${theme.slice(1).join("[").slice(0, -1)})` : theme[0]));
         }
     }
     if (result.length) {
-        r += `&::${utils.deDuplicate(result).join("::")}`;
+        r = `&::${utils.deDuplicate(result).join("::")}`;
     }
     result.length = 0;
     for (const th of themes) {
         const theme = th.split("[");
         if (specializeTheme.has(theme[0])) {
-            result.push(theme.at(-1).endsWith("]") ? `${theme[0]}(${theme.slice(1).join("[").slice(0, -1)})` : theme[0]);
+            result.push(theme.at(-1).endsWith("]") ? `${utils.removePrefixs(theme[0], ["in-"])}(${theme.slice(1).join("[").slice(0, -1)})` : theme[0]);
         }
     }
     if (result.length) {
@@ -208,9 +214,29 @@ export function themeSetter(themes, data) {
     if (theme.length === 0) {
         return data;
     }
-    const result = [];
+    const result = [],
+        result2 = [],
+        result3 = [];
     for (const t of theme) {
+        if (t.startsWith("in-")) {
+            result2.push(utils.trimStart(t, "in-"));
+            continue;
+        }
+        if (t.startsWith("g-")) {
+            result3.push(utils.trimStart(t, "g-").split("-"));
+            continue;
+        }
         result.push(`[data-theme~="${CSS.escape(t)}"]`);
     }
-    return result.join("") + " " + data;
+    let pre = "";
+    if (result2.length) {
+        pre = ":where(:" + result2.join(") :where(:") + ") ";
+    }
+    for (const [cla, ...rest] of result3) {
+        pre += `:where(.${cla}):${rest.join("-")} `;
+    }
+    if (result3.length > 1) {
+        pre = pre.slice(0, -1);
+    }
+    return pre + result.join("") + (result.length ? " " : "") + data;
 }

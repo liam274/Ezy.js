@@ -201,6 +201,8 @@ Remembered always put the `css-attribute-css-value` thing at last of the class n
 | `theme1:theme2:...` | The remaining css will only apply on elements if the condition themes are the sub-array of the setted theme array |
 | `pseudo-class:theme1:pseudo-element:theme2:...` or whatever order you'd like | As above, just added pseudo conditions |
 | `pseudo-class[someParmExpression]:...` | As above, but allow using parm-required pseudo classes or elements |
+| `in-pseudo-class:...` | It will be converted into `:where(pseudo-class) ...` |
+| `g-selectorName-pseudo-class` | It will be converted into `:where(.selectorName):pseudo-class ...` |
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.

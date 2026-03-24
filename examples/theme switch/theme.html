@@ -43,8 +43,8 @@
                     reporter: () => undefined
                 }
             },
-            component: {
-                container: {
+            component: [
+                {
                     tag: 'div',
                     type: [
                         'display-flex',               // 通用布局类（无主题前缀）
@@ -57,16 +57,45 @@
                         // 暗色主题样式
                         'dark:bg-clr-gray',
                         'dark:clr-white',
-                        "hover:scale-12"
+                        "hover:scale-12",
+                        "in"
                     ],
-                    content: `
-                        <h1 class="text-3xl font-bold mb-4">🌓 Ezy.js 主题切换</h1>
-                        <p class="mb-6">当前主题由框架内置主题系统控制，点击下方按钮切换。</p>
-                        <div class="flex gap-4">
-                            <button id="lightBtn" type="button" class="px-4 py-2 rounded light:bg-gray light:clr-black dark:bg-clr-black dark:clr-white transition">🌞 亮色模式</button>
-                            <button id="darkBtn" type="button" class="px-4 py-2 rounded light:bg-gray light:clr-black dark:bg-clr-black dark:clr-white transition">🌙 暗色模式</button>
-                        </div>
-                    `,
+                    component: [
+                        {
+                            tag: "h1",
+                            content: "🌓 Ezy.js Theme Switching",
+                            type: ["text-3xl", "font-bold", "mb-4"]
+                        },
+                        {
+                            tag: "p",
+                            type: ["mb-6"],
+                            content: "当前主题由框架内置主题系统控制，点击下方按钮切换。"
+                        },
+                        {
+                            type: ["flex", "gap-4", "font-size-15!"],
+                            component: [
+                                {
+                                    id: "lightBtn",
+                                    type: [
+                                        "px-4", "py-2", "rounded", "light:bg-gray", "light:clr-black",
+                                        "dark:bg-clr-black", "dark:clr-white", "transition", "g-in-hover:scale-20"
+                                    ],
+                                    content: "🌞 亮色模式",
+                                    tag: "button"
+                                },
+                                {
+                                    id: "darkBtn",
+                                    type: [
+                                        "px-4", "py-2", "rounded", "light:bg-gray",
+                                        "light:clr-black", "dark:bg-clr-black",
+                                        "dark:clr-white", "transition"
+                                    ],
+                                    tag: "button",
+                                    content: "🌙 暗色模式"
+                                }
+                            ]
+                        }
+                    ],
                     // 为按钮绑定事件（可选，也可用原生监听）
                     events: {
                         click: {
@@ -84,7 +113,7 @@
                         }
                     }
                 }
-            }
+            ]
         };
 
         // 2️⃣ 初始化渲染器，挂载到 #app

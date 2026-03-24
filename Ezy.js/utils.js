@@ -276,3 +276,35 @@ export function endsWith(string, arr) {
     }
     return false;
 }
+/**
+ * @param {string} data
+ * @param {string[]} prefixes
+ * @returns {string}
+ */
+export function removePrefixs(data, prefixes) {
+    for (const prefix of prefixes) {
+        data = removePrefix(data, prefix);
+    }
+    return data;
+}
+
+/**
+ * @param {string} string
+ * @param {string} trimmer
+ */
+export function trimStart(string, trimmer) {
+    const result = [];
+    trimmer = new Set(trimmer);
+    let con = true;
+    for (const char of string) {
+        if (trimmer.has(char)) {
+            if (con) {
+                continue;
+            }
+        } else {
+            con = false;
+        }
+        result.push(char);
+    }
+    return result.join("");
+}
