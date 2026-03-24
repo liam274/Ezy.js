@@ -165,7 +165,7 @@ export function specializeCSS(themes, key, value) {
     for (const th of themes) {
         const theme = th.split("[");
         if (specializeTheme.has(theme[0])) {
-            result.push(theme.at(-1).endsWith("]") ? `${utils.removePrefixs(theme[0], ["in-"])}(${theme.slice(1).join("[").slice(0, -1)})` : theme[0]);
+            result.push(theme.at(-1).endsWith("]") ? `${utils.removePrefixs(theme[0], ["iin-"])}(${theme.slice(1).join("[").slice(0, -1)})` : theme[0]);
         }
     }
     if (result.length) {
@@ -218,8 +218,8 @@ export function themeSetter(themes, data) {
         result2 = [],
         result3 = [];
     for (const t of theme) {
-        if (t.startsWith("in-")) {
-            result2.push(utils.trimStart(t, "in-"));
+        if (t.startsWith("iin-")) {
+            result2.push(utils.trimStart(t, "iin-"));
             continue;
         }
         if (t.startsWith("g-")) {
