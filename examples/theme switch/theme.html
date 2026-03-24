@@ -9,7 +9,7 @@
         /* 基础重置，让主题切换效果更明显 */
         body {
             margin: 0;
-            min-height: 100vh;
+            height: 100vh;
             transition: background-color 0.2s ease, color 0.2s ease;
         }
 
@@ -18,7 +18,7 @@
 </head>
 
 <body>
-    <div id="app"></div>
+    <div id="app" class="h-full"></div>
 
     <script type="importmap">
         {
@@ -52,13 +52,12 @@
                         'align-items-center',
                         'justify-content-center',
                         // 亮色主题样式
-                        'light:bg-clr-yellow',
-                        'light:clr-blue',
+                        'light:bg-clr-white',
+                        'light:clr-black',
                         // 暗色主题样式
                         'dark:bg-clr-gray',
                         'dark:clr-white',
-                        "hover:scale-12",
-                        "in"
+                        "h-full"
                     ],
                     component: [
                         {
@@ -77,8 +76,8 @@
                                 {
                                     id: "lightBtn",
                                     type: [
-                                        "px-4", "py-2", "rounded", "light:bg-gray", "light:clr-black",
-                                        "dark:bg-clr-black", "dark:clr-white", "transition", "g-in-hover:scale-20"
+                                        "px-4", "py-2", "rounded", "light:bg-clr-gray!", "light:clr-black",
+                                        "dark:bg-clr-black!", "dark:clr-white", "transition"
                                     ],
                                     content: "🌞 亮色模式",
                                     tag: "button"
@@ -86,8 +85,8 @@
                                 {
                                     id: "darkBtn",
                                     type: [
-                                        "px-4", "py-2", "rounded", "light:bg-gray",
-                                        "light:clr-black", "dark:bg-clr-black",
+                                        "px-4", "py-2", "rounded", "light:bg-clr-gray!",
+                                        "light:clr-black", "dark:bg-clr-black!",
                                         "dark:clr-white", "transition"
                                     ],
                                     tag: "button",

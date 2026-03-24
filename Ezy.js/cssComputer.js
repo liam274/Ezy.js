@@ -27,7 +27,8 @@ const alias = {
     ltr: "direction-ltr",
     rtl: "direction-rtl",
     shrink: "flex-shrink",
-    grow: "flex-grow"
+    grow: "flex-grow",
+    full: "100%",
 };
 
 function manageCSSAlias(data) {
