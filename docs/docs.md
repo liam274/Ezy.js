@@ -203,6 +203,7 @@ Remembered always put the `css-attribute-css-value` thing at last of the class n
 | `pseudo-class[someParmExpression]:...` | As above, but allow using parm-required pseudo classes or elements |
 | `iin-pseudo-class:...` | It will be converted into `:where(pseudo-class) ...` |
 | `g-selectorName-pseudo-class` | It will be converted into `:where(.selectorName):pseudo-class ...` |
+| `...clr$number$` | The number will be considered as precentage, converted into hex and appended after the color |
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.

@@ -308,3 +308,21 @@ export function trimStart(string, trimmer) {
     }
     return result.join("");
 }
+/**
+ * @param {string} data
+ * @param {Object<string,Object<string,any>>} dictonary
+ * @returns {string}
+ */
+export function replaceSuffix(data, dictonary) {
+    for (const key in dictonary) {
+        const val = dictonary[key];
+        if (data.endsWith(key)) {
+            if (val.data) {
+                return data.slice(0, -key.length) + val.data;
+            } else if (val.manager) {
+                return val.manager(data);
+            }
+        }
+    }
+    return data;
+}

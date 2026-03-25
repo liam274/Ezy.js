@@ -48,7 +48,7 @@ function cssFix(data) {
     data = data.slice(1);
     let support = false;
     while (data.length > 0) {
-        if (CSS.supports(n3w.join("-"), format(n3w.join("-"), utils.trimEnd(data.join(" "), "!")))) {
+        if (CSS.supports(n3w.join("-"), format(n3w.join("-"), data.join(" ")))) {
             support = true;
         } else if (support) {
             data.push(n3w[n3w.length - 1]);
@@ -70,7 +70,8 @@ const formatters = new Set([
     "grid-column-end", "grid-column-start", "grid-row", "grid-row-end", "grid-row-start",
     "line-height", "opacity", "order", "orphans", "tab-size", "widows", "z-index",
     "scale", "font-size-adjust", "counter-set", "zoom", "fill-opacity", "stroke-opacity",
-    "stroke-miterlimit", "shape-image-threshold", "column-count", "grid-auto-columns"
+    "stroke-miterlimit", "shape-image-threshold", "column-count", "grid-auto-columns",
+    "background-color", "color"
 ]);
 
 /**
@@ -111,12 +112,26 @@ export function cssCompiler(classes, condition = []) {
             throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected classes as string[], found ${typeof _class} as element`);
         }
         const conditions = _class.split(":"),
-            lis = conditions.at(-1).split("-"),
-            [key, value] = cssFix(manageCSSAlias(lis));
+            lis = conditions.at(-1),
+            [key, value] = cssFix(manageCSSAlias(
+                utils.replaceSuffix(lis,
+                    {
+                        "!": {
+                            data: " !important"
+                        }, "$": {
+                            manager(data) {
+                                return data.replace(/\$([^$]+)\$/g, (_, content) => {
+                                    return precentage2hex(parseInt(content));
+                                });
+                            }
+                        }
+                    }
+                ).split("-")
+            )
+            );
         if (value !== null) {
-            const a = value.join(" ");
             result[_class] = {
-                value: format(key.join("-"), a.endsWith("!") ? a.slice(0, -1) + " !important" : a),
+                value: format(key.join("-"), value.join(" ")),
                 key: key.join("-"),
                 theme: conditions.slice(0, -1)
             };
@@ -247,6 +262,6 @@ export function themeSetter(themes, data) {
  * @param {Object<string,boolean>} options
  * @returns {string}
  */
-export function precentage2hex(data, { round = Math.round, prefix = false, uppercase = false }) {
-    return ((prefix ? "0x" : "") + round(data / 100 * 255).toString(16).padStart(2, "0"))[uppercase ? "toUpperCase" : "toLowerCase"]();
+export function precentage2hex(data, { round = Math.round, prefix = false, uppercase = false } = {}) {
+    return ((prefix ? "0x" : "") + round((data % 101) / 100 * 255).toString(16).padStart(2, "0"))[uppercase ? "toUpperCase" : "toLowerCase"]();
 }
