@@ -241,3 +241,11 @@ export function themeSetter(themes, data) {
     }
     return pre + result.join("") + (result.length ? " " : "") + data;
 }
+
+/**
+ * @param {Number} data
+ * @returns {string}
+ */
+export function precentage2hex(data) {
+    return Math.round(data / 100 * 255).toString(16).padStart(2, "0");
+}
