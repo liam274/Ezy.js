@@ -65,6 +65,10 @@ Discord : https://discord.gg/QhaEZTTgru
 
 ## Notice
 - The `setting.html` is **DESIGNED** to pop up error, in order to test whether the `render.loadingPage` is working or not.
+- Please implement inline CSS to promise the CSS must works:
+```CSS
+@layer normalize, customize, yourLayer1, yourLayer2, ..., ezy-js-dependent;
+```
 
 ## **DISCLAIMER**
 Please note that you should ***NEVER*** fully rely on the builtin firewall, since the developer is not a professional security expert. The firewall is only for providing small client-side protection, reducing server load.
