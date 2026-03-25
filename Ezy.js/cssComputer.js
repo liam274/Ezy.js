@@ -125,13 +125,6 @@ export function cssCompiler(classes, condition = []) {
                                     return precentage2hex(parseInt(content));
                                 });
                             }
-                        },
-                        "`": {
-                            manager(data) {
-                                return data.replace(/\$([^$]+)\$/g, (_, content) => {
-                                    return "-" + content.replaceAll(": ", ":").replaceAll(" :", ":").split(":").join("-").split(" ").join("-").replaceAll("$", ":");
-                                });
-                            }
                         }
                     }
                 ).split("-")
