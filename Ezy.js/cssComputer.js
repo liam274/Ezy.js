@@ -244,8 +244,9 @@ export function themeSetter(themes, data) {
 
 /**
  * @param {Number} data
+ * @param {Object<string,boolean>} options
  * @returns {string}
  */
-export function precentage2hex(data) {
-    return Math.round(data / 100 * 255).toString(16).padStart(2, "0");
+export function precentage2hex(data, { round = Math.round, prefix = false, uppercase = false }) {
+    return ((prefix ? "0x" : "") + round(data / 100 * 255).toString(16).padStart(2, "0"))[uppercase ? "toUpperCase" : "toLowerCase"]();
 }
