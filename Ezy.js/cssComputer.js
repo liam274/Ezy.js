@@ -118,10 +118,18 @@ export function cssCompiler(classes, condition = []) {
                     {
                         "!": {
                             data: " !important"
-                        }, "$": {
+                        },
+                        "$": {
                             manager(data) {
                                 return data.replace(/\$([^$]+)\$/g, (_, content) => {
                                     return precentage2hex(parseInt(content));
+                                });
+                            }
+                        },
+                        "`": {
+                            manager(data) {
+                                return data.replace(/\$([^$]+)\$/g, (_, content) => {
+                                    return "-" + content.replaceAll(": ", ":").replaceAll(" :", ":").split(":").join("-").split(" ").join("-").replaceAll("$", ":");
                                 });
                             }
                         }
@@ -175,7 +183,7 @@ export function specializeCSS(themes, key, value) {
         }
     }
     if (result.length) {
-        r = `&::${utils.deDuplicate(result).join("::")}`;
+        r = `::${utils.deDuplicate(result).join("::")}`;
     }
     result.length = 0;
     for (const th of themes) {
@@ -185,13 +193,10 @@ export function specializeCSS(themes, key, value) {
         }
     }
     if (result.length) {
-        if (r.length === 0) {
-            r = "&";
-        }
         r += `:${utils.deDuplicate(result).join(":")}`;
     }
     if (r.length) {
-        return `${r}{${key}: ${specializeCSSValue(key, value)};}`;
+        return `&${r}{${key}: ${specializeCSSValue(key, value)};}`;
     }
     return `${key}: ${specializeCSSValue(key, value)};`;
 }

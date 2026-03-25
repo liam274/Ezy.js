@@ -204,6 +204,7 @@ Remembered always put the `css-attribute-css-value` thing at last of the class n
 | `iin-pseudo-class:...` | It will be converted into `:where(pseudo-class) ...` |
 | `g-selectorName-pseudo-class` | It will be converted into `:where(.selectorName):pseudo-class ...` |
 | `...clr$number$` | The number will be considered as precentage, converted into hex and appended after the color. Note that the framework couldn't promise what will happen if the `number>100` |
+| `...`it-will-be: inline-css` ` | It will become `...-it-will-be-inline-css` |
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.
