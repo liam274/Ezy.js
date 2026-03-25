@@ -236,7 +236,7 @@ export function searchValue(obj, val) {
 
 /**
  * @param {string} string
- * @param {string} trimmer
+ * @param {string[]} trimmer
  */
 export function trimEnd(string, trimmer) {
     const result = [];
