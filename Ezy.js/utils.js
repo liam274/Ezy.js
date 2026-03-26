@@ -322,3 +322,10 @@ export function replaceSuffix(data, dictonary) {
     }
     return data;
 }
+
+/**
+ * @returns {Promise}
+ */
+export function yieldProcess() {
+    return new Promise((resolve) => setTimeout(resolve, 0));
+}

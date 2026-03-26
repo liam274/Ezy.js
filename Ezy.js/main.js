@@ -11,11 +11,13 @@ export * from "./storage.js";
 export * from "./history.js";
 
 /*
-    @file ezy.js
-    by Liam Lei
+    @module Ezy.js
+    @author Liam Lei <ezyjsdeveloper@gmail.com>
     Started from 2026.02.11
 
-    Release: 0.1.2 (Stable)
+    @version 0.1.2
+
+    @description Render engine of front-end web
 
     Acknowledgments:
         - Nathan Wong. Thanks for :
@@ -514,6 +516,7 @@ export class render {
      * @param {int} maxWait - how much to wait for parm data to be definded
      * @param {Object} namespace - historical issues, just avoid it
      * @returns {render}
+     * @since 0.0.3
      */
     constructor(el, data, maxWait = MAXWAIT, namespace = {}) {
         head.appendChild(this.#style);
@@ -680,30 +683,32 @@ export class render {
         this.#varage = Ezy.watchout({ ...varage, ...(this.data.data || {}) }, {
             late: (function (_, key) {
                 if (key in this.#listen2) {
-                    const [obj, el, cleanup, options] = this.#listen2[key];
-                    this.#oldBoys = {};
-                    if (cleanup) {
-                        if (utils._default(options.deep, true)) {
-                            cleanup.innerHTML = "";
-                        } else {
-                            for (const node of [...cleanup.childNodes]) {
-                                if (node.nodeType === Node.TEXT_NODE) {
-                                    node.remove();
+                    for (const val of this.#listen2[key]) {
+                        const [obj, el, cleanup, options] = val;
+                        this.#oldBoys = {};
+                        if (cleanup) {
+                            if (utils._default(options.deep, true)) {
+                                cleanup.innerHTML = "";
+                            } else {
+                                for (const node of [...cleanup.childNodes]) {
+                                    if (node.nodeType === Node.TEXT_NODE) {
+                                        node.remove();
+                                    }
                                 }
                             }
-                        }
-                        this.render(obj, cleanup, options);
-                    } else {
-                        if (utils._default(options.deep, true)) {
-                            el.innerHTML = "";
+                            this.render(obj, cleanup, options);
                         } else {
-                            for (const node of [...el.childNodes]) {
-                                if (node.nodeType === Node.TEXT_NODE) {
-                                    node.remove();
+                            if (utils._default(options.deep, true)) {
+                                el.innerHTML = "";
+                            } else {
+                                for (const node of [...el.childNodes]) {
+                                    if (node.nodeType === Node.TEXT_NODE) {
+                                        node.remove();
+                                    }
                                 }
                             }
+                            this.render(obj, el, options);
                         }
-                        this.render(obj, el, options);
                     }
                 }
             }).bind(this)
@@ -979,7 +984,10 @@ export class render {
                 }
                 for (const _buckle of buckle) {
                     if (_buckle in this.#varage) {
-                        this.#listen2[_buckle] = [fatherData, card, root, i.belt.options || {}];
+                        if (!this.#listen2[_buckle]) {
+                            this.#listen2[_buckle] = [];
+                        }
+                        this.#listen2[_buckle].push([fatherData, card, root, i.belt.options || {}]);
                     } else {
                         this.set(errors.VARIABLE_ERROR);
                         return Ezy.formatError(`varage variable ${_buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
@@ -1031,7 +1039,7 @@ export class render {
         if (this.config.escapeHTML || config.escapeHTML || i.config?.escapeHTML) {
             r = utils.htmlEscape(r);
         }
-        card.innerHTML += r;
+        card.innerHTML = r;
         for (const j in i) {
             if (keyword.has(j)) {
                 continue;
@@ -1534,7 +1542,7 @@ export class render {
         if (this.config.escapeHTML || config.escapeHTML || j.config?.escapeHTML) {
             r = utils.htmlEscape(r);
         }
-        el.innerHTML += r;
+        el.innerHTML = r;
         if (j.expire) {
             setTimeout((function () {
                 el.innerHTML = "";
@@ -1576,7 +1584,10 @@ export class render {
                 }
                 for (const _buckle of buckle) {
                     if (_buckle in this.#varage) {
-                        this.#listen2[_buckle] = [i, parentNode, undefined, j.belt.options || {}];
+                        if (!this.#listen2[_buckle]) {
+                            this.#listen2[_buckle] = [];
+                        }
+                        this.#listen2[_buckle].push([i, parentNode, undefined, j.belt.options || {}]);
                     } else {
                         this.set(errors.VARIABLE_ERROR);
                         return Ezy.formatError(`varage variable ${_buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
