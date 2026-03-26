@@ -29,6 +29,7 @@ const alias = {
     shrink: "flex-shrink",
     grow: "flex-grow",
     full: "100%",
+    fw: "font-weight"
 };
 
 function manageCSSAlias(data) {
@@ -111,19 +112,23 @@ export function cssCompiler(classes, condition = []) {
         if (typeof _class !== "string") {
             throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected classes as string[], found ${typeof _class} as element`);
         }
+        let important = false;
         const conditions = _class.split(":"),
             lis = conditions.at(-1),
             [key, value] = cssFix(manageCSSAlias(
                 utils.replaceSuffix(lis,
                     {
-                        "!": {
-                            data: " !important"
-                        },
                         "$": {
                             manager(data) {
                                 return data.replace(/\$([^$]+)\$/g, (_, content) => {
                                     return precentage2hex(parseInt(content));
                                 });
+                            }
+                        },
+                        "!": {
+                            manager(data) {
+                                important = true;
+                                return data.slice(0, -1);
                             }
                         }
                     }
@@ -132,7 +137,14 @@ export function cssCompiler(classes, condition = []) {
             );
         if (value !== null) {
             result[_class] = {
-                value: format(key.join("-"), value.join(" ")),
+                value: utils.replaceSuffix(
+                    format(key.join("-"), value.join(" ")) + (important ? "!" : ""),
+                    {
+                        "!": {
+                            data: " !important"
+                        }
+                    }
+                ),
                 key: key.join("-"),
                 theme: conditions.slice(0, -1)
             };
