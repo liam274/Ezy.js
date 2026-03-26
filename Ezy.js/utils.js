@@ -1,11 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable indent */
 
-export const log = console.log,
-    $ = document.querySelector.bind(document),
-    $$ = document.createElement.bind(document),
-    error = console.error.bind(console),
-    warn = console.warn.bind(console);
+import { $$ } from "./main.js";
 
 export const UPPERCASE_REGEX = /[A-Z]/g,
     ALPHABET_REGEX = /^[a-zA-Z]+$/,
