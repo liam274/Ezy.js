@@ -121,17 +121,24 @@ export const Ezy = {
             return data >= limit;
         },
     },
+    /**
+     * @param {Object} obj
+     * @param {Map} varage
+     * @param {string} item
+     * @param {string} traceback
+     * @returns {boolean|void}
+     */
     validateComponentIf(obj, varage, item, traceback) {
         if (item) {
-            if (!varage[item]) {
+            if (!varage.has(item)) {
                 obj.set(errors.VALUE_ERROR);
                 return Ezy.formatError(`render.#varage[component.if] not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
             }
-            if (typeof varage[item] !== "function") {
+            if (typeof varage.get(item) !== "function") {
                 obj.set(errors.TYPE_ERROR);
                 return Ezy.formatError(`expected render.#varage[component.if] as function, found ${typeof varage[item]}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
             }
-            return !varage[item]();
+            return !varage.get(item)();
         }
     },
     validateValidation(obj, el, validate, traceback, parentNode) {
@@ -399,9 +406,9 @@ export const Ezy = {
         if (typeof def !== "object") {
             throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected Ezy.component(name: string, def: Object), found def as ${typeof def}`);
         }
-        this.components[name] = def;
+        this.components.set(name, def);
     },
-    components: {},
+    components: new Map(),
     /**
      *
      * @param {string} data
@@ -416,6 +423,13 @@ export const Ezy = {
                 target[key] = value;
                 set.late?.(target, key, value);
                 return true;
+            },
+            get(target, prop) {
+                const value = target[prop];
+                if (typeof value === "function") {
+                    return value.bind(target);
+                }
+                return value;
             }
         }
         );
@@ -472,14 +486,14 @@ const varage = {},// variable storage (?cold joke)
         innerHTML: (data) => data,
         id: (data) => data,
         style: (data) => {
-            const result = {};
+            const result = new Map();
             for (const i in data) {
                 if (Ezy.validates.isInt(i)) {
                     const got = utils.array2camel(data[i].split("-"));
-                    result[got] = data[got];
+                    result.set(got, data[got]);
                 }
             }
-            return { ...result };
+            return Object.fromEntries(result);
         },
         title: (data) => data,
         events: (data) => {
@@ -493,10 +507,10 @@ export const MAXWAIT = 60000,
 export const store = new storage.store();
 
 export class render {
-    #varage = {};
-    #oldBoys = {};
-    #typeExtend = {};
-    #listen2 = {};
+    #varage = new Map();
+    #oldBoys = new Map();
+    #typeExtend = new Map();
+    #listen2 = new Map();
     #debug = false;
     #pluginLeftovers = {
         timeouts: [],
@@ -505,7 +519,7 @@ export class render {
     };
     #confirmer = undefined;
     #reporter = undefined;
-    #cssBefore = {};
+    #cssBefore = new Map();
     #cssAfter = new Set();
     #style = $$("style");
     #remarkableStyle = $$("style");
@@ -537,9 +551,7 @@ export class render {
             }, HTTP_NOT_FOUND, this.maxWait));
             return this;
         }
-        if (data.classify) {
-            this.classify = data.classify;
-        }
+        this.classify = new Map(Object.entries(data.classify || {}));
         if (!data.component) {
             this.set(errors.STRUCTURE_ERROR);
             this.loadPage.push(this.loadingPage({
@@ -680,39 +692,7 @@ export class render {
             _error: "Timeout Error"
         }, HTTP_TIMEOUT, this.maxWait, "Page render timeout"));
         this.clear();
-        this.#varage = Ezy.watchout({ ...varage, ...(this.data.data || {}) }, {
-            late: (function (_, key) {
-                if (key in this.#listen2) {
-                    for (const val of this.#listen2[key]) {
-                        const [obj, el, cleanup, options] = val;
-                        this.#oldBoys = {};
-                        if (cleanup) {
-                            if (utils._default(options.deep, true)) {
-                                cleanup.innerHTML = "";
-                            } else {
-                                for (const node of [...cleanup.childNodes]) {
-                                    if (node.nodeType === Node.TEXT_NODE) {
-                                        node.remove();
-                                    }
-                                }
-                            }
-                            this.render(obj, cleanup, options);
-                        } else {
-                            if (utils._default(options.deep, true)) {
-                                el.innerHTML = "";
-                            } else {
-                                for (const node of [...el.childNodes]) {
-                                    if (node.nodeType === Node.TEXT_NODE) {
-                                        node.remove();
-                                    }
-                                }
-                            }
-                            this.render(obj, el, options);
-                        }
-                    }
-                }
-            }).bind(this)
-        });
+        this.#varage = new Map(Object.entries({ ...varage, ...(this.data.data || {}) }));
         this.statusCode = 0;
         this.systemPlot = {
             time: 0
@@ -736,7 +716,7 @@ export class render {
                     this.set(errors.TYPE_ERROR);
                     return Ezy.formatError(`Expected Array, found ${typeof val}.`, errorLevels.CRITICAL_ERROR, "Type Error");
                 }
-                this.#typeExtend[i] = [...val];
+                this.#typeExtend.set(i, [...val]);
             }
         }
         this.render(this.data, this.mainEl);
@@ -812,11 +792,39 @@ export class render {
      * @returns {boolean}
      */
     edit(key, data) {
-        if (this.#varage[key] === data) {
+        if (this.#varage.get(key) === data) {
             return false;
         }
-        this.#varage[key] = data;
-        this.#oldBoys = {};
+        this.#varage.set(key, data);
+        this.#oldBoys.clear();
+        if (this.#listen2.has(key)) {
+            for (const val of [...this.#listen2.get(key)]) {
+                const [obj, el, cleanup, options] = val;
+                if (cleanup) {
+                    if (utils._default(options.deep, true)) {
+                        cleanup.innerHTML = "";
+                    } else {
+                        for (const node of [...cleanup.childNodes]) {
+                            if (node.nodeType === Node.TEXT_NODE) {
+                                node.remove();
+                            }
+                        }
+                    }
+                    this.render(obj, cleanup, options);
+                } else {
+                    if (utils._default(options.deep, true)) {
+                        el.innerHTML = "";
+                    } else {
+                        for (const node of [...el.childNodes]) {
+                            if (node.nodeType === Node.TEXT_NODE) {
+                                node.remove();
+                            }
+                        }
+                    }
+                    this.render(obj, el, options);
+                }
+            }
+        }
         return true;
     }
     /**
@@ -825,8 +833,8 @@ export class render {
      * @returns {Any}
      */
     read(key) {
-        if (key in this.#varage) {
-            return this.#varage[key];
+        if (this.#varage.has(key)) {
+            return this.#varage.get(key);
         }
         else {
             this.set(errors.VARIABLE_ERROR);
@@ -935,7 +943,7 @@ export class render {
     #extendType(...data) {
         const result = [];
         for (const i of data) {
-            result.push(...(this.#typeExtend[i] || [i]));
+            result.push(...(this.#typeExtend.get(i) || [i]));
         }
         return result;
     }
@@ -975,7 +983,7 @@ export class render {
         if (this.statusCode !== 0) {
             return;
         }
-        if (i.belt) {
+        if (i.belt && first === 0) {
             const { buckle, reverseBuckle } = i.belt;
             if (buckle) {
                 if (!Array.isArray(buckle)) {
@@ -983,11 +991,8 @@ export class render {
                     return Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                 }
                 for (const _buckle of buckle) {
-                    if (_buckle in this.#varage) {
-                        if (!this.#listen2[_buckle]) {
-                            this.#listen2[_buckle] = [];
-                        }
-                        this.#listen2[_buckle].push([fatherData, card, root, i.belt.options || {}]);
+                    if (this.#varage.has(_buckle)) {
+                        this.#listen2.getOrInsert(_buckle, []).push([fatherData, card, root, i.belt.options || {}]);
                     } else {
                         this.set(errors.VARIABLE_ERROR);
                         return Ezy.formatError(`varage variable ${_buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
@@ -999,13 +1004,14 @@ export class render {
                     this.set(errors.TYPE_ERROR);
                     return Ezy.formatError(`Expected component.belt.reverseBuckle as string, found ${typeof reverseBuckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                 }
-                if (!(reverseBuckle in this.#varage)) {
+                if (this.#varage.has(reverseBuckle)) {
+                    card.addEventListener("input", event => {
+                        this.edit(reverseBuckle, event.target.value);
+                    });
+                } else {
                     this.set(errors.VARIABLE_ERROR);
                     return Ezy.formatError(`varage variable ${reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                 }
-                card.addEventListener("input", event => {
-                    this.edit(reverseBuckle, event.target.value);
-                });
             }
         }
         if (first === 0 && i.varAs) {
@@ -1068,15 +1074,11 @@ export class render {
             traceback = `${title}`,
             vdom = [];
         if (typeof i === "string") {
-            if (Object.keys(this.classify || Ezy.components).length === 0) {
-                this.set(errors.CLASSIFY_ERROR);
-                return Ezy.formatError(`Error when trying to use classify component without classify dictionary, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
-            }
-            if (!(this.classify?.[i] || Ezy.components?.[i])) {
+            if (!(this.classify.has(i) || Ezy.components.has(i))) {
                 this.set(errors.CLASSIFY_ERROR);
                 return Ezy.formatError(`Error when trying to use classify component "${i}" without definition, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
             }
-            i = this.classify?.[i] || Ezy.components?.[i];
+            i = this.classify.get(i) || Ezy.components.get(i);
         }
         const todo = document.createDocumentFragment(),
             frag = i.isFragment || false;
@@ -1095,18 +1097,18 @@ export class render {
                 i[key] = placeholder[key];
             }
         }
-        if (i.evaluate && this.#varage[i.evaluate]) {
-            const obj = JSON.parse(this.#varage[i.evaluate]);
+        if (i.evaluate && this.#varage.has(i.evaluate)) {
+            const obj = JSON.parse(this.#varage.get(i.evaluate));
             for (const key in obj) {
                 i[key] = obj[key];
             }
         }
         if (i.forEach) {
-            if (this.#varage[i.forEach] === undefined) {
+            if (!this.#varage.has(i.forEach)) {
                 this.set(errors.RENDER_ERROR);
                 return Ezy.formatError(`Error when rendering, expected forEach variable, not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
             }
-            const obj = this.#varage[i.forEach];
+            const obj = this.#varage.get(i.forEach);
             if (!(obj && typeof obj === "object")) {
                 this.set(errors.RENDER_ERROR);
                 return Ezy.formatError(`Error when rendering, expected object as forEach variable value, found ${obj}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
@@ -1216,7 +1218,7 @@ export class render {
      * ***CALLING IT IS NOT SUGGESTED***
      * @param {string} expr
      * @param {string} traceback
-     * @param {Object} extraScope
+     * @param {Map} extraScope
      * @returns {Any}
      */
     evaluateExpression(expr, traceback, extraScope) {
@@ -1248,8 +1250,8 @@ export class render {
                 if (char === "|") {
                     let name = varName.join("").trim();
                     if (first) {
-                        if (extraScope[name]) {
-                            result = extraScope[name];
+                        if (extraScope.has(name)) {
+                            result = extraScope.get(name);
                         }
                         else {
                             this.set(errors.PHARSING_ERROR);
@@ -1258,14 +1260,14 @@ export class render {
                         first = false;
                     } else {
                         name = name.split(":");
-                        if (extraScope[name[0]]) {
-                            if (typeof extraScope[name[0]] === "function") {
+                        if (extraScope.has(name[0])) {
+                            if (typeof extraScope.get(name[0]) === "function") {
                                 result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
-                                    traceback, { ...extraScope, result });
+                                    traceback, { ...Object.fromEntries(extraScope), result });
                             }
                             else {
                                 this.set(errors.PHARSING_ERROR);
-                                return Ezy.formatError(`Error when parsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`,
+                                return Ezy.formatError(`Error when parsing, expected filter as function, found ${typeof extraScope.get(name[0])}, not found, in ${traceback}`,
                                     errorLevels.CRITICAL_ERROR, "Parse Error");
                             }
                         }
@@ -1281,8 +1283,8 @@ export class render {
             }
             let name = varName.join("").trim();
             if (first) {
-                if (extraScope[name]) {
-                    result = extraScope[name];
+                if (extraScope.has(name)) {
+                    result = extraScope.get(name);
                 }
                 else {
                     this.set(errors.PHARSING_ERROR);
@@ -1292,14 +1294,14 @@ export class render {
                 first = false;
             } else {
                 name = name.split(":");
-                if (extraScope[name[0]]) {
-                    if (typeof extraScope[name[0]] === "function") {
+                if (extraScope.has(name[0])) {
+                    if (typeof extraScope.get(name[0]) === "function") {
                         result = this.evaluateExpression(`${name[0]}(result, ${name.filter((_, i) => i).join(", ")})`,
-                            traceback, { ...extraScope, result });
+                            traceback, { ...Object.fromEntries(extraScope), result });
                     }
                     else {
                         this.set(errors.PHARSING_ERROR);
-                        return Ezy.formatError(`Error when parsing, expected filter as function, found ${typeof extraScope[name[0]]}, not found, in ${traceback}`,
+                        return Ezy.formatError(`Error when parsing, expected filter as function, found ${typeof extraScope.get(name[0])}, not found, in ${traceback}`,
                             errorLevels.CRITICAL_ERROR, "Parse Error");
                     }
                 }
@@ -1310,8 +1312,8 @@ export class render {
             }
             return result;
         }
-        const keys = Object.keys(extraScope);
-        const values = keys.map(k => extraScope[k]);
+        const keys = Object.keys(Object.fromEntries(extraScope));
+        const values = keys.map(k => extraScope.get(k));
 
         try {
             const fn = new Function(...keys, `return (${expr})`);
@@ -1332,7 +1334,7 @@ export class render {
     }
     #setOldBoys(name, val, bool) {
         if (bool) {
-            this.#oldBoys[name] = val;
+            this.#oldBoys.set(name, val);
         } else {
             return val;
         }
@@ -1357,16 +1359,16 @@ export class render {
             doubleStop = false,
             varName = [];
         replacement = { ...this.systemPlot, ...replacement };
-        const newReplacement = {},
-            _varage = { ...this.#varage },
-            local = {};
+        const newReplacement = new Map(),
+            _varage = this.#varage,
+            local = new Map();
         for (const i in replacement) {
             for (const t of (dictionary[i] || [i])) {
-                newReplacement[t] = replacement[i];
+                newReplacement.set(t, replacement[i]);
             }
         }
-        for (const i in newReplacement) {
-            data = data.replaceAll(`{{${i}}}`, newReplacement[i]);
+        for (const [i, val] of newReplacement) {
+            data = data.replaceAll(`{{${i}}}`, val);
         }
         for (const i of data) {
             if (skip) {
@@ -1382,18 +1384,18 @@ export class render {
             if ((stop && !longVar) || (doubleStop && longVar)) {
                 varName = varName.join("").trim();
                 const _var = stop ? _varage : newReplacement;
-                if (varName in this.#oldBoys) {
-                    result.push(this.#oldBoys[varName]);
+                if (this.#oldBoys.has(varName)) {
+                    result.push(this.#oldBoys.get(varName));
                 } else if (varName in local) {
                     result.push(local[varName]);
-                } else if (_var[varName]) {
-                    if ((typeof _var[varName]) === "function") {
-                        const temp = String(_var[varName]());
+                } else if (_var.has(varName)) {
+                    if ((typeof _var.get(varName)) === "function") {
+                        const temp = String(_var.get(varName)());
                         result.push(temp);
                         local[varName] = this.#setOldBoys(varName, temp, stop) || temp;
                     }
                     else {
-                        const temp = String(_var[varName]);
+                        const temp = String(_var.get(varName));
                         result.push(temp);
                         local[varName] = this.#setOldBoys(varName, temp, stop) || temp;
                     }
@@ -1486,20 +1488,20 @@ export class render {
             return Ezy.formatError(`Error when formatting string, expected any character after \\ in ${traceback}`, errorLevels.CRITICAL_ERROR, "Format Error");
         }
         varName = varName.join("").trim();
-        if (varName in this.#oldBoys) {
-            result.push(this.#oldBoys[varName]);
+        if (this.#oldBoys.has(varName)) {
+            result.push(this.#oldBoys.get(varName));
         } else if (varName in local) {
             result.push(local[varName]);
         } else if (stop || doubleStop) {
             const _var = stop ? _varage : newReplacement;
-            if (_var[varName]) {
-                if ((typeof _var[varName]) === "function") {
-                    const temp = String(_var[varName]());
+            if (_var.has(varName)) {
+                if ((typeof _var.get(varName)) === "function") {
+                    const temp = String(_var.get(varName)());
                     result.push(temp);
                     local[varName] = this.#setOldBoys(varName, temp, stop) || temp;
                 }
                 else {
-                    const temp = String(_var[varName]);
+                    const temp = String(_var.get(varName));
                     result.push(temp);
                     local[varName] = this.#setOldBoys(varName, temp, stop) || temp;
                 }
@@ -1575,7 +1577,7 @@ export class render {
         if (this.statusCode !== 0) {
             return;
         }
-        if (j.belt) {
+        if (j.belt && first === 0) {
             const { buckle, reverseBuckle } = j.belt;
             if (buckle) {
                 if (!Array.isArray(buckle)) {
@@ -1583,11 +1585,8 @@ export class render {
                     return Ezy.formatError(`Expected component.belt.buckle as string[], found ${typeof buckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                 }
                 for (const _buckle of buckle) {
-                    if (_buckle in this.#varage) {
-                        if (!this.#listen2[_buckle]) {
-                            this.#listen2[_buckle] = [];
-                        }
-                        this.#listen2[_buckle].push([i, parentNode, undefined, j.belt.options || {}]);
+                    if (this.#varage.has(_buckle)) {
+                        this.#listen2.getOrInsert(_buckle, []).push([i, parentNode, undefined, j.belt.options || {}]);
                     } else {
                         this.set(errors.VARIABLE_ERROR);
                         return Ezy.formatError(`varage variable ${_buckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
@@ -1599,13 +1598,14 @@ export class render {
                     this.set(errors.TYPE_ERROR);
                     return Ezy.formatError(`Expected component.belt.reverseBuckle as string, found ${typeof reverseBuckle}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
                 }
-                if (!(reverseBuckle in this.#varage)) {
+                if (this.#varage.has(reverseBuckle)) {
+                    el.addEventListener("input", event => {
+                        this.edit(reverseBuckle, event.target.value);
+                    });
+                } else {
                     this.set(errors.VARIABLE_ERROR);
                     return Ezy.formatError(`varage variable ${reverseBuckle} not found`, errorLevels.CRITICAL_ERROR, "Variable Error");
                 }
-                el.addEventListener("input", event => {
-                    this.edit(reverseBuckle, event.target.value);
-                });
             }
         }
         if (first === 0 && j.varAs) {
@@ -1632,15 +1632,11 @@ export class render {
             frag = i.isFragment || false;
         for (let j of (i.component || [])) {
             if (typeof j === "string") {
-                if (!this.classify) {
-                    this.set(errors.CLASSIFY_ERROR);
-                    return Ezy.formatError(`Error when trying to use classify component without classify dictionary, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
-                }
-                if (!(this.classify[j] || Ezy.components[j])) {
+                if (!(this.classify.has(j) || Ezy.components.has(j))) {
                     this.set(errors.CLASSIFY_ERROR);
                     return Ezy.formatError(`Error when trying to use classify component "${j}" without definition, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Classify Error");
                 }
-                j = this.classify[j] || Ezy.components[j];
+                j = this.classify.get(j) || Ezy.components.get(j);
             }
             if (Ezy.validateComponentIf(this, this.#varage, j.if, traceback)) {
                 continue;
@@ -1663,18 +1659,18 @@ export class render {
                     j[key] = placeholder[key];
                 }
             }
-            if (j.evaluate && this.#varage[j.evaluate]) {
-                const obj = JSON.parse(this.#varage[j.evaluate]);
+            if (j.evaluate && this.#varage.has(j.evaluate)) {
+                const obj = JSON.parse(this.#varage.get(j.evaluate));
                 for (const key in obj) {
                     j[key] = obj[key];
                 }
             }
             if (j.forEach) {
-                if (this.#varage[j.forEach] === undefined) {
+                if (!this.#varage.has(j.forEach)) {
                     this.set(errors.RENDER_ERROR);
                     return Ezy.formatError(`Error when rendering, expected forEach variable, not found, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
                 }
-                const obj = this.#varage[j.forEach];
+                const obj = this.#varage.get(j.forEach);
                 if (!(obj && typeof obj === "object")) {
                     this.set(errors.RENDER_ERROR);
                     return Ezy.formatError(`Error when rendering, expected object as forEach variable value, found ${obj}, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Render Error");
@@ -1816,8 +1812,8 @@ export class render {
         this.#remarkableStyle.remove();
         this.#remarkableStyle = $$("style");
         head.appendChild(this.#remarkableStyle);
-        this.#oldBoys = {};
-        this.#listen2 = {};
+        this.#oldBoys.clear();
+        this.#listen2.clear();
         vars.clear();
     }
     /**
@@ -1974,12 +1970,12 @@ export class render {
      * @returns {Object}
      */
     varage() {
-        return { ...this.#varage };
+        return Object.fromEntries(this.#varage);
     }
     cssPutter() {
         const result = [];
-        for (const name in this.#cssBefore) {
-            const { key, value, theme } = this.#cssBefore[name];
+        for (const [name, val] of this.#cssBefore) {
+            const { key, value, theme } = val;
             if (this.#cssAfter.has(name)) {
                 continue;
             }
@@ -1988,9 +1984,12 @@ export class render {
         }
         this.#style.innerHTML += result.join("");
     }
+    /**
+     * @param {Object<string,string>} result
+     */
     putCSS(result) {
         for (const key in result) {
-            this.#cssBefore[key] = result[key];
+            this.#cssBefore.set(key, result[key]);
         }
     }
     /**
