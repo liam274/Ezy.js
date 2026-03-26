@@ -45,7 +45,8 @@ export const log = console.log,
     $ = document.querySelector.bind(document),
     $$ = document.createElement.bind(document),
     error = console.error.bind(console),
-    warn = console.warn.bind(console);
+    warn = console.warn.bind(console),
+    clear = console.clear.bind(console);
 
 export const keyword = new Set([
     "type", "component", "tag",
@@ -581,7 +582,7 @@ export class render {
             this.#debug = false;
         }
         if (!this.#debug) {
-            console.clear();
+            clear();
         }
         if (this.loadPage.length) {
             for (const i of this.loadPage) {
