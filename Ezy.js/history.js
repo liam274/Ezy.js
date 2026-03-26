@@ -19,6 +19,11 @@ export default class History {
     valueOf() {
         return this.#data;
     }
+    /**
+     * Commit a definded function
+     * @param {string} key
+     * @param {any} value
+     */
     commit(key, value) {
         const snapshot = {
             old: this.#data[key],

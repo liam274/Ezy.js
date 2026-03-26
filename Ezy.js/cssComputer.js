@@ -268,7 +268,7 @@ export function themeSetter(themes, data) {
 }
 
 /**
- * @param {Number} data
+ * @param {int} data
  * @param {Object<string,boolean>} options
  * @returns {string}
  */

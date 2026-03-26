@@ -234,7 +234,7 @@ export const Ezy = {
         },
         /**
          * Ask for confirm
-         * @param {Object<string,function(boolean,...any)|string>} data
+         * @param {Object<string,function(boolean,...any): void|string>} data
          */
         confirm(data) {
             const barrier = $$("div");
@@ -375,7 +375,7 @@ export const Ezy = {
     /**
      * format error message. ***CALLING THIS FUNCTION IS NOT SUGGEGSTED***
      * @param {string} message
-     * @param {number} level
+     * @param {int} level
      * @param {string} error
      * @param {boolean} die
      */
@@ -511,7 +511,7 @@ export class render {
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
      * @param {Object} data - The data that used to render
-     * @param {Number} maxWait - how much to wait for parm data to be definded
+     * @param {int} maxWait - how much to wait for parm data to be definded
      * @param {Object} namespace - historical issues, just avoid it
      * @returns {render}
      */
@@ -863,7 +863,7 @@ export class render {
     /**
      * Edit virtual DOM
      * @param {Object} data
-     * @param {function(Object, number)} func - The function that will be editing the children. It should recieve
+     * @param {function(Object, int):void} func - The function that will be editing the children. It will receive the vdom children and its index
      * @param {Object} vdom
      * @returns {boolean}
      */
@@ -885,7 +885,7 @@ export class render {
      * @param {Node} parentElement
      * @param {string} sectionName
      * @param {string} title
-     * @param {function(string, Object, Object, Object)} createElement
+     * @param {function(string, Object, Object, Object):Node|DocumentFragment} createElement
      * @param {Node} root
      * @param {Object} options
      * @returns {Object|void}
@@ -1199,7 +1199,7 @@ export class render {
     };
     /**
      * Set status code. ***CALLING IT IS NOT SUGGESTED***, unless you want to control the render flow.
-     * @param {number} code
+     * @param {int} code
      */
     set(code) {
         this.statusCode = code;
@@ -1881,11 +1881,11 @@ export class render {
     /**
      * Add a loading page to the give node.
      * @param {Object} prop0 - Shown message on the error page, if timeout
-     * @param {number} errorCode - The HTTP error code on the error page, if timeout
-     * @param {number} guillotine - Timeout time limit
+     * @param {int} errorCode - The HTTP error code on the error page, if timeout
+     * @param {int} guillotine - Timeout time limit
      * @param {string} reason - Timeout for what
      * @param {Node} parentNode
-     * @returns {Object<string,Node|number>}
+     * @returns {Object<string,Node|int>}
      */
     loadingPage({ message, level, _error }, errorCode, guillotine = MAXWAIT, reason = "Resource page.data not found", parentNode = body) {// dark joke
         const pot = $$("div");
@@ -1909,7 +1909,7 @@ export class render {
     /**
      * ***CALLING IT IS NOT SUGGESTED***
      * @param {Object} prop0
-     * @param {number} errorCode
+     * @param {int} errorCode
      * @param {string} reason
      * @param {Node} parentNode
      * @returns {Object<string,function>}
