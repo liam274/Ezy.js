@@ -6,13 +6,16 @@
 import * as utils from "./utils.js";
 import * as storage from "./storage.js";
 import * as cssComputer from "./cssComputer.js";
+export * from "./utils.js";
+export * from "./storage.js";
+export * from "./history.js";
 
 /*
     @file ezy.js
     by Liam Lei
     Started from 2026.02.11
 
-    Release: 0.1.1 (Stable)
+    Release: 0.1.2 (Stable)
 
     Acknowledgments:
         - Nathan Wong. Thanks for :
