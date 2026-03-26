@@ -1,3 +1,6 @@
+import { yieldProcess } from "./utils.js";
+import { MAX_LOOP_TIME } from "./consts.js";
+
 export class store {
     #store = {};
     #varstore = {};
@@ -50,8 +53,13 @@ export class store {
         return () => this.#listeners.delete(func);
     }
     #notify(..._) {
+        let t = 1;
         for (const i of this.#listeners) {
+            if (t === 10) {
+                yieldProcess();
+            }
             i(..._);
+            t++;
         }
     }
 }

@@ -6,3 +6,5 @@ export const KEYCODE = {
     DELETE: 46,
     BACKSPACE: 8
 };
+
+export const MAX_LOOP_TIME = 8;
