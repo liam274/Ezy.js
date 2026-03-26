@@ -6,7 +6,6 @@
 Note that this framework is ***NOT*** designed to build pages independently. Please use other backend languages to support the project, or any other ways you prefer.
 
 ## Attention
-- Developers **MUST** detect the statusCode after reRender, as it might returns error code.
 - Note that based on considerations of flexibilty, *Ezy.js* will not be fully responsible for XSS security or any other HTML-related attacks. If you want to implement such defenses, please view the [config attributes](docs.md#general-config-attributes), or using PHP or any other possible backend language to pre-render contents. ***XSS DEFENSE MODE IS DEFAULT TO BE ON***
 
 ## Hello, world!
