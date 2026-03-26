@@ -55,8 +55,9 @@ export class store {
     #notify(..._) {
         let t = 1;
         for (const i of this.#listeners) {
-            if (t === 10) {
+            if (t === MAX_LOOP_TIME) {
                 yieldProcess();
+                t = 0;
             }
             i(..._);
             t++;
