@@ -490,7 +490,7 @@ const vars = new Set(),// Ensure that third party can use the given name in asVa
             for (const i in data) {
                 if (Ezy.validates.isInt(i)) {
                     const got = utils.array2camel(data[i].split("-"));
-                    result.set(got, data[got]);
+                    result.set(got, data[data[i]]);
                 }
             }
             return Object.fromEntries(result);
@@ -538,10 +538,6 @@ export class render {
         head.appendChild(this.#remarkableStyle);
         this.maxWait = maxWait;
         this.data = data;
-        this.vdom = {
-            children: [],
-            dataset: {}
-        };
         this.loadPage = [];
         if (!data) {
             this.set(errors.STRUCTURE_ERROR);
@@ -569,14 +565,6 @@ export class render {
         }
         else {
             this.mainEl = el;
-        }
-        {
-            for (const i in ARGS) {
-                this.vdom[i] = ARGS[i](this.mainEl[i]);
-            }
-            this.vdom.tag = this.mainEl.tagName;
-            this.vdom.dataset = { ...this.vdom.dataset, ...this.mainEl.dataset };
-            this.vdom.config = { ...this.config };
         }
         this.original = this.mainEl.innerHTML;
         this.reload();
@@ -755,7 +743,7 @@ export class render {
             this.#pluginLeftovers.animationFrames.push(...animationFrames);
         }
         const el = document.createDocumentFragment();
-        this.vdom.children.push(...this.sectionRender(data, el, data.name || "", data.title || "", this.contentRender, root, options));
+        this.sectionRender(data, el, data.name || "", data.title || "", this.contentRender, root, options);
         this.cssPutter();
         log(`%c[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`,
             this.statusCode === 0 ? "font-size: 30px; font-weight: bold;color: #e0e0e0;" : "font-size: 30px; font-weight: bold;color: red;");
@@ -852,48 +840,6 @@ export class render {
         }
     }
     /**
-     * Remove virtual DOM
-     * @param {Object} data
-     * @param {Object} rootVdom
-     * @returns {boolean}
-     */
-    removeVdom(data, rootVdom = this.vdom) {
-        const stack = [rootVdom];
-        while (stack.length > 0) {
-            const currentNode = stack.pop();
-            for (let i = currentNode.children.length - 1; i >= 0; i--) {
-                const child = currentNode.children[i];
-                if (child === data) {
-                    currentNode.children.splice(i, 1);
-                    return true;
-                }
-                if (child && child.children) {
-                    stack.push(child);
-                }
-            }
-        }
-        return false;
-    }
-    /**
-     * Edit virtual DOM
-     * @param {Object} data
-     * @param {function(Object, int):void} func - The function that will be editing the children. It will receive the vdom children and its index
-     * @param {Object} vdom
-     * @returns {boolean}
-     */
-    editVdom(data, func, vdom = this.vdom) {
-        for (let i = vdom.children.length; i > 0; i--) {
-            if (vdom.children[i - 1] === data) {
-                func(vdom.children, i - 1);
-                return true;
-            }
-            if (this.editVdom(data, func, vdom.children[i - 1])) {
-                return true;
-            }
-        }
-        return false;
-    }
-    /**
      * ***CALLING IT IS NOT SUGGESTED***
      * @param {Object} sectionData
      * @param {Node} parentElement
@@ -902,7 +848,7 @@ export class render {
      * @param {function(string, Object, Object, Object):Node|DocumentFragment} createElement
      * @param {Node} root
      * @param {Object} options
-     * @returns {Object|void}
+     * @returns {void}
      */
     sectionRender = (sectionData, parentElement, sectionName, title, createElement, root, options) => {
         const traceback = `${title} -> ${sectionName}`;
@@ -910,7 +856,6 @@ export class render {
             this.set(errors.TYPE_ERROR);
             return Ezy.formatError(`function found first parameter in ${sectionData}, expected object, in ${traceback}`, errorLevels.CRITICAL_ERROR, "Type Error");
         }
-        const vdom = [];
         this.systemPlot.time = 0;
         for (const i in sectionData.component) {
             const item = sectionData.component[i];
@@ -920,26 +865,17 @@ export class render {
             if (this.statusCode !== 0) {
                 return;
             }
-            const temp = createElement(i, item, { ...(sectionData.config || {}), ...(i.config || {}) }, sectionData, parentElement, root, options);
+            const el = createElement(i, item, { ...(sectionData.config || {}), ...(i.config || {}) }, sectionData, parentElement, root, options);
             if (this.statusCode !== 0) {
                 return;
             }
-            if (!(temp && temp.el && temp.obj)) {
-                this.set(errors.VALUE_ERROR);
-                return Ezy.formatError(`argument-function "createElement" return unexpected value, expected {el:Node(or NodeLike object),obj:vdom}, in page ${traceback}`,
-                    errorLevels.CRITICAL_ERROR, "Value Error"
-                );
-            }
-            const { el, obj } = temp;
             if (!(el instanceof Node)) {
                 this.set(errors.VALUE_ERROR);
-                return Ezy.formatError(`argument-function "createElement" return unexpected value, expected {el:Node(or NodeLike object),obj:vdom}, in page ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
+                return Ezy.formatError(`argument-function "createElement" return unexpected value, expected Node(or NodeLike object), in page ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
             }
             parentElement.appendChild(el);
             this.systemPlot.time++;
-            vdom.push(...obj);
         }
-        return vdom;
     };
     #extendType(...data) {
         const result = [];
@@ -948,7 +884,7 @@ export class render {
         }
         return result;
     }
-    #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp, root) {
+    #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, root) {
         const classes = [...(i.type || []), ...(config.type || [])];
         if (classes.some((char) => char.includes(" "))) {
             this.set(errors.VALUE_ERROR);
@@ -962,7 +898,6 @@ export class render {
             setTimeout((function () {
                 card.innerHTML = "";
                 card.remove();
-                this.removeVdom(temp);
                 setTimeout(() => {
                     i.expire.expired?.();
                 });
@@ -1028,7 +963,7 @@ export class render {
             card.type = i._type;
         }
     }
-    #logic2(card, i, temp, config, replacement, traceback) {
+    #logic2(card, i, config, replacement, traceback) {
         utils.applyStyles(card, i.style);
         for (const j in (i.events || {})) {
             this.addListener(j, i, card, traceback);
@@ -1055,7 +990,6 @@ export class render {
             if (this.statusCode !== 0) {
                 return;
             }
-            temp[j] = card[j];
         }
     }
     /**
@@ -1072,8 +1006,7 @@ export class render {
     contentRender = (_, i, config, fatherData, fatherElement, root, options) => {
         options.deep = utils._default(options.deep, true);
         const title = fatherData.title || "",
-            traceback = `${title}`,
-            vdom = [];
+            traceback = `${title}`;
         if (typeof i === "string") {
             if (!(this.classify.has(i) || Ezy.components.has(i))) {
                 this.set(errors.CLASSIFY_ERROR);
@@ -1118,15 +1051,11 @@ export class render {
             for (const k in obj) {
                 first++;
                 const card = (frag ? document.createDocumentFragment() : $$(i.tag || config.tag || "div")),
-                    temp = {
-                        children: [],
-                        dataset: {}
-                    },
                     replacement = {
                         ...this.systemPlot, ...(i.inherit || {}), key: k, item: obj[k]
                     };
                 if (!frag) {
-                    this.#logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, temp, root);
+                    this.#logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, root);
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1137,38 +1066,20 @@ export class render {
                     return;
                 }
                 if (!frag) {
-                    this.#logic2(card, i, temp, config, replacement, traceback);
+                    this.#logic2(card, i, config, replacement, traceback);
                     if (this.statusCode !== 0) {
                         return;
                     }
                 }
-                if (options.deep) {
-                    temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, replacement));
-                }
                 if (this.statusCode !== 0) {
                     return;
-                }
-                if (!frag) {
-                    for (const i in ARGS) {
-                        temp[i] = ARGS[i](card[i]);
-                    }
-                    temp.tag = card.tagName;
-                    temp.dataset = { ...temp.dataset, ...card.dataset };
-                    temp.config = { ...config };
-                    vdom.push(temp);
-                } else {
-                    vdom.push(...temp.children);
                 }
             }
         } else {
             for (let k = 0; k < (i.times || 1); k++) {
-                const card = (frag ? document.createDocumentFragment() : $$(i.tag || config.tag || "div")),
-                    temp = {
-                        children: [],
-                        dataset: {}
-                    };
+                const card = (frag ? document.createDocumentFragment() : $$(i.tag || config.tag || "div"));
                 if (!frag) {
-                    this.#logic1(card, i, fatherData, fatherElement, k, i.inherit || {}, traceback, config, temp, root);
+                    this.#logic1(card, i, fatherData, fatherElement, k, i.inherit || {}, traceback, config, root);
                     if (this.statusCode !== 0) {
                         return;
                     }
@@ -1179,34 +1090,17 @@ export class render {
                     return;
                 }
                 if (!frag) {
-                    this.#logic2(card, i, temp, config, i.inherit || {}, traceback);
+                    this.#logic2(card, i, config, i.inherit || {}, traceback);
                     if (this.statusCode !== 0) {
                         return;
                     }
                 }
-                if (options.deep) {
-                    temp.children.push(...this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, i.inherit));
-                }
                 if (this.statusCode !== 0) {
                     return;
                 }
-                if (!frag) {
-                    for (const i in ARGS) {
-                        temp[i] = ARGS[i](card[i]);
-                    }
-                    temp.tag = card.tagName;
-                    temp.dataset = { ...temp.dataset, ...card.dataset };
-                    temp.config = { ...config };
-                    vdom.push(temp);
-                } else {
-                    vdom.push(...temp.children);
-                }
             }
         }
-        return {
-            el: todo,
-            obj: vdom
-        };
+        return todo;
     };
     /**
      * Set status code. ***CALLING IT IS NOT SUGGESTED***, unless you want to control the render flow.
@@ -1519,7 +1413,7 @@ export class render {
         }
         return result.join("");
     }
-    #pushLogic(j, el, replace, temp, config, traceback, myTraceback, first, parentNode, i) {
+    #pushLogic(j, el, replace, config, traceback, myTraceback, first, parentNode, i) {
         for (const evt in j.events) {
             this.addListener(evt, j, el, myTraceback);
             if (this.statusCode !== 0) {
@@ -1534,7 +1428,6 @@ export class render {
             if (this.statusCode !== 0) {
                 return;
             }
-            temp[parm] = el[parm];
         }
         let r = this.preCompileStr(
             (j.content || ""), myTraceback, replace
@@ -1550,7 +1443,6 @@ export class render {
             setTimeout((function () {
                 el.innerHTML = "";
                 el.remove();
-                this.removeVdom(temp);
                 setTimeout(() => {
                     j.expire.expired?.();
                 });
@@ -1629,7 +1521,6 @@ export class render {
             time: 0
         },
             todo = document.createDocumentFragment(),
-            vdom = [],
             frag = i.isFragment || false;
         for (let j of (i.component || [])) {
             if (typeof j === "string") {
@@ -1679,11 +1570,7 @@ export class render {
                 let first = -1;
                 for (const k in obj) {
                     first++;
-                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || j.config?.tag || "div")),
-                        temp = {
-                            children: [],
-                            dataset: {}
-                        };
+                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || j.config?.tag || "div"));
                     if (!frag) {
                         const classes = [...(j.type || []), ...(config.type || [])];
                         if (classes.some((char) => char.includes(" "))) {
@@ -1699,7 +1586,7 @@ export class render {
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`),
                         replace = { ...replacement, ...j.inherit, key: k, item: obj[k], ...own };
                     if (!frag) {
-                        this.#pushLogic(j, el, replace, temp, config, traceback, myTraceback, first, parentNode, i);
+                        this.#pushLogic(j, el, replace, config, traceback, myTraceback, first, parentNode, i);
                         if (this.statusCode !== 0) {
                             return;
                         }
@@ -1709,29 +1596,14 @@ export class render {
                     if (this.statusCode !== 0) {
                         return;
                     }
-                    temp.children.push(...this.pushComponent(j, utils.isDocumentFragment(el) ? parentNode : el, myTraceback, { ...config, ...(j.config || {}) }, replace));
+                    this.pushComponent(j, utils.isDocumentFragment(el) ? parentNode : el, myTraceback, { ...config, ...(j.config || {}) }, replace);
                     if (this.statusCode !== 0) {
                         return;
-                    }
-                    if (!frag) {
-                        for (const i in ARGS) {
-                            temp[i] = ARGS[i](el[i]);
-                        }
-                        temp.tag = el.tagName;
-                        temp.dataset = { ...temp.dataset, ...el.dataset };
-                        temp.config = { ...i.config, ...j.config };
-                        vdom.push(temp);
-                    } else {
-                        vdom.push(...temp.children);
                     }
                 }
             } else {
                 for (let k = 0; k < (j.times || 1); k++) {
-                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || j.config?.tag || "div")),
-                        temp = {
-                            children: [],
-                            dataset: {}
-                        };
+                    const el = (frag ? document.createDocumentFragment() : $$(j.tag || config.tag || j.config?.tag || "div"));
                     if (!frag) {
                         const classes = [...(j.type || []), ...(config.type || [])];
                         if (classes.some((char) => char.includes(" "))) {
@@ -1746,7 +1618,7 @@ export class render {
                     }
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`);
                     if (!frag) {
-                        this.#pushLogic(j, el, { ...replacement, ...j.inherit, ...own }, temp, config, traceback, myTraceback, k, parentNode, i);
+                        this.#pushLogic(j, el, { ...replacement, ...j.inherit, ...own }, config, traceback, myTraceback, k, parentNode, i);
                         if (this.statusCode !== 0) {
                             return;
                         }
@@ -1756,21 +1628,10 @@ export class render {
                     if (this.statusCode !== 0) {
                         return;
                     }
-                    temp.children.push(...this.pushComponent(j, utils.isDocumentFragment(el) ? parentNode : el, myTraceback,
-                        { ...config, ...(j.config || {}) }, { ...replacement, ...j.inherit, ...own }));
+                    this.pushComponent(j, utils.isDocumentFragment(el) ? parentNode : el, myTraceback,
+                        { ...config, ...(j.config || {}) }, { ...replacement, ...j.inherit, ...own });
                     if (this.statusCode !== 0) {
                         return;
-                    }
-                    if (!frag) {
-                        for (const i in ARGS) {
-                            temp[i] = ARGS[i](el[i]);
-                        }
-                        temp.tag = el.tagName;
-                        temp.dataset = { ...temp.dataset, ...el.dataset };
-                        temp.config = { ...i.config, ...j.config };
-                        vdom.push(temp);
-                    } else {
-                        vdom.push(...temp.children);
                     }
                 }
             }
@@ -1778,7 +1639,7 @@ export class render {
             parentNode.appendChild(todo);
             todo.replaceChildren();
         }
-        return vdom;
+        return;
     }
     /**
      * This function will promise that the Ezy.js will not collide the id. Without other JavaScript actions, you may use the varAs as the variable name to access the DOM.
@@ -1806,10 +1667,6 @@ export class render {
         }
         utils.removeChild(this.mainEl);
         this.mainEl.innerHTML = this.original;
-        this.vdom = {
-            children: [],
-            dataset: {}
-        };
         this.#remarkableStyle.remove();
         this.#remarkableStyle = $$("style");
         head.appendChild(this.#remarkableStyle);
