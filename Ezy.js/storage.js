@@ -1,4 +1,4 @@
-export class store {
+export default class store {
     #store = new Map();
     #varstore = {};
     #listeners = new Set();
