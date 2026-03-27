@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        @layer normalize, customize, ezy-js-dependent;
+    </style>
+    <link rel="stylesheet" href="./Ezy.js/main.css" />
+</head>
+
+<body>
+</body>
+<script src="./Ezy.js/main.js" defer type="module"></script>
+<script defer type="module">
+    import * as ezy from "./Ezy.js/main.js";
+    new ezy.render("head", {
+        config: {
+            urlFilter: {
+                rules: [".*"],
+                confirmer: () => true,
+                reporter: () => undefined
+            },
+            debug: false
+        }, component: [
+            {
+                tag: "title",
+                content: "Security Error"
+            },
+            {
+                tag: "link",
+                rel: "icon",
+                href: "./assets/icon.svg"
+            }
+        ]
+    });
+    const proc = new ezy.render("body", {
+        config: {
+            debug: false,
+            urlFilter: {
+                rules: [".*"],
+                confirmer: () => true,
+                reporter: () => undefined
+            }
+        },
+        component: []
+    });
+    proc.errorPage(
+        {
+            message: "Error when navigating, dangerous URL detected",
+            level: ezy.errorLevels.CRITICAL_ERROR,
+            _error: "Security Error"
+        },
+        505,
+        "Dangerous URL detected"
+    );
+</script>
+
+</html>

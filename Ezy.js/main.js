@@ -456,6 +456,7 @@ export const Ezy = Object.freeze({
      */
     navigate(href) {
         if (!isSafeURL(href, this.whitelistProtocol)) {
+            location.href = this.saviour;
             throw new Error(`Error when navigating, dangerous URL detected: ${href}`);
         }
         let full = true;
@@ -473,7 +474,8 @@ export const Ezy = Object.freeze({
             location.href = href;
         }
     },
-    whitelistProtocol: []
+    whitelistProtocol: [],
+    saviour: "saviour.html"
 });
 
 export const errorLevels = Object.freeze(
@@ -641,7 +643,7 @@ export class render {
                 }
                 navigator.serviceWorker.register(new URL("./firewall.js", import.meta.url)).then((function () {
                     if (this.#debug) {
-                        log(this, "[ezy.js] URL filter registered successful.");
+                        log("[ezy.js] URL filter registered successful.");
                     }
                     return navigator.serviceWorker.ready;
                 }).bind(this)).then(reg => {
