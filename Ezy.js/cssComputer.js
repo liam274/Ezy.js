@@ -98,7 +98,7 @@ function format(attribute, value) {
 /**
  * style-class self implement. Note that the implement is different from Tailwind!
  * @param {string[]} classes
- * @returns {Object<string,Object<string,string>> | void}
+ * @returns {Map<string,Object<string,string>> | void}
  */
 export function cssCompiler(classes, condition = []) {
     if (!Array.isArray(classes)) {

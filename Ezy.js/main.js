@@ -1986,11 +1986,11 @@ export class render {
         this.#style.innerHTML += result.join("");
     }
     /**
-     * @param {Object<string,string>} result
+     * @param {Map<string,string>} result
      */
     putCSS(result) {
-        for (const key in result) {
-            this.#cssBefore.set(key, result[key]);
+        for (const [key, val] of result) {
+            this.#cssBefore.set(key, val);
         }
     }
     /**
