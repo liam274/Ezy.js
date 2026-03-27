@@ -433,6 +433,27 @@ export const Ezy = Object.freeze({
             }
         }
         );
+    },
+    errors: Object.freeze(["MINOR ERROR", "MAJOR ERROR", "CRITICAL ERROR"]),
+    /**
+     * Use routeGuard.guards to check whether should redirect or not
+     * @param {string} href - destination
+     */
+    navigate(href) {
+        let full = true;
+        for (const guard of routeGuard.guards) {
+            const result = guard(href);
+            if (!result.allow) {
+                if (result.href) {
+                    location.href = result.href;
+                    return;
+                }
+                full = false;
+            }
+        }
+        if (full) {
+            location.href = href;
+        }
     }
 });
 
@@ -443,8 +464,6 @@ export const errorLevels = Object.freeze(
         MINOR_ERROR: 0
     }
 );
-
-Ezy.errors = Object.freeze(["MINOR ERROR", "MAJOR ERROR", "CRITICAL ERROR"]);
 
 // Route Guard
 
@@ -457,26 +476,7 @@ routeGuard.guards.push(function (href) {
         allow: routeGuard.builtin.has(href)
     };
 });
-/**
- * Use routeGuard.guards to check whether should redirect or not
- * @param {string} href - destination
- */
-Ezy.navigate = function (href) {
-    let full = true;
-    for (const guard of routeGuard.guards) {
-        const result = guard(href);
-        if (!result.allow) {
-            if (result.href) {
-                location.href = result.href;
-                return;
-            }
-            full = false;
-        }
-    }
-    if (full) {
-        location.href = href;
-    }
-};
+
 // render
 
 export const varage = {};// variable storage (?cold joke)
