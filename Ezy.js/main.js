@@ -6,6 +6,7 @@
 import * as utils from "./utils.js";
 import * as storage from "./storage.js";
 import * as cssComputer from "./cssComputer.js";
+import { dangerousAttribute, isSafeURL } from "./safety.js";
 export * from "./utils.js";
 export * from "./storage.js";
 export * from "./history.js";
@@ -882,6 +883,18 @@ export class render {
         }
         return result;
     }
+    /**
+     * @param {Node} card
+     * @param {Object} i
+     * @param {Object} fatherData
+     * @param {Node} fatherElement
+     * @param {int} first
+     * @param {Object<string,string>} replacement
+     * @param {string} traceback
+     * @param {Object<string,int|boolean|string>} config
+     * @param {Node} root
+     * @returns {void}
+     */
     #logic1(card, i, fatherData, fatherElement, first, replacement, traceback, config, root) {
         const classes = [...(i.type || []), ...(config.type || [])];
         if (classes.some((char) => char.includes(" "))) {
@@ -961,6 +974,14 @@ export class render {
             card.type = i._type;
         }
     }
+    /**
+     * @param {Node} card
+     * @param {Object} i
+     * @param {Object<string,int|boolean|string|void>} config
+     * @param {Object<string,string>} replacement
+     * @param {string} traceback
+     * @returns {void}
+     */
     #logic2(card, i, config, replacement, traceback) {
         utils.applyStyles(card, i.style);
         for (const j in (i.events || {})) {
@@ -988,6 +1009,18 @@ export class render {
             if (this.statusCode !== 0) {
                 return;
             }
+        }
+        let ok = true;
+        for (const danger of dangerousAttribute) {
+            if (!isSafeURL(card.getAttribute(danger))) {
+                this.set(errors.SECURITY_ERROR);
+                Ezy.formatError(`Found JavaScript injection in attribute "${danger}" as "${card.getAttribute(danger)}" when scanning attributes, in ${traceback}`,
+                    errorLevels.CRITICAL_ERROR, "Security Error", false);
+                ok = false;
+            }
+        }
+        if (!ok) {
+            throw new Error("Found JavaScript injection when scanning attributes, rendering process interrupted.");
         }
     }
     /**
@@ -1432,6 +1465,18 @@ export class render {
             if (this.statusCode !== 0) {
                 return;
             }
+        }
+        let ok = true;
+        for (const danger of dangerousAttribute) {
+            if (!isSafeURL(el.getAttribute(danger))) {
+                this.set(errors.SECURITY_ERROR);
+                Ezy.formatError(`Found JavaScript injection in attribute "${danger}" as "${el.getAttribute(danger)}" when scanning attributes, in ${traceback}`,
+                    errorLevels.CRITICAL_ERROR, "Security Error", false);
+                ok = false;
+            }
+        }
+        if (!ok) {
+            throw new Error("Found JavaScript injection when scanning attributes, rendering process interrupted.");
         }
         let r = this.preCompileStr(
             (j.content || ""), myTraceback, replace
