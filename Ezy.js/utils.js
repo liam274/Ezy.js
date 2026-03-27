@@ -62,21 +62,6 @@ export function array2camel(data) {
     }
     return result.join("");
 }
-const HTMLescapes = Object.freeze({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "\"": "&quot;",
-    "'": "&#39;"
-});
-/**
- * escape html special chars
- * @param {string} data
- * @returns {string}
- */
-export function htmlEscape(data) {
-    return data.replace(/[&<>"']/g, char => HTMLescapes[char]);
-}
 
 /**
  * remove prefix

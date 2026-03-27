@@ -30,7 +30,7 @@ export function isSafeURL(url, white = []) {
     if (!url) {
         return true;
     }
-    white = new Set(white.map(_ => _.endsWith(":") ? _ : _ + ":"));
+    white = new Set([...white].map(_ => _.endsWith(":") ? _ : _ + ":"));// Ensure it's an array.
     const trimmed = url.trim().toLowerCase(),
         dangerous = new RegExp(`^\\s*(${[...dangerousProtocol].filter(_ => !white.has(_)).join("|")})\\s*:`);
     try {
@@ -46,4 +46,20 @@ export function isSafeURL(url, white = []) {
         }
         return true;
     }
+}
+
+const HTMLescapes = Object.freeze({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+});
+/**
+ * escape html special chars
+ * @param {string} data
+ * @returns {string}
+ */
+export function htmlEscape(data) {
+    return data.replace(/[&<>"']/g, char => HTMLescapes[char]);
 }

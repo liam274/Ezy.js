@@ -36,44 +36,25 @@ In the root data, we have:
 
 **Attention!** The config mentioned here is the root config, not the virtual DOM config
 
-- keepConsole<br />
-Expect type: boolean<br />
-Required: <span style="color: red">true</span><br />
-Function: To disable the `console.clear()` in every reload.
-- style<br />
-Expect type: Object<br />
-Required: <span style="color: red">true</span><br />
-Function: Define styles for the entire document, reducing the time consum of repeating inline style renders.<br />
-- typeExtend<br />
-Expect type: Object<br />
-Required: <span style="color: red">true</span><br />
-Function: pack up style classes, so developers can use one class references to mutliple number of classes.<br />
-- debug<br />
-Expect type: boolean<br />
-Required: <span style="color: red">true</span><br />
-Function: Decided rather showing warnings or not
-- urlFilter<br />
-Expect type: Object<br />
-Required: <span style="color: green">true</span><br />
-Function: define request-related URL whitelist. [Details](#url-filter-syntax)
-- noComputeCSS<br />
-Expect type: boolean<br />
-Required: <span style="color: red">false</span><br />
-Function: disable builtin CSS compiling
-- whitelistProtocol<br />
-Expect type: string[]<br />
-Required: <span style="color: red">false</span><br />
-Function: trigger whether a protocol is banned or not. Default blocking `["javascript:", "data:", "vbscript:", "about:"]`
+| config name | Expect type | required | description |
+| ----------- | ----------- | -------- | ----------- |
+| `keepConsole` | `boolean` | <span style="color: red">`true`</span> | to disable the `console.clear()` in every reload |
+| `style` | `Object` | <span style="color: red">`false`</span> | define styles for the entire document, reducing the time consum of repeating inline style renders |
+| `typeExtend` | `Object` | <span style="color: red">`false`</span> | pack up style classes, so developers can use one class references to mutliple number of classes |
+| `debug` | `boolean` | <span style="color: red">`false`</span> | decided rather showing warnings or not |
+| `urlFilter` | `Object` | <span style="color: green">`true`</span> | define request-related URL whitelist. [Details](#url-filter-syntax) |
+| `noComputeCSS` | `boolean` | <span style="color: red">`false`</span> | disable builtin CSS compiling |
+| `whitelistProtocol` | `string[]` | <span style="color: red">`false`</span> | trigger whether a protocol is banned or not. Default blocking `["javascript:", "data:", "vbscript:", "about:"]` |
+| `strict` | `boolean` | <span style="color: red">`false`</span> | telling the framework whether to strictly check on dependencies or not. Suggested to run once before production |
 
 ### General Config Attributes
 
-**Attention!** These attributes are supported over **ALL** config objects.
-- escapeHTML<br />
-Expect type: boolean<br />
-Function: To enable `utils.htmlEscape` on `content` attributes.
-- tag<br />
-Expect type: string<br />
-Function: Define the default tag for childrens, if is not mentioned.
+**Attention!** These attributes are supported over **ALL** config objects. None of the general configs are enforced to apply.
+| config name | Expect type | description |
+| ----------- | ----------- | ----------- |
+| `escapeHTML` | `boolean` | to enable `utils.htmlEscape` on `content` attributes |
+| `tag` | `string` | define the default tag for childrens, if is not mentioned |
+| `removeUnsafeHTML` | `boolean` | use the browser Sanitizer API to sanitize(If have) |
 
 ### Components
 Except the specific root structure, *Ezy.js* is very dynamic and flexible, which means once you follow a certain pattern, you can build it in the way you like.

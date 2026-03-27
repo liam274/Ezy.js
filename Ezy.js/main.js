@@ -6,7 +6,7 @@
 import * as utils from "./utils.js";
 import * as storage from "./storage.js";
 import * as cssComputer from "./cssComputer.js";
-import { dangerousAttribute, isSafeURL } from "./safety.js";
+import * as secure from "./safety.js";
 export * from "./utils.js";
 export * from "./storage.js";
 export * from "./history.js";
@@ -86,7 +86,8 @@ export const keyword = new Set([
     PHARSING_ERROR: 10,
     ID_ERROR: 11,
     TYPE_ERROR: 12,
-    VARIABLE_ERROR: 13
+    VARIABLE_ERROR: 13,
+    _STRICT_UNSUPPORT_FEATURE_ERROR: 14
 });
 
 export const dictionary = Object.freeze({
@@ -455,7 +456,7 @@ export const Ezy = Object.freeze({
      * @param {string} href - destination
      */
     navigate(href) {
-        if (!isSafeURL(href, this.whitelistProtocol)) {
+        if (!secure.isSafeURL(href, this.whitelistProtocol)) {
             location.href = this.saviour;
             throw new Error(`Error when navigating, dangerous URL detected: ${href}`);
         }
@@ -474,7 +475,7 @@ export const Ezy = Object.freeze({
             location.href = href;
         }
     },
-    whitelistProtocol: [],
+    whitelistProtocol: new Set(),
     saviour: "saviour.html"
 });
 
@@ -541,6 +542,7 @@ export class render {
     #style = $$("style");
     #remarkableStyle = $$("style");
     #myvars = new Set();
+    #strict = false;
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -596,13 +598,22 @@ export class render {
     reload() {
         this.config = this.data.config || {};
         this.config.escapeHTML = utils._default(this.config.escapeHTML, true);
-        this.config.whitelistProtocol = Array.isArray(this.config.whitelistProtocol) ? this.config.whitelistProtocol : [];
-        // clean-up section start
+        this.config.whitelistProtocol = new Set(
+            ...((this.config.whitelistProtocol instanceof Set) ? this.config.whitelistProtocol : new Set()),
+            ...Ezy.whitelistProtocol
+        );
         if (this.config.debug) {
             this.#debug = true;
         } else {
             this.#debug = false;
         }
+        if (this.config.strict) {
+            this.#strict = true;
+        } else {
+            this.#strict = false;
+        }
+        this.supportCheck(this.config, "root");
+        // clean-up section start
         if (!this.#debug) {
             clear();
         }
@@ -1018,10 +1029,14 @@ export class render {
         if (this.statusCode !== 0) {
             return;
         }
-        if (this.config.escapeHTML || config.escapeHTML || i.config?.escapeHTML) {
-            r = utils.htmlEscape(r);
+        if ((this.config.removeUnsafeHTML || config.removeUnsafeHTML || i.config?.removeUnsafeHTML)) {
+            card.setHTML(r);
+        } else {
+            if (this.config.escapeHTML || config.escapeHTML || i.config?.escapeHTML) {
+                r = secure.htmlEscape(r);
+            }
+            card.innerHTML = r;
         }
-        card.innerHTML = r;
         for (const j in i) {
             if (keyword.has(j)) {
                 continue;
@@ -1032,8 +1047,8 @@ export class render {
             }
         }
         let ok = true;
-        for (const danger of dangerousAttribute) {
-            if (!isSafeURL(card.getAttribute(danger), this.config.whitelistProtocol)) {
+        for (const danger of secure.dangerousAttribute) {
+            if (!secure.isSafeURL(card.getAttribute(danger), this.config.whitelistProtocol)) {
                 this.set(errors.SECURITY_ERROR);
                 Ezy.formatError(`Found JavaScript injection in attribute "${danger}" as "${card.getAttribute(danger)}" when scanning attributes, in ${traceback}`,
                     errorLevels.CRITICAL_ERROR, "Security Error", false);
@@ -1089,6 +1104,7 @@ export class render {
                 i[key] = obj[key];
             }
         }
+        this.supportCheck(i.config || {}, traceback);
         if (i.forEach) {
             if (!this.#varage.has(i.forEach)) {
                 this.set(errors.RENDER_ERROR);
@@ -1273,6 +1289,12 @@ export class render {
             const result = fn(...values);
             return result === undefined ? "" : String(result);
         } catch (e) {
+            if (this.#strict) {
+                error(e);
+                this.set(errors.EVAL_ERROR);
+                Ezy.formatError(`Failed to evaluate "${expr}" in ${traceback}`, errorLevels.CRITICAL_ERROR, "Eval Error");
+                return "";
+            }
             if (e instanceof ReferenceError) {
                 if (this.#debug) {
                     warn(`[ezy.js] Warning: Variable not defined in "${expr}" at ${traceback}`);
@@ -1488,8 +1510,8 @@ export class render {
             }
         }
         let ok = true;
-        for (const danger of dangerousAttribute) {
-            if (!isSafeURL(el.getAttribute(danger), this.config.whitelistProtocol)) {
+        for (const danger of secure.dangerousAttribute) {
+            if (!secure.isSafeURL(el.getAttribute(danger), this.config.whitelistProtocol)) {
                 this.set(errors.SECURITY_ERROR);
                 Ezy.formatError(`Found JavaScript injection in attribute "${danger}" as "${el.getAttribute(danger)}" when scanning attributes, in ${traceback}`,
                     errorLevels.CRITICAL_ERROR, "Security Error", false);
@@ -1505,10 +1527,14 @@ export class render {
         if (this.statusCode !== 0) {
             return;
         }
-        if (this.config.escapeHTML || config.escapeHTML || j.config?.escapeHTML) {
-            r = utils.htmlEscape(r);
+        if (this.config.removeUnsafeHTML || config.removeUnsafeHTML || j.config?.removeUnsafeHTML) {
+            el.setHTML(r);
+        } else {
+            if (this.config.escapeHTML || config.escapeHTML || j.config?.escapeHTML) {
+                r = secure.htmlEscape(r);
+            }
+            el.innerHTML = r;
         }
-        el.innerHTML = r;
         if (j.expire) {
             setTimeout((function () {
                 el.innerHTML = "";
@@ -1655,6 +1681,7 @@ export class render {
                     }
                     const myTraceback = frag ? traceback : (traceback + ` -> ${el.tagName}${el.id ? "#" + el.id : ""}.${[...el.classList].join(".")}`),
                         replace = { ...replacement, ...j.inherit, key: k, item: obj[k], ...own };
+                    this.supportCheck(j.config || {}, myTraceback);
                     if (!frag) {
                         this.#pushLogic(j, el, replace, config, traceback, myTraceback, first, parentNode, i);
                         if (this.statusCode !== 0) {
@@ -1936,5 +1963,23 @@ export class render {
      */
     setTheme(themes) {
         this.mainEl.setAttribute("data-theme", themes.join(" "));
+    }
+    /**
+     * @param {Object<string,any>} config
+     * @param {string} traceback
+     */
+    supportCheck(config, traceback) {
+        if (config.removeUnsafeHTML && typeof Element.prototype.setHTML !== "function") {
+            if (this.#strict) {
+                this.set(errors._STRICT_UNSUPPORT_FEATURE_ERROR);
+                return Ezy.formatError(
+                    `Error in strict mode, found config.removeUnsafeHTML truely, while the browser doesn't supports Sanitizer API, in ${traceback}`,
+                    errorLevels.CRITICAL_ERROR,
+                    "Strict Unsupport Feature Error"
+                );
+            } else {
+                config.removeUnsafeHTML = false;
+            }
+        }
     }
 };
