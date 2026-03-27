@@ -2,7 +2,7 @@
  * Version Controller. This class assumes that it has its own proporties.
  * @template type
  */
-export default class History {
+export class History {
     #history = [];
     #data = undefined;
     /**
