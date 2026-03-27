@@ -1071,6 +1071,9 @@ export class render {
                         return;
                     }
                 }
+                if (options.deep) {
+                    this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, replacement);
+                }
                 if (this.statusCode !== 0) {
                     return;
                 }
@@ -1094,6 +1097,9 @@ export class render {
                     if (this.statusCode !== 0) {
                         return;
                     }
+                }
+                if (options.deep) {
+                    this.pushComponent(i, utils.isDocumentFragment(card) ? fatherElement : card, traceback, { ...config, ...(i.config || {}) }, i.inherit);
                 }
                 if (this.statusCode !== 0) {
                     return;
@@ -1639,7 +1645,6 @@ export class render {
             parentNode.appendChild(todo);
             todo.replaceChildren();
         }
-        return;
     }
     /**
      * This function will promise that the Ezy.js will not collide the id. Without other JavaScript actions, you may use the varAs as the variable name to access the DOM.
