@@ -498,6 +498,20 @@ routeGuard.guards.push(function (href) {
     };
 });
 
+// Security
+const csp = $$("meta");
+head.appendChild(csp);
+csp.setAttribute("http-equiv", "Content-Security-Policy");
+csp.setAttribute("content",
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-eval'; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data:; " +
+    "worker-src 'self'; " +
+    "connect-src 'self'; " +
+    "font-src 'self';"
+);
+
 // render
 
 export const varage = {};// variable storage (?cold joke)
