@@ -455,7 +455,7 @@ export const Ezy = Object.freeze({
      * @param {string} href - destination
      */
     navigate(href) {
-        if (!isSafeURL(href)) {
+        if (!isSafeURL(href, this.whitelistProtocol)) {
             throw new Error(`Error when navigating, dangerous URL detected: ${href}`);
         }
         let full = true;
@@ -472,7 +472,8 @@ export const Ezy = Object.freeze({
         if (full) {
             location.href = href;
         }
-    }
+    },
+    whitelistProtocol: []
 });
 
 export const errorLevels = Object.freeze(
@@ -579,6 +580,7 @@ export class render {
     reload() {
         this.config = this.data.config || {};
         this.config.escapeHTML = utils._default(this.config.escapeHTML, true);
+        this.config.whitelistProtocol = Array.isArray(this.config.whitelistProtocol) ? this.config.whitelistProtocol : [];
         // clean-up section start
         if (this.config.debug) {
             this.#debug = true;
@@ -1015,7 +1017,7 @@ export class render {
         }
         let ok = true;
         for (const danger of dangerousAttribute) {
-            if (!isSafeURL(card.getAttribute(danger))) {
+            if (!isSafeURL(card.getAttribute(danger), this.config.whitelistProtocol)) {
                 this.set(errors.SECURITY_ERROR);
                 Ezy.formatError(`Found JavaScript injection in attribute "${danger}" as "${card.getAttribute(danger)}" when scanning attributes, in ${traceback}`,
                     errorLevels.CRITICAL_ERROR, "Security Error", false);
@@ -1471,7 +1473,7 @@ export class render {
         }
         let ok = true;
         for (const danger of dangerousAttribute) {
-            if (!isSafeURL(el.getAttribute(danger))) {
+            if (!isSafeURL(el.getAttribute(danger), this.config.whitelistProtocol)) {
                 this.set(errors.SECURITY_ERROR);
                 Ezy.formatError(`Found JavaScript injection in attribute "${danger}" as "${el.getAttribute(danger)}" when scanning attributes, in ${traceback}`,
                     errorLevels.CRITICAL_ERROR, "Security Error", false);

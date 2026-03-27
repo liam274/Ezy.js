@@ -60,6 +60,10 @@ Function: define request-related URL whitelist. [Details](#url-filter-syntax)
 Expect type: boolean<br />
 Required: <span style="color: red">false</span><br />
 Function: disable builtin CSS compiling
+- whitelistProtocol<br />
+Expect type: string[]<br />
+Required: <span style="color: red">false</span><br />
+Function: trigger whether a protocol is banned or not. Default blocking `["javascript:", "data:", "vbscript:", "about:"]`
 
 ### General Config Attributes
 
