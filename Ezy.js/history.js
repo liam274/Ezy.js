@@ -1,9 +1,14 @@
 /**
- * Version Controller
+ * Version Controller. This class assumes that it has its own proporties.
+ * @template type
  */
 export default class History {
     #history = [];
     #data = undefined;
+    /**
+     * @param {type} data
+     * @param {(function(any):any)[]} methods
+     */
     constructor(data, methods) {
         this.#data = data;
         for (const name in methods) {
@@ -20,7 +25,7 @@ export default class History {
         return this.#data;
     }
     /**
-     * Commit a definded function
+     * Commit a value
      * @param {string} key
      * @param {any} value
      */
@@ -31,6 +36,13 @@ export default class History {
         });
         this.#history.push(snapshot);
         this.#data[key] = value;
+    }
+    /**
+     * @param {string} key
+     * @returns {any}
+     */
+    read(key) {
+        return this.#data[key];
     }
     /**
      * @param {int} offset - the element that you'd like to rollback **TO**. Count from 1

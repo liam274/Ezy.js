@@ -1087,7 +1087,7 @@ export class render {
             const { loader, setter, placeholder, error } = i.async;
             loader().then((data) => setter(data)).catch((err) => {
                 const temp = { ...fatherData };
-                for (const key of error) {
+                for (const key in error) {
                     i[key] = error[key];
                 }
                 temp.inherit = temp.inherit || {};
@@ -1649,7 +1649,7 @@ export class render {
                 const { loader, setter, placeholder, error } = j.async;
                 loader().then((data) => setter(data)).catch((err) => {
                     const temp = { ...i };
-                    for (const key of error) {
+                    for (const key in error) {
                         j[key] = error[key];
                     }
                     temp.inherit = temp.inherit || {};
