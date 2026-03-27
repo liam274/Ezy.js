@@ -55,7 +55,7 @@ export default class History {
         if (offset === 0) {
             return Object.freeze({});
         }
-        const snapshot = { key: this.#data[this.#history.at(-offset).key], old };
+        const snapshot = { old: this.#data[this.#history.at(-offset).key], key: this.#history.at(-offset).key };
         this.#history.length -= offset - 1;
         const { key, old } = this.#history.at(-1);
         this.#data[key] = old;

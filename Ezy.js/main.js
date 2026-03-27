@@ -366,6 +366,7 @@ export const Ezy = Object.freeze({
                 utils.removeChild(barrier);
                 barrier.remove();
                 data.func(true, bind(), ...(data.props || []));
+                deletor();
             });
             backk.appendChild(confirm);
             cancel.innerHTML = "Cancel";
@@ -374,6 +375,7 @@ export const Ezy = Object.freeze({
                 utils.removeChild(barrier);
                 barrier.remove();
                 data.func(false, bind(), ...(data.props || []));
+                deletor();
             });
             backk.appendChild(cancel);
             back.appendChild(backk);
@@ -480,26 +482,7 @@ routeGuard.guards.push(function (href) {
 // render
 
 export const varage = {};// variable storage (?cold joke)
-const vars = new Set(),// Ensure that third party can use the given name in asVar (name) as variable in JS
-    ARGS = Object.freeze({
-        classList: (data) => Array.from(data),
-        innerHTML: (data) => data,
-        id: (data) => data,
-        style: (data) => {
-            const result = new Map();
-            for (const i in data) {
-                if (Ezy.validates.isInt(i)) {
-                    const got = utils.array2camel(data[i].split("-"));
-                    result.set(got, data[data[i]]);
-                }
-            }
-            return Object.fromEntries(result);
-        },
-        title: (data) => data,
-        events: (data) => {
-            return { ...data };
-        }
-    });
+const vars = new Set();// Ensure that third party can use the given name in asVar (name) as variable in JS
 
 export const MAXWAIT = 60000,
     HTTP_NOT_FOUND = 404,
@@ -524,6 +507,7 @@ export class render {
     #cssAfter = new Set();
     #style = $$("style");
     #remarkableStyle = $$("style");
+    #myvars = new Set();
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -1660,6 +1644,7 @@ export class render {
                 return Ezy.formatError(`when rendering ${el.tagName}.${[...el.classList].join(".")}, id collide to "${varAs}", in ${traceback}`, errorLevels.CRITICAL_ERROR, "ID Error");
             }
             vars.add(varAs);
+            this.#myvars.add(varAs);
             el.id = varAs;
         }
     }
@@ -1677,7 +1662,10 @@ export class render {
         head.appendChild(this.#remarkableStyle);
         this.#oldBoys.clear();
         this.#listen2.clear();
-        vars.clear();
+        for (const i of this.#myvars) {
+            vars.delete(i);
+        }
+        this.#myvars.clear();
     }
     /**
      * ***CALLING IT IS NOT SUGGESTED***
