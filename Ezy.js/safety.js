@@ -26,7 +26,7 @@ export const
  * @param {string[]} white - to allow protocol(Both remove the element from black list and add it in white list)
  * @returns {boolean}
  */
-export function isSafeURL(url, white) {
+export function isSafeURL(url, white = []) {
     if (!url) {
         return true;
     }

@@ -455,6 +455,9 @@ export const Ezy = Object.freeze({
      * @param {string} href - destination
      */
     navigate(href) {
+        if (!isSafeURL(href)) {
+            throw new Error(`Error when navigating, dangerous URL detected: ${href}`);
+        }
         let full = true;
         for (const guard of routeGuard.guards) {
             const result = guard(href);
