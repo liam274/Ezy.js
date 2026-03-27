@@ -25,10 +25,10 @@ export default class History {
      * @param {any} value
      */
     commit(key, value) {
-        const snapshot = {
+        const snapshot = Object.freeze({
             old: this.#data[key],
             key
-        };
+        });
         this.#history.push(snapshot);
         this.#data[key] = value;
     }

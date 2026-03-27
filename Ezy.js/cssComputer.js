@@ -2,7 +2,7 @@
 
 import * as utils from "./utils.js";
 
-const alias = {
+const alias = Object.freeze({
     bg: "background",
     mid: "middle",
     img: "image",
@@ -30,7 +30,7 @@ const alias = {
     grow: "flex-grow",
     full: "100%",
     fw: "font-weight"
-};
+});
 
 function manageCSSAlias(data) {
     const result = [];

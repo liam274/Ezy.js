@@ -59,7 +59,7 @@ export const keyword = new Set([
     "forEach", "innerHTML", "config",
     "data", "belt", "isFragment",
     "evaluate", "_type"
-]), errors = {
+]), errors = Object.freeze({
     SECURITY_ERROR: -1,
     STRUCTURE_ERROR: 1,
     ASVAR_REWRITE_ERROR: 2,
@@ -74,19 +74,19 @@ export const keyword = new Set([
     ID_ERROR: 11,
     TYPE_ERROR: 12,
     VARIABLE_ERROR: 13
-};
+});
 
-export const dictionary = {
+export const dictionary = Object.freeze({
     time: ["i", "index", "renderIndex"], // maintain counts of independent elements (Which means those who is independent on times duplication)
     key: ["key"],
     item: ["item", "value"]
-};
+});
 
 // Ezy
 export const body = document.body,
     head = document.head;
 
-export const Ezy = {
+export const Ezy = Object.freeze({
     plugins: [],
     /**
      * Add plugins
@@ -434,7 +434,7 @@ export const Ezy = {
         }
         );
     }
-};
+});
 
 export const errorLevels = Object.freeze(
     {
@@ -444,7 +444,7 @@ export const errorLevels = Object.freeze(
     }
 );
 
-Ezy.errors = ["MINOR ERROR", "MAJOR ERROR", "CRITICAL ERROR"];
+Ezy.errors = Object.freeze(["MINOR ERROR", "MAJOR ERROR", "CRITICAL ERROR"]);
 
 // Route Guard
 
@@ -479,9 +479,9 @@ Ezy.navigate = function (href) {
 };
 // render
 
-const varage = {},// variable storage (?cold joke)
-    vars = new Set(),// Ensure that third party can use the given name in asVar (name) as variable in JS
-    ARGS = {
+export const varage = {};// variable storage (?cold joke)
+const vars = new Set(),// Ensure that third party can use the given name in asVar (name) as variable in JS
+    ARGS = Object.freeze({
         classList: (data) => Array.from(data),
         innerHTML: (data) => data,
         id: (data) => data,
@@ -499,7 +499,8 @@ const varage = {},// variable storage (?cold joke)
         events: (data) => {
             return { ...data };
         }
-    };
+    });
+
 export const MAXWAIT = 60000,
     HTTP_NOT_FOUND = 404,
     HTTP_TIMEOUT = 408;

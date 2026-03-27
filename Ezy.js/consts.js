@@ -1,10 +1,10 @@
 export const body = document.body,
     head = document.head;
 
-export const KEYCODE = {
+export const KEYCODE = Object.freeze({
     ENTER: 13,
     DELETE: 46,
     BACKSPACE: 8
-};
+});
 
 export const MAX_LOOP_TIME = 8;

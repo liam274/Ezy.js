@@ -62,20 +62,20 @@ export function array2camel(data) {
     }
     return result.join("");
 }
+const HTMLescapes = Object.freeze({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+});
 /**
  * escape html special chars
  * @param {string} data
  * @returns {string}
  */
 export function htmlEscape(data) {
-    const map = {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        "\"": "&quot;",
-        "'": "&#39;"
-    };
-    return data.replace(/[&<>"']/g, char => map[char]);
+    return data.replace(/[&<>"']/g, char => HTMLescapes[char]);
 }
 
 /**
