@@ -1641,7 +1641,6 @@ export class render {
             }
             own.time++;
             parentNode.appendChild(todo);
-            todo.replaceChildren();
         }
     }
     /**
