@@ -7,7 +7,7 @@ const pageData = {
         funcs: []
     },
     config: {
-        debug: true,
+        debug: false,
         urlFilter: {
             rules: [".*"],
             confirmer: () => true,
@@ -282,7 +282,7 @@ new ezy.render("head", {
             confirmer: () => true,
             reporter: () => undefined
         },
-        debug: true
+        debug: false
     }, component: [
         {
             tag: "title",

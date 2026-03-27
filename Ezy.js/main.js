@@ -42,13 +42,25 @@ export * from "./history.js";
             + give out improvement suggestions
             + teach me differrent JS syntax
 */
+let _allowClear = true;
+/**
+ * @param {boolean} clr
+ */
+export function allowClear(clr) {
+    _allowClear = clr;
+}
 
 export const log = console.log,
     $ = document.querySelector.bind(document),
     $$ = document.createElement.bind(document),
     error = console.error.bind(console),
     warn = console.warn.bind(console),
-    clear = console.clear.bind(console);
+    oriclear = console.clear.bind(console),
+    clear = function (...args) {
+        if (_allowClear) {
+            oriclear(...args);
+        }
+    };
 
 export const keyword = new Set([
     "type", "component", "tag",
@@ -621,12 +633,12 @@ export class render {
                     this.#reporter();
                     return Ezy.formatError("Error when trying to setup URL filter, URL WHITELIST HAS BEEN TAMPERED.", errorLevels.CRITICAL_ERROR, "Security Error");
                 }
-                navigator.serviceWorker.register(new URL("./firewall.js", import.meta.url)).then(() => {
+                navigator.serviceWorker.register(new URL("./firewall.js", import.meta.url)).then((function () {
                     if (this.#debug) {
-                        log("[ezy.js] URL filter registered successful.");
+                        log(this, "[ezy.js] URL filter registered successful.");
                     }
                     return navigator.serviceWorker.ready;
-                }).then(reg => {
+                }).bind(this)).then(reg => {
                     if (navigator.serviceWorker.controller) {
                         navigator.serviceWorker.controller.postMessage({
                             type: "UPDATE_RULES",
@@ -729,8 +741,10 @@ export class render {
         const el = document.createDocumentFragment();
         this.sectionRender(data, el, data.name || "", data.title || "", this.contentRender, root, options);
         this.cssPutter();
-        log(`%c[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`,
-            this.statusCode === 0 ? "font-size: 30px; font-weight: bold;color: #e0e0e0;" : "font-size: 30px; font-weight: bold;color: red;");
+        if (this.#debug) {
+            log(`%c[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`,
+                this.statusCode === 0 ? "font-size: 30px; font-weight: bold;color: #e0e0e0;" : "font-size: 30px; font-weight: bold;color: red;");
+        }
         if (data.onLoad) {
             for (const i of data.onLoad) {
                 i(data);
@@ -1104,7 +1118,7 @@ export class render {
      * @param {string} expr
      * @param {string} traceback
      * @param {Map} extraScope
-     * @returns {Any}
+     * @returns {string|void}
      */
     evaluateExpression(expr, traceback, extraScope) {
         expr = expr.trim();
@@ -1859,6 +1873,3 @@ export class render {
         this.mainEl.setAttribute("data-theme", themes.join(" "));
     }
 };
-
-
-log("%c[ezy.js] Welcome to the world of Ezy.js framework!", "font-size: 60px; font-weight: bold;color: yellow;");
