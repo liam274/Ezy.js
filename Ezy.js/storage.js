@@ -2,7 +2,7 @@ import { yieldProcess } from "./utils.js";
 import { MAX_LOOP_TIME } from "./consts.js";
 
 export class store {
-    #store = {};
+    #store = new Map();
     #varstore = {};
     #listeners = new Set();
     /**
@@ -11,7 +11,7 @@ export class store {
      */
     add({ vars, actions }) {
         for (const name in actions) {
-            this.#store[name] = actions[name].bind(this.#varstore);
+            this.#store.set(name, actions[name].bind(this.#varstore));
         }
         for (const key in vars) {
             this.#varstore[key] = vars[key];
@@ -23,10 +23,10 @@ export class store {
      * @param  {...any} args
      */
     commit(name, ...args) {
-        if (!this.#store[name]) {
+        if (!this.#store.has(name)) {
             throw new Error(`[ezy.js] CRITICAL ERROR: Variable Error: Try to access function-in-variable ${name}, not found.`);
         }
-        this.#store[name](...args);
+        this.#store.get(name)(...args);
         this.#notify(name, ...args);
     }
     /**
@@ -34,7 +34,7 @@ export class store {
      * @returns {any}
      */
     get(key) {
-        return this.#store[key];
+        return this.#store.get(key);
     }
     /**
      * Get the shallow copy of this.#varstore

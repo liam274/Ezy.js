@@ -107,7 +107,7 @@ export function cssCompiler(classes, condition = []) {
     if (!Array.isArray(condition)) {
         throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected condition as string[], found ${typeof condition}`);
     }
-    const result = {};
+    const result = new Map();
     for (const _class of classes) {
         if (typeof _class !== "string") {
             throw new Error(`[ezy.js] CRITICAL ERROR: Value Error: Expected classes as string[], found ${typeof _class} as element`);
@@ -136,7 +136,7 @@ export function cssCompiler(classes, condition = []) {
             )
             );
         if (value !== null) {
-            result[_class] = {
+            result.set(_class, {
                 value: utils.replaceSuffix(
                     format(key.join("-"), value.join(" ")) + (important ? "!" : ""),
                     {
@@ -147,7 +147,7 @@ export function cssCompiler(classes, condition = []) {
                 ),
                 key: key.join("-"),
                 theme: conditions.slice(0, -1)
-            };
+            });
         }
     }
     return result;
