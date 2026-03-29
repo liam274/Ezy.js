@@ -79,6 +79,8 @@ if (getPropertySafe(
     obj,
     "admin",
     true // whether should the function throw error when it's a prototype attribute, or not.
+    // true = don't throw
+    // false = throw
     )
 ){
     // ...
