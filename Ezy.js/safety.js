@@ -88,10 +88,10 @@ export function builtinCSP() {
  * Get the value of a property(if it's not polluted), checking for prototype pollution.
  * @param {Object<string,any>} obj
  * @param {string} param
- * @param {boolean} slience
+ * @param {boolean} silence
  * @returns {any}
  */
-export function getPropertySafe(obj, param, slience = true) {
+export function getPropertySafe(obj, param, silence = true) {
     if (safeHasOwn && safeHasOwn(obj, param)) {
         return obj[param];
     }
@@ -99,7 +99,7 @@ export function getPropertySafe(obj, param, slience = true) {
         return obj[param];
     }
     if (param in obj) {
-        if (slience) {
+        if (silence) {
             return undefined;
         }
         throw new Error(`[ezy.js] CRITICAL ERROR: Security Error: Error occured when getting property "${param}", found polluted.`);
