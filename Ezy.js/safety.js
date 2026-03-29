@@ -119,8 +119,14 @@ export function createSafeObject(obj) {
         has(target, key) {
             return !!(safeHasOwn?.(target, key) || safeHasOwnProperty(target, key));
         },
-        ownKeys(target, key) {
-            return !!(safeHasOwn?.(target, key) || safeHasOwnProperty(target, key));
+        ownKeys(target) {
+            const result = [];
+            for (const key in target) {
+                if (getPropertySafe(target, key)) {
+                    result.push(target[key]);
+                }
+            }
+            return result;
         }
     });
 }
