@@ -6,97 +6,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ezy.js Dogfood Demo - 搜索框示例</title>
+    <link rel="stylesheet" href="../../Ezy.js/main.css" />
     <style>
-        /* 简单样式，让搜索面板更美观 */
-        body {
-            font-family: system-ui, 'Segoe UI', monospace;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 2rem;
-        }
+        @layer normalize, customize, demo, ezy-js-dependent;
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-        }
+        @layer demo {
+            body {
+                font-family: system-ui, 'Segoe UI', monospace;
+                background: #f5f5f5;
+                margin: 0;
+                padding: 2rem;
+            }
 
-        h1 {
-            font-size: 1.8rem;
-            margin-top: 0;
-            color: #1e1e2f;
-        }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                padding: 2rem;
+            }
 
-        .search-wrapper {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
+            h1 {
+                font-size: 1.8rem;
+                margin-top: 0;
+                color: #1e1e2f;
+            }
 
-        #searchInput {
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 32px;
-            outline: none;
-            transition: 0.2s;
-            box-sizing: border-box;
-        }
+            .search-wrapper {
+                position: relative;
+                margin-bottom: 1.5rem;
+            }
 
-        #searchInput:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
+            #searchInput {
+                width: 100%;
+                padding: 12px 16px;
+                font-size: 1rem;
+                border: 1px solid #ccc;
+                border-radius: 32px;
+                outline: none;
+                transition: 0.2s;
+                box-sizing: border-box;
+            }
 
-        .search-results-panel {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            z-index: 10;
-            max-height: 300px;
-            overflow-y: auto;
-        }
+            #searchInput:focus {
+                border-color: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            }
 
-        .search-item {
-            padding: 10px 16px;
-            cursor: pointer;
-            transition: background 0.1s;
-            border-bottom: 1px solid #eee;
-        }
+            .search-results-panel {
+                position: absolute;
+                top: calc(100% + 8px);
+                left: 0;
+                right: 0;
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+                z-index: 10;
+                max-height: 300px;
+                overflow-y: auto;
+            }
 
-        .search-item:hover {
-            background-color: #f0f0ff;
-        }
+            .search-content {
+                margin-top: 20px;
+                padding: 16px;
+                background: #f9f9ff;
+                border-radius: 16px;
+                border-left: 4px solid #6366f1;
+            }
 
-        .search-content {
-            margin-top: 20px;
-            padding: 16px;
-            background: #f9f9ff;
-            border-radius: 16px;
-            border-left: 4px solid #6366f1;
-        }
+            .selected-label {
+                font-weight: bold;
+                color: #4f46e5;
+            }
 
-        .selected-label {
-            font-weight: bold;
-            color: #4f46e5;
-        }
+            hr {
+                margin: 20px 0;
+            }
 
-        hr {
-            margin: 20px 0;
-        }
-
-        footer {
-            margin-top: 30px;
-            font-size: 0.8rem;
-            color: #888;
-            text-align: center;
+            footer {
+                margin-top: 30px;
+                font-size: 0.8rem;
+                color: #888;
+                text-align: center;
+            }
         }
     </style>
 </head>

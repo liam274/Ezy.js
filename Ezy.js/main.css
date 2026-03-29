@@ -33,7 +33,7 @@
     }
 
     span {
-        font-size: 10px;
+        font-size: 16px;
     }
 }
 
@@ -175,8 +175,17 @@
     }
 
     .search-item {
-        border: 0 solid black;
+        border: 0 solid #eee;
         border-bottom-width: 1px;
+        width: 100%;
+        padding: 12px 24px;
+        cursor: pointer;
+        background-color: white;
+        transition: all .1s ease;
+    }
+
+    .search-item:hover {
+        background-color: #f0f0ff;
     }
 }
 
