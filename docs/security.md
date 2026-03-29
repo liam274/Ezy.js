@@ -46,7 +46,7 @@ if (passwordVerify(psw,hash)){
     obj.admin=true;
 }
 // ... meanwhile, no one touches obj
-if (obj.isAdmin()){
+if (obj.admin){
     redirect2("admin.php",{passed:someUnreachableToken});
 }
 ```
@@ -69,4 +69,18 @@ const safeHasOwn = Object.hasOwn,
 /* eslint-disable no-undef */
 import { log } from "./main.js";
 // ...
+```
+But please be ***EXTREMELY*** careful to use that method, since it will block ALL the prototype attributes, like `toString`, `valueOf`, etc.
+Of course, if you want to handcheck it in vulnerable points, you can use this(though it will be very annoying to type it manually):
+```JavaScript
+import {getPropertySafe} from "./safety.js";
+// ...
+if (getPropertySafe(
+    obj,
+    "admin",
+    true // whether should the function throw error when it's a prototype attribute, or not.
+    )
+){
+    // ...
+}
 ```
