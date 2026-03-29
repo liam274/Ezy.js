@@ -1,0 +1,255 @@
+<!--Deepseek generated example-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ezy.js Dogfood Demo - 搜索框示例</title>
+    <style>
+        /* 简单样式，让搜索面板更美观 */
+        body {
+            font-family: system-ui, 'Segoe UI', monospace;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-top: 0;
+            color: #1e1e2f;
+        }
+
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 32px;
+            outline: none;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
+
+        #searchInput:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .search-results-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .search-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.1s;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-item:hover {
+            background-color: #f0f0ff;
+        }
+
+        .search-content {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f9f9ff;
+            border-radius: 16px;
+            border-left: 4px solid #6366f1;
+        }
+
+        .selected-label {
+            font-weight: bold;
+            color: #4f46e5;
+        }
+
+        hr {
+            margin: 20px 0;
+        }
+
+        footer {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #888;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="container"></div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "ezy": "../../Ezy.js/main.js"
+        }
+    }
+</script>
+    <script type="module" defer>
+        import * as ezy from "ezy";
+        import { searchBar, yieldProcess } from "../../Ezy.js/utils.js";
+
+        // 准备数据：一个简单的键值对列表，用于搜索
+        const fruits = {
+            "苹果": "苹果 🍎",
+            "香蕉": "香蕉 🍌",
+            "橙子": "橙子 🍊",
+            "葡萄": "葡萄 🍇",
+            "西瓜": "西瓜 🍉",
+            "草莓": "草莓 🍓",
+            "芒果": "芒果 🥭",
+            "菠萝": "菠萝 🍍",
+            "樱桃": "樱桃 🍒",
+            "蓝莓": "蓝莓 🫐",
+            "荔枝": "荔枝",
+            "榴莲": "榴莲",
+            "火龙果": "火龙果",
+            "柚子": "柚子"
+        };
+
+        // 转换数据格式：searchBar 期望接收 { key: value } 对象
+        const fruitData = fruits;
+
+        // 定义组件对象 (Component Object)
+        const pageData = {
+            config: {
+                // 必须的 urlFilter（demo 中允许所有请求）
+                urlFilter: {
+                    rules: [".*"],
+                    confirmer: () => true,
+                    reporter: () => console.warn("URL filter tampered")
+                },
+                escapeHTML: true,    // 开启 XSS 转义
+                debug: true          // 开启调试日志
+            },
+            component: [
+                {
+                    tag: "h1",
+                    content: "🍎 Ezy.js Dogfood Demo"
+                },
+                {
+                    tag: "p",
+                    content: "下面的搜索框使用 Ezy.js 内置的 searchBar 工具实现，支持实时过滤、点击选择、无限滚动（更多）等功能。"
+                },
+                {
+                    tag: "div",
+                    style: {
+                        marginTop: "20px"
+                    },
+                    component: [
+                        {
+                            tag: "div",
+                            // 这里我们手动创建搜索框元素，然后挂载 searchBar
+                            // 由于 Ezy 渲染的是静态结构，我们可以在 onLoad 中初始化 searchBar
+                            tag: "div",
+                            content: `
+                            <div class="search-wrapper">
+                                <input type="text" id="searchInput" placeholder="输入水果名称...">
+                                <div id="searchResultsPanel" class="search-results-panel" style="display: none;"></div>
+                            </div>
+                        `,
+                            config: { escapeHTML: false }  // 允许 HTML 插入，但我们已经手动控制内容安全
+                        },
+                        {
+                            tag: "div",
+                            id: "selectedInfo",
+                            content: "✨ 点击搜索结果中的项目，会在这里显示你选择的内容。",
+                            style: {
+                                marginTop: "20px",
+                                padding: "12px",
+                                backgroundColor: "#f0f4ff",
+                                borderRadius: "12px",
+                                borderLeft: "4px solid #4f46e5"
+                            }
+                        }
+                    ]
+                }
+            ],
+            onLoad: [
+                // 在页面渲染完成后，初始化 searchBar
+                async function initSearch() {
+                    const input = document.getElementById("searchInput");
+                    const panelDiv = document.getElementById("searchResultsPanel");
+                    const infoDiv = document.getElementById("selectedInfo");
+
+                    if (!input || !panelDiv) return;
+
+                    // 使用 searchBar 创建搜索组件
+                    const search = searchBar(
+                        input,
+                        fruitData,
+                        5,  // 最多显示 5 项，超过显示“更多”按钮
+                        (selectedHTML) => {
+                            // 点击搜索项时的回调
+                            // selectedHTML 是选中的项目的 innerHTML
+                            // 这里我们更新下方信息
+                            infoDiv.innerHTML = `✅ 你选择了：<span class="selected-label">${selectedHTML}</span>`;
+                            // 清理搜索面板（可选）
+                            search.clean?.();
+                            panelDiv.style.display = "none";
+                        }
+                    );
+
+                    // 将 searchBar 生成的结果面板添加到页面中
+                    if (search.el) {
+                        panelDiv.appendChild(search.el);
+                        panelDiv.style.display = "block";
+                        // 监听输入事件，控制面板显示/隐藏
+                        input.addEventListener("input", () => {
+                            if (input.value.trim() === "") {
+                                panelDiv.style.display = "none";
+                            } else {
+                                panelDiv.style.display = "block";
+                            }
+                        });
+                        // 点击外部关闭面板（可选）
+                        document.addEventListener("click", (e) => {
+                            if (!panelDiv.contains(e.target) && e.target !== input) {
+                                panelDiv.style.display = "none";
+                            }
+                        });
+                    }
+
+                    // 为了演示，我们也可以提供一个“清除”按钮
+                    console.log("searchBar 已挂载，limit=5，超过将显示「更多」按钮");
+                }
+            ]
+        };
+
+        // 创建 render 实例
+        const renderer = new ezy.render("#app", pageData);
+        if (renderer.statusCode !== 0) {
+            console.error("渲染失败，状态码:", renderer.statusCode);
+        } else {
+            console.log("页面渲染成功，你可以体验搜索功能啦！");
+        }
+    </script>
+</body>
+
+</html>

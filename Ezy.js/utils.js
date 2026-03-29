@@ -340,7 +340,7 @@ export function searchBar(el, data, limit, handler) {
             await yieldProcess();
             item.item = await updateSearchResult(result, limit, datas, val, handler);
         };
-    for (const key of data) {
+    for (const key in data) {
         datas[key] = {
             value: data[key],
             show: true

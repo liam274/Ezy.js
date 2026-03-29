@@ -765,14 +765,6 @@ export class render {
             log(`%c[ezy.js] Render Program exits ${this.statusCode === 0 ? "" : "un"}successfully. Status Code: ${this.statusCode}`,
                 this.statusCode === 0 ? "font-size: 30px; font-weight: bold;color: #e0e0e0;" : "font-size: 30px; font-weight: bold;color: red;");
         }
-        if (data.onLoad) {
-            for (const i of data.onLoad) {
-                i(data);
-            }
-        }
-        else if (this.#debug) {
-            warn("[ezy.js] MINOR SUGGESTION: : Suggest adding onLoad function list to handle onLoad process");
-        }
         for (const i of Ezy.plugins) {
             const { timeouts, events, animationFrames } = i.onLoad?.(data) || {};
             this.#pluginLeftovers.timeouts.push(...timeouts);
@@ -784,6 +776,14 @@ export class render {
         }
         if (el) {
             root.appendChild(el);
+        }
+        if (data.onLoad) {
+            for (const i of data.onLoad) {
+                i(data);
+            }
+        }
+        else if (this.#debug) {
+            warn("[ezy.js] MINOR SUGGESTION: : Suggest adding onLoad function list to handle onLoad process");
         }
         if (this.loadPage.length) {
             for (const i of this.loadPage) {
@@ -1019,7 +1019,7 @@ export class render {
         if ((this.config.removeUnsafeHTML || config.removeUnsafeHTML || i.config?.removeUnsafeHTML)) {
             card.setHTML(r);
         } else {
-            if (this.config.escapeHTML || config.escapeHTML || i.config?.escapeHTML) {
+            if (i.config?.escapeHTML !== false && config.escapeHTML !== false && this.config.escapeHTML !== false) {
                 r = secure.htmlEscape(r);
             }
             card.innerHTML = r;
@@ -1517,7 +1517,7 @@ export class render {
         if (this.config.removeUnsafeHTML || config.removeUnsafeHTML || j.config?.removeUnsafeHTML) {
             el.setHTML(r);
         } else {
-            if (this.config.escapeHTML || config.escapeHTML || j.config?.escapeHTML) {
+            if (j.config?.escapeHTML !== false && this.config.escapeHTML !== false && config.escapeHTML !== false) {
                 r = secure.htmlEscape(r);
             }
             el.innerHTML = r;

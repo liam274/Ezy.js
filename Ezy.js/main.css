@@ -167,6 +167,17 @@
         border-bottom-width: 0;
         flex-direction: column;
     }
+
+    .search-content {
+        background-color: white;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+
+    .search-item {
+        border: 0 solid black;
+        border-bottom-width: 1px;
+    }
 }
 
 /*custome class*/
