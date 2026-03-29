@@ -314,3 +314,114 @@ export function replaceSuffix(data, dictonary) {
 export function yieldProcess() {
     return new Promise((resolve) => setTimeout(resolve, 0));
 }
+export const MAX_ITER = 10;
+
+/**
+ * You must Proxy the returned Object, since its attribute will change as the user inputs.
+ * @param {Node} el
+ * @param {Object<string,any>} data
+ * @param {int} limit - How many items should it shows
+ * @param {function(any):void} handler
+ * @returns {Object<string,function():void|Node>}
+ */
+export function searchBar(el, data, limit, handler) {
+    const datas = {},
+        result = $$("div"),
+        item = {},
+        d = async () => {
+            const val = (el.value || el.innerHTML);
+            for (const i in datas) {
+                if (i.includes(val)) {
+                    datas[i].show = true;
+                } else {
+                    datas[i].show = false;
+                }
+            }
+            await yieldProcess();
+            item.item = await updateSearchResult(result, limit, datas, val, handler);
+        };
+    for (const key of data) {
+        datas[key] = {
+            value: data[key],
+            show: true
+        };
+    }
+    el.addEventListener("input", d);
+    item.el = result;
+    item.clean = () => {
+        el.removeEventListener("input", d);
+        result.remove();
+    };
+    return item;
+}
+/**
+ * @param {Node} el
+ * @param {int} limit
+ * @param {Object<string,Object<>>} datas
+ * @param {string} query
+ * @param {function(any):void} handler
+ * @returns {Object<string,string|function>}
+ */
+export async function updateSearchResult(el, limit, datas, query, handler) {
+    removeChild(el);
+    let t = 0;
+    const result = {},
+        frag = document.createDocumentFragment(),
+        alls = [];
+    for (const i in datas) {
+        const val = datas[i];
+        if (val.show) {
+            if (t % MAX_ITER === 0) {
+                await yieldProcess();
+            }
+            if (t > limit) {
+                const more = $$("div");
+                more.classList.add("search-item");
+                if (more.setHTML) {
+                    more.setHTML(`More information about ${query}...`);
+                } else {
+                    more.textContent = `More information about ${query}...`;
+                }
+                const d = () => {
+                    const _ = $$("div");
+                    _.classList.add("search-content");
+                    const { clean } = updateSearchResult(_, Infinity, datas, query, handler);
+                    result.clean();
+                    more.removeEventListener("click", d);
+                    result.more = {
+                        el: _,
+                        clean
+                    };
+                };
+                more.addEventListener("click", d);
+                alls.push([more, d]);
+                frag.appendChild(more);
+                break;
+            } else {
+                const item = $$("div");
+                item.classList.add("search-item");
+                if (item.setHTML) {
+                    item.setHTML(val.value);
+                } else {
+                    item.textContent = val;
+                }
+                const d = () => {
+                    handler(item.innerHTML);
+                };
+                item.addEventListener("click", d);
+                alls.push([item, d]);
+                frag.appendChild(item);
+            }
+            t++;
+        }
+    }
+    el.appendChild(frag);
+    result.clean = () => {
+        for (const [element, handler] of alls) {
+            element.removeEventListener("click", handler);
+        }
+        result.more.clean?.();
+        removeChild(el);
+    };
+    return result;
+}

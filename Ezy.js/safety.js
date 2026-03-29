@@ -40,7 +40,7 @@ export function isSafeURL(url, white = []) {
             return true;
         }
         return false;
-    } catch (_) {
+    } catch {
         if (dangerous.test(trimmed)) {
             return false;
         }
@@ -62,4 +62,22 @@ const HTMLescapes = Object.freeze({
  */
 export function htmlEscape(data) {
     return data.replace(/[&<>"']/g, char => HTMLescapes[char]);
+}
+
+/**
+ * Append builtin csp setting.
+ */
+export function builtinCSP() {
+    const csp = $$("meta");
+    document.head.appendChild(csp);
+    csp.setAttribute("http-equiv", "Content-Security-Policy");
+    csp.setAttribute("content",
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-eval'; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "img-src 'self' data:; " +
+        "worker-src 'self'; " +
+        "connect-src 'self'; " +
+        "font-src 'self';"
+    );
 }

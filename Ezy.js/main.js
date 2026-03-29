@@ -7,9 +7,10 @@ import * as utils from "./utils.js";
 import * as storage from "./storage.js";
 import * as cssComputer from "./cssComputer.js";
 import * as secure from "./safety.js";
-export * from "./utils.js";
+export * as utils from "./utils.js";
 export * from "./storage.js";
 export * from "./history.js";
+export * as secure from "./safety.js";
 
 /*
     @module Ezy.js
@@ -498,20 +499,6 @@ routeGuard.guards.push(function (href) {
         allow: routeGuard.builtin.has(href)
     };
 });
-
-// Security
-const csp = $$("meta");
-head.appendChild(csp);
-csp.setAttribute("http-equiv", "Content-Security-Policy");
-csp.setAttribute("content",
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-eval'; " +
-    "style-src 'self' 'unsafe-inline'; " +
-    "img-src 'self' data:; " +
-    "worker-src 'self'; " +
-    "connect-src 'self'; " +
-    "font-src 'self';"
-);
 
 // render
 
