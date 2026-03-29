@@ -490,14 +490,14 @@ export const errorLevels = Object.freeze(
 
 // Route Guard
 
-export const routeGuard = {
+export const routeGuard = Object.freeze({
     builtin: new Set([]),
     guards: []
-};
+});
 routeGuard.guards.push(function (href) {
-    return {
+    return Object.freeze({
         allow: routeGuard.builtin.has(href)
-    };
+    });
 });
 
 // render

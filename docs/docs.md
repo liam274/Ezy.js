@@ -1,8 +1,9 @@
 # Ezy.js
 
 If you're curious about our document's specific terminologies, please take a look [here](#specific-terminologies)<br />
-Also, please read [this](special-syntax.md) since there might be special syntax in the document that isn't valid JS syntax.
-If you prefer to get start from small, please take a look at our [tutorial](tutorial.md)
+Also, please read [this](special-syntax.md) since there might be special syntax in the document that isn't valid JS syntax.<br />
+If you prefer to get start from small, please take a look at our [tutorial](tutorial.md)<br />
+If you have any security concern, hope [this](security.md) is able to help you.
 
 ## Table of Contents
 
@@ -190,33 +191,6 @@ Remembered always put the `css-attribute-css-value` thing at last of the class n
 | `g-selectorName-pseudo-class` | It will be converted into `:where(.selectorName):pseudo-class ...` |
 | `...clr$number$` | The number will be considered as precentage, converted into hex and appended after the color. Note that the framework couldn't promise what will happen if the `number>100` |
 
-## Security Concern
-To ensure the highest security, and the best digital experience, relying on any framework, no matter is front-end or back-end, big or small, is not advisable.
-### Template Injection
-Problem of the most is template injection:
-```JavaScript
-// It generates a closure function
-eval(`generateRedirection(\`${domain}${location}\`)`)();
-// or return cleaning method
-function popup(msg){
-    // dom actions...
-    return eval(`(${msg})=>{parent.remove();${exp}}`);// while the `exp` is related to the msg, like the implementation of render.evaluateExpression,
-    // which is trying to act as scoped eval
-}
-```
-Anyways, if the `location` is polluted to `${evilJavaScript()}`, it will be executed.
-So we suggest rewrite to this:
-```JavaScript
-/**
- * @param {function(any):void} func
- * @param {any[]} args
- */
-function template(func,...args){
-    return func(...args);
-}
-template(generateRedirection,`${domain}${location}`);
-```
-This is much safer.
 
 ## Specific Terminologies
 - LRP(Late Render Page) means the page that will be rendered on the main process of *render*.

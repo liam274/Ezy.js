@@ -1,3 +1,5 @@
+const safeHasOwn = Object.hasOwn,
+    safeHasOwnProperty = Object.prototype.hasOwnProperty;
 /* eslint-disable no-undef */
 import { log } from "./main.js";
 export function selfXSSwarn() {
@@ -80,4 +82,45 @@ export function builtinCSP() {
         "connect-src 'self'; " +
         "font-src 'self';"
     );
+}
+
+/**
+ * Get the value of a property(if it's not polluted), checking for prototype pollution.
+ * @param {Object<string,any>} obj
+ * @param {string} param
+ * @param {boolean} slience
+ * @returns {any}
+ */
+export function getPropertySafe(obj, param, slience = true) {
+    if (safeHasOwn && safeHasOwn(obj, param)) {
+        return obj[param];
+    }
+    if (safeHasOwnProperty.call(obj, param)) {
+        return obj[param];
+    }
+    if (param in obj) {
+        if (slience) {
+            return undefined;
+        }
+        throw new Error(`[ezy.js] CRITICAL ERROR: Security Error: Error occured when getting property "${param}", found polluted.`);
+    } else {
+        return undefined;
+    }
+}
+
+/**
+ * @param {Object<string,any>} obj
+ */
+export function createSafeObject(obj) {
+    return new Proxy(obj, {
+        get(target, key) {
+            return getPropertySafe(target, key, true);
+        },
+        has(target, key) {
+            return !!(safeHasOwn?.(target, key) || safeHasOwnProperty(target, key));
+        },
+        ownKeys(target, key) {
+            return !!(safeHasOwn?.(target, key) || safeHasOwnProperty(target, key));
+        }
+    });
 }
