@@ -1,5 +1,9 @@
-const safeHasOwn = Object.hasOwn,
-    safeHasOwnProperty = Object.prototype.hasOwnProperty;
+export const safeObject = Object.freeze({
+    hasOwn: Object.hasOwn,
+    hasOwnProperty: Object.prototype.hasOwnProperty,
+    entries: Object.entries,
+    fromEntries: Object.fromEntries
+});
 /* eslint-disable no-undef */
 import { log } from "./main.js";
 export function selfXSSwarn() {
@@ -92,10 +96,10 @@ export function builtinCSP() {
  * @returns {any}
  */
 export function getPropertySafe(obj, param, silence = true) {
-    if (safeHasOwn && safeHasOwn(obj, param)) {
+    if (safeObject.hasOwn && safeObject.hasOwn(obj, param)) {
         return obj[param];
     }
-    if (safeHasOwnProperty.call(obj, param)) {
+    if (safeObject.hasOwnProperty.call(obj, param)) {
         return obj[param];
     }
     if (param in obj) {
@@ -117,7 +121,7 @@ export function createSafeObject(obj) {
             return getPropertySafe(target, key, true);
         },
         has(target, key) {
-            return !!(safeHasOwn?.(target, key) || safeHasOwnProperty(target, key));
+            return !!(safeObject.hasOwn?.(target, key) || safeObject.hasOwnProperty.call(target, key));
         },
         ownKeys(target) {
             const result = [];

@@ -517,11 +517,11 @@ export class render {
     #typeExtend = new Map();
     #listen2 = new Map();
     #debug = false;
-    #pluginLeftovers = {
+    #pluginLeftovers = new Map(secure.safeObject.entries({
         timeouts: [],
         events: [],
         animationFrames: []
-    };
+    }));
     #confirmer = undefined;
     #reporter = undefined;
     #cssBefore = new Map();
@@ -611,13 +611,13 @@ export class render {
             }
             this.loadPage.length = 0;
         }
-        for (const i of this.#pluginLeftovers.timeouts) {
+        for (const i of this.#pluginLeftovers.get("timeouts")) {
             clearTimeout(i);
         }
-        for (const i of this.#pluginLeftovers.events) {
+        for (const i of this.#pluginLeftovers.get("events")) {
             document.removeEventListener(...i);
         }
-        for (const i of this.#pluginLeftovers.animationFrames) {
+        for (const i of this.#pluginLeftovers.get("animationFrames")) {
             cancelAnimationFrame(i);
         }
         // Url filter section
@@ -755,9 +755,9 @@ export class render {
         }
         for (const i of Ezy.plugins) {
             const { timeouts, events, animationFrames } = i.onStart?.(data) || {};
-            this.#pluginLeftovers.timeouts.push(...timeouts);
-            this.#pluginLeftovers.events.push(...events);
-            this.#pluginLeftovers.animationFrames.push(...animationFrames);
+            this.#pluginLeftovers.get("timeouts").push(...timeouts);
+            this.#pluginLeftovers.get("events").push(...events);
+            this.#pluginLeftovers.get("animationFrames").push(...animationFrames);
         }
         const el = document.createDocumentFragment();
         this.sectionRender(data, el, data.name || "", data.title || "", this.contentRender, root, options);
@@ -768,9 +768,9 @@ export class render {
         }
         for (const i of Ezy.plugins) {
             const { timeouts, events, animationFrames } = i.onLoad?.(data) || {};
-            this.#pluginLeftovers.timeouts.push(...timeouts);
-            this.#pluginLeftovers.events.push(...events);
-            this.#pluginLeftovers.animationFrames.push(...animationFrames);
+            this.#pluginLeftovers.get("timeouts").push(...timeouts);
+            this.#pluginLeftovers.get("events").push(...events);
+            this.#pluginLeftovers.get("animationFrames").push(...animationFrames);
         }
         if (this.statusCode !== 0) {
             return;
@@ -1770,9 +1770,9 @@ export class render {
     plugComponent(el, traceback) {
         for (const i of Ezy.plugins) {
             const { timeouts, events, animationFrames } = i.onComponentLoad?.(this, el, traceback) || {};
-            this.#pluginLeftovers.timeouts.push(...timeouts);
-            this.#pluginLeftovers.events.push(...events);
-            this.#pluginLeftovers.animationFrames.push(...animationFrames);
+            this.#pluginLeftovers.get("timeouts").push(...timeouts);
+            this.#pluginLeftovers.get("events").push(...events);
+            this.#pluginLeftovers.get("animationFrames").push(...animationFrames);
             if (this.statusCode !== 0) {
                 return;
             }
@@ -1787,9 +1787,9 @@ export class render {
     beforePlugComponent(el, traceback) {
         for (const i of Ezy.plugins) {
             const { timeouts, events, animationFrames } = i.beforeComponentLoad?.(this, el, traceback) || {};
-            this.#pluginLeftovers.timeouts.push(...timeouts);
-            this.#pluginLeftovers.events.push(...events);
-            this.#pluginLeftovers.animationFrames.push(...animationFrames);
+            this.#pluginLeftovers.get("timeouts").push(...timeouts);
+            this.#pluginLeftovers.get("events").push(...events);
+            this.#pluginLeftovers.get("animationFrames").push(...animationFrames);
             if (this.statusCode !== 0) {
                 return;
             }
