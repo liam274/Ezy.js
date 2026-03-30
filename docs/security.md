@@ -4,6 +4,7 @@ To ensure the highest security, and the best digital experience, relying on any 
 ## Table of Contents
 - [Template Injection](#template-injection)
 - [Prototype Pollution](#prototype-pollution)
+- [CSS Injection](#css-injection)
 
 ## Template Injection
 Problem of the most is template injection:
