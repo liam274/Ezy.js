@@ -116,6 +116,9 @@ export function getPropertySafe(obj, param, silence = true) {
  * @param {Object<string,any>} obj
  */
 export function createSafeObject(obj) {
+    if (obj.prototype) {
+        Object.freeze(obj.prototype);
+    }
     return new Proxy(obj, {
         get(target, key) {
             return getPropertySafe(target, key, true);
@@ -133,4 +136,8 @@ export function createSafeObject(obj) {
             return result;
         }
     });
+}
+
+export function createBlankObject() {
+    return Object.create(null);
 }
