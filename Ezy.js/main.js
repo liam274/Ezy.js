@@ -530,6 +530,7 @@ export class render {
     #remarkableStyle = $$("style");
     #myvars = new Set();
     #strict = false;
+    #config = null;
     /**
      * The constructor of class *render*
      * @param {Node} el - The main element that act as root
@@ -583,23 +584,23 @@ export class render {
      * @returns null
      */
     reload() {
-        this.config = this.data.config || {};
-        this.config.escapeHTML = utils._default(this.config.escapeHTML, true);
-        this.config.whitelistProtocol = new Set(
-            ...((this.config.whitelistProtocol instanceof Set) ? this.config.whitelistProtocol : new Set()),
+        this.#config = secure.createSafeObject(this.data.config || {});
+        this.#config.escapeHTML = utils._default(this.#config.escapeHTML, true);
+        this.#config.whitelistProtocol = new Set(
+            ...((this.#config.whitelistProtocol instanceof Set) ? this.#config.whitelistProtocol : new Set()),
             ...Ezy.whitelistProtocol
         );
-        if (this.config.debug) {
+        if (this.#config.debug) {
             this.#debug = true;
         } else {
             this.#debug = false;
         }
-        if (this.config.strict) {
+        if (this.#config.strict) {
             this.#strict = true;
         } else {
             this.#strict = false;
         }
-        this.supportCheck(this.config, "root");
+        this.supportCheck(this.#config, "root");
         // clean-up section start
         if (!this.#debug) {
             clear();
@@ -620,8 +621,8 @@ export class render {
             cancelAnimationFrame(i);
         }
         // Url filter section
-        if (this.config.urlFilter) {
-            const { urlFilter } = this.config,
+        if (this.#config.urlFilter) {
+            const { urlFilter } = this.#config,
                 { confirmer, reporter, rules } = urlFilter;
             if (!this.#confirmer && typeof confirmer === "function") {// Prevent malicious replace
                 this.#confirmer = confirmer;
@@ -702,10 +703,10 @@ export class render {
         this.systemPlot = {
             time: 0
         };
-        if (this.config.style) {
+        if (this.#config.style) {
             const c = [];
-            for (const j in this.config.style) {
-                const val = this.config.style[j],
+            for (const j in this.#config.style) {
+                const val = this.#config.style[j],
                     d = [];
                 for (const i in val) {
                     d.push(`${utils.camel2array(i).join("-")}: ${val[i]};`);
@@ -714,9 +715,9 @@ export class render {
             }
             this.#remarkableStyle.innerHTML = c.join("");
         }
-        if (this.config.typeExtend) {
-            for (const i in this.config.typeExtend) {
-                const val = this.config.typeExtend[i];
+        if (this.#config.typeExtend) {
+            for (const i in this.#config.typeExtend) {
+                const val = this.#config.typeExtend[i];
                 if (!Array.isArray(val)) {
                     this.set(errors.TYPE_ERROR);
                     return Ezy.formatError(`Expected Array, found ${typeof val}.`, errorLevels.CRITICAL_ERROR, "Type Error");
@@ -921,7 +922,7 @@ export class render {
             return Ezy.formatError(`Error when computing classList, found " " char in className, ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
         }
         card.classList.add(...classes);
-        if (!this.config.noComputeCSS) {
+        if (!this.#config.noComputeCSS) {
             this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
         }
         if (i.expire) {
@@ -1016,10 +1017,10 @@ export class render {
         if (this.statusCode !== 0) {
             return;
         }
-        if ((this.config.removeUnsafeHTML || config.removeUnsafeHTML || i.config?.removeUnsafeHTML)) {
+        if ((this.#config.removeUnsafeHTML || config.removeUnsafeHTML || i.config?.removeUnsafeHTML)) {
             card.setHTML(r);
         } else {
-            if (i.config?.escapeHTML !== false && config.escapeHTML !== false && this.config.escapeHTML !== false) {
+            if (i.config?.escapeHTML !== false && config.escapeHTML !== false && this.#config.escapeHTML !== false) {
                 r = secure.htmlEscape(r);
             }
             card.innerHTML = r;
@@ -1035,7 +1036,7 @@ export class render {
         }
         let ok = true;
         for (const danger of secure.dangerousAttribute) {
-            if (!secure.isSafeURL(card.getAttribute(danger), this.config.whitelistProtocol)) {
+            if (!secure.isSafeURL(card.getAttribute(danger), this.#config.whitelistProtocol)) {
                 this.set(errors.SECURITY_ERROR);
                 Ezy.formatError(`Found JavaScript injection in attribute "${danger}" as "${card.getAttribute(danger)}" when scanning attributes, in ${traceback}`,
                     errorLevels.CRITICAL_ERROR, "Security Error", false);
@@ -1498,7 +1499,7 @@ export class render {
         }
         let ok = true;
         for (const danger of secure.dangerousAttribute) {
-            if (!secure.isSafeURL(el.getAttribute(danger), this.config.whitelistProtocol)) {
+            if (!secure.isSafeURL(el.getAttribute(danger), this.#config.whitelistProtocol)) {
                 this.set(errors.SECURITY_ERROR);
                 Ezy.formatError(`Found JavaScript injection in attribute "${danger}" as "${el.getAttribute(danger)}" when scanning attributes, in ${traceback}`,
                     errorLevels.CRITICAL_ERROR, "Security Error", false);
@@ -1514,10 +1515,10 @@ export class render {
         if (this.statusCode !== 0) {
             return;
         }
-        if (this.config.removeUnsafeHTML || config.removeUnsafeHTML || j.config?.removeUnsafeHTML) {
+        if (this.#config.removeUnsafeHTML || config.removeUnsafeHTML || j.config?.removeUnsafeHTML) {
             el.setHTML(r);
         } else {
-            if (j.config?.escapeHTML !== false && this.config.escapeHTML !== false && config.escapeHTML !== false) {
+            if (j.config?.escapeHTML !== false && this.#config.escapeHTML !== false && config.escapeHTML !== false) {
                 r = secure.htmlEscape(r);
             }
             el.innerHTML = r;
@@ -1661,7 +1662,7 @@ export class render {
                             return Ezy.formatError(`Error when computing classList, found " " char in className, ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
                         }
                         el.classList.add(...classes);
-                        if (!this.config.noComputeCSS) {
+                        if (!this.#config.noComputeCSS) {
                             this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
                         }
                         utils.applyStyles(el, j.style);
@@ -1695,7 +1696,7 @@ export class render {
                             return Ezy.formatError(`Error when computing classList, found " " char in className, ${traceback}`, errorLevels.CRITICAL_ERROR, "Value Error");
                         }
                         el.classList.add(...classes);
-                        if (!this.config.noComputeCSS) {
+                        if (!this.#config.noComputeCSS) {
                             this.putCSS(cssComputer.cssCompiler(this.#extendType(...classes)));
                         }
                         utils.applyStyles(el, j.style);
