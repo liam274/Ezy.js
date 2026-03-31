@@ -10,8 +10,9 @@ To ensure the highest security, and the best digital experience, relying on any 
 Problem of the most is template injection:
 ```JavaScript
 // It generates a closure function
-popup(`generateRedirection(\`${domain}${location}\`)`)();
-// or return cleaning method
+// Example 1:
+eval(`generateRedirection(\`${domain}${location}\`)`)();
+// or return cleaning method, which is example 2:
 function popup(msg){
     // dom actions...
     return eval(`(${msg})=>{parent.remove();${exp}}`);// while the `exp` is related to the msg, like the implementation of render.evaluateExpression,
