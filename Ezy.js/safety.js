@@ -84,7 +84,8 @@ export function builtinCSP() {
         "img-src 'self' data:; " +
         "worker-src 'self'; " +
         "connect-src 'self'; " +
-        "font-src 'self';"
+        "font-src 'self';" +
+        "frame-src 'none';"
     );
 }
 
