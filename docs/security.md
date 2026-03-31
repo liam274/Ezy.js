@@ -10,7 +10,7 @@ To ensure the highest security, and the best digital experience, relying on any 
 Problem of the most is template injection:
 ```JavaScript
 // It generates a closure function
-eval(`generateRedirection(\`${domain}${location}\`)`)();
+popup(`generateRedirection(\`${domain}${location}\`)`)();
 // or return cleaning method
 function popup(msg){
     // dom actions...
