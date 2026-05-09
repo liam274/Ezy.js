@@ -22,7 +22,7 @@ export * as secure from "./safety.js";
     @description Render engine of front-end web
 
     Acknowledgments:
-        - Nathan Wong. Thanks for :
+        - Nathan Vong. Thanks for :
             + him providing his seat, as it's close to the electricity socket
         - Deepseek. Thanks for it to:
             + debug js
@@ -30,7 +30,7 @@ export * as secure from "./safety.js";
             + design btn css
             + give out css concepts and attribute usage
             + improve CLS
-            + teach me differrent JS syntax
+            + teach me different JS syntax
         - Mr. Steven L. Thanks for him providing:
             + emotional value (Why I'm listing this out is because it's mostly why I decided to continue!)
             + React concept
